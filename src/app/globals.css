@@ -1,0 +1,41 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  *, *::before, *::after {
+    box-sizing: border-box;
+  }
+
+  html {
+    scroll-behavior: smooth;
+    background-color: #0A0A0A;
+  }
+
+  body {
+    background-color: #0A0A0A;
+    color: #F5F5F0;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* Focus ring: amber hairline, no browser default */
+  *:focus-visible {
+    outline: 1px solid #C8965A;
+    outline-offset: 2px;
+  }
+
+  /* Remove default button styles */
+  button {
+    border: none;
+    background: none;
+    cursor: pointer;
+  }
+}
+
+@layer utilities {
+  /* Thin hairline utility — 1px border in warm grey */
+  .hairline-top    { border-top: 1px solid #2A2A2A; }
+  .hairline-bottom { border-bottom: 1px solid #2A2A2A; }
+  .hairline-amber  { border-top: 1px solid rgba(200, 150, 90, 0.35); }
+}
