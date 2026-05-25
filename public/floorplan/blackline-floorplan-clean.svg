@@ -1,0 +1,221 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1000" width="100%" height="100%">
+  <defs>
+    <style>
+      .bg { fill: #0A0A0A; }
+      .wall-outer { stroke: #444444; stroke-width: 3.5; fill: none; stroke-linejoin: round; }
+      .wall-inner { stroke: #333333; stroke-width: 1.8; fill: none; stroke-linejoin: round; }
+      .glass { stroke: #666666; stroke-dasharray: 4,2; stroke-width: 1; }
+      .arch-stone { fill: #222222; stroke: #666666; stroke-width: 1.2; }
+      .arch-span { stroke: #555555; stroke-width: 0.8; stroke-dasharray: 2,4; fill: none; }
+      .stair-step { stroke: #2a2a2a; stroke-width: 0.8; fill: none; }
+      
+      /* Equipment and Fixtures */
+      .eq-iron { fill: #121212; stroke: #333333; stroke-width: 0.8; }
+      .eq-cable { fill: #0d0d0d; stroke: #444444; stroke-width: 1; }
+      .eq-platform { fill: #12100e; stroke: #A3794C; stroke-width: 0.8; }
+      .spa-tub { fill: #151311; stroke: #A3794C; stroke-width: 0.8; }
+      .spa-water { fill: #0a0d0f; stroke: #26383E; stroke-width: 1; }
+      
+      /* Text Styles */
+      .txt-title { font-family: "Fraunces", Georgia, serif; font-size: 20px; font-weight: 500; fill: #F5F0E8; letter-spacing: 0.05em; }
+      .txt-subtitle { font-family: "Inter Tight", sans-serif; font-size: 11px; font-weight: 600; fill: #888888; letter-spacing: 0.15em; text-transform: uppercase; }
+      .txt-zone-label { font-family: "Inter Tight", sans-serif; font-size: 11px; font-weight: 700; fill: #F5F0E8; letter-spacing: 0.1em; text-transform: uppercase; }
+      .txt-zone-sqft { font-family: "Inter Tight", sans-serif; font-size: 9px; font-weight: 400; fill: #666666; letter-spacing: 0.05em; }
+      .txt-annotation { font-family: "Inter Tight", sans-serif; font-size: 9px; fill: #666666; font-style: italic; }
+    </style>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1600" height="1000" class="bg" />
+
+  <!-- Simple Header -->
+  <g transform="translate(100, 100)">
+    <text x="0" y="0" class="txt-title" style="letter-spacing: 0.2em;">BLACKLINE METHOD</text>
+    <text x="0" y="18" class="txt-subtitle" style="font-size: 9px;">1418 Dragon St. / Spatial Concept (28,000 SQFT)</text>
+  </g>
+
+  <!-- ==================== FLOOR 1 ==================== -->
+  <g id="floor-1">
+    <!-- Outer Walls -->
+    <rect x="100" y="150" width="400" height="700" class="wall-outer" />
+    
+    <!-- Entry Lobby & Reception (X=200 to 410, Y=750 to 850) -->
+    <line x1="200" y1="750" x2="200" y2="850" class="wall-inner" />
+    <line x1="410" y1="750" x2="410" y2="850" class="wall-inner" />
+    <line x1="200" y1="750" x2="410" y2="750" class="wall-inner" />
+    <rect x="250" y="848" width="100" height="5" style="fill: #111111; stroke: #555555; stroke-width: 1;" />
+    <rect x="250" y="780" width="100" height="20" class="eq-cable" />
+    <line x1="260" y1="750" x2="350" y2="750" class="glass" />
+    
+    <!-- Stairs & Elevator Core (X=410 to 500, Y=750 to 850) -->
+    <rect x="450" y="750" width="40" height="80" class="wall-inner" />
+    <path d="M 450 820 L 490 820 M 450 810 L 490 810 M 450 800 L 490 800 M 450 790 L 490 790 M 450 780 L 490 780 M 450 770 L 490 770 M 450 760 L 490 760" class="stair-step" />
+    <rect x="415" y="750" width="30" height="35" class="wall-inner" />
+    
+    <!-- Staff / Service -->
+    <rect x="105" y="755" width="90" height="90" class="wall-inner" />
+
+    <!-- Arches -->
+    <rect x="170" y="440" width="10" height="10" class="arch-stone" />
+    <rect x="170" y="480" width="10" height="10" class="arch-stone" />
+    <rect x="170" y="520" width="10" height="10" class="arch-stone" />
+    <rect x="170" y="560" width="10" height="10" class="arch-stone" />
+    <rect x="170" y="600" width="10" height="10" class="arch-stone" />
+    <rect x="170" y="640" width="10" height="10" class="arch-stone" />
+    <rect x="170" y="680" width="10" height="10" class="arch-stone" />
+    <rect x="170" y="720" width="10" height="10" class="arch-stone" />
+    
+    <rect x="410" y="440" width="10" height="10" class="arch-stone" />
+    <rect x="410" y="480" width="10" height="10" class="arch-stone" />
+    <rect x="410" y="520" width="10" height="10" class="arch-stone" />
+    <rect x="410" y="560" width="10" height="10" class="arch-stone" />
+    <rect x="410" y="600" width="10" height="10" class="arch-stone" />
+    <rect x="410" y="640" width="10" height="10" class="arch-stone" />
+    <rect x="410" y="680" width="10" height="10" class="arch-stone" />
+    <rect x="410" y="720" width="10" height="10" class="arch-stone" />
+
+    <path d="M 175 445 Q 295 415 415 445" class="arch-span" />
+    <path d="M 175 485 Q 295 455 415 485" class="arch-span" />
+    <path d="M 175 525 Q 295 495 415 525" class="arch-span" />
+    <path d="M 175 565 Q 295 535 415 565" class="arch-span" />
+    <path d="M 175 605 Q 295 575 415 605" class="arch-span" />
+    <path d="M 175 645 Q 295 615 415 645" class="arch-span" />
+    <path d="M 175 685 Q 295 655 415 685" class="arch-span" />
+    <path d="M 175 725 Q 295 695 415 725" class="arch-span" />
+
+    <!-- Equipment -->
+    <rect x="110" y="415" width="40" height="35" class="eq-platform" />
+    <rect x="170" y="415" width="40" height="35" class="eq-platform" />
+    <rect x="230" y="415" width="40" height="35" class="eq-platform" />
+    <rect x="120" y="415" width="20" height="12" class="eq-cable" />
+    <rect x="180" y="415" width="20" height="12" class="eq-cable" />
+    <rect x="240" y="415" width="20" height="12" class="eq-cable" />
+    
+    <rect x="105" y="480" width="12" height="110" class="eq-iron" />
+    <rect x="105" y="610" width="12" height="110" class="eq-iron" />
+    
+    <!-- Detailed Cable Equipment along East wall -->
+    <rect x="380" y="470" width="15" height="10" class="eq-cable" />
+    <rect x="380" y="520" width="15" height="10" class="eq-cable" />
+    <line x1="387" y1="480" x2="387" y2="520" style="stroke: #555; stroke-dasharray: 2,2;" />
+    
+    <rect x="375" y="545" width="20" height="25" class="eq-cable" />
+    <rect x="380" y="550" width="10" height="8" style="fill: #151515;" />
+    
+    <rect x="375" y="585" width="20" height="25" class="eq-cable" />
+    
+    <rect x="370" y="625" width="25" height="35" class="eq-cable" />
+    
+    <rect x="375" y="675" width="20" height="25" class="eq-cable" />
+    
+    <!-- Recovery Walls -->
+    <line x1="100" y1="270" x2="500" y2="270" class="wall-inner" />
+    <line x1="100" y1="410" x2="500" y2="410" class="wall-inner" />
+    <line x1="220" y1="410" x2="280" y2="410" class="glass" />
+    
+    <!-- Plunges -->
+    <rect x="120" y="290" width="25" height="35" rx="2" ry="2" class="spa-tub" />
+    <rect x="120" y="293" width="25" height="29" class="spa-water" />
+    <rect x="160" y="290" width="25" height="35" rx="2" ry="2" class="spa-tub" />
+    <rect x="160" y="293" width="25" height="29" class="spa-water" />
+    <rect x="200" y="290" width="25" height="35" rx="2" ry="2" class="spa-tub" />
+    <rect x="200" y="293" width="25" height="29" class="spa-water" />
+
+    <!-- Sauna / Steam -->
+    <rect x="260" y="280" width="70" height="50" class="wall-inner" />
+    <line x1="280" y1="330" x2="310" y2="330" class="glass" />
+    <rect x="340" y="280" width="60" height="50" class="wall-inner" />
+    <line x1="350" y1="330" x2="380" y2="330" class="glass" />
+    
+    <!-- Lounge / Contrast -->
+    <rect x="120" y="355" width="80" height="10" style="fill: #1a1715; stroke: #555555; stroke-width: 0.8;" />
+    <rect x="260" y="350" width="220" height="45" class="eq-cable" />
+    
+    <!-- Locker Rooms -->
+    <line x1="300" y1="150" x2="300" y2="270" class="wall-inner" />
+    <line x1="180" y1="270" x2="210" y2="270" class="glass" />
+    <line x1="390" y1="270" x2="420" y2="270" class="glass" />
+    
+    <rect x="105" y="155" width="25" height="25" class="wall-inner" />
+    <rect x="130" y="155" width="25" height="25" class="wall-inner" />
+    <rect x="155" y="155" width="25" height="25" class="wall-inner" />
+    <rect x="230" y="160" width="15" height="70" class="eq-cable" />
+    
+    <rect x="320" y="155" width="25" height="25" class="wall-inner" />
+    <rect x="345" y="155" width="25" height="25" class="wall-inner" />
+    <rect x="370" y="155" width="25" height="25" class="wall-inner" />
+    <rect x="420" y="160" width="15" height="70" class="eq-cable" />
+
+    <!-- Labels -->
+    <text x="110" y="843" class="txt-subtitle">I. Ground</text>
+    <text x="305" y="810" class="txt-zone-label" text-anchor="middle">Entry &amp; Reception</text>
+    <text x="300" y="600" class="txt-zone-label" text-anchor="middle">Training Floor</text>
+    <text x="300" y="612" class="txt-zone-sqft" text-anchor="middle">8,500 SQFT</text>
+    <text x="450" y="390" class="txt-zone-label" text-anchor="end">Recovery Wing</text>
+    <text x="450" y="400" class="txt-zone-sqft" text-anchor="end">3,500 SQFT</text>
+    <text x="200" y="250" class="txt-zone-label" text-anchor="middle">Men's Locker</text>
+    <text x="200" y="260" class="txt-zone-sqft" text-anchor="middle">1,500 SQFT</text>
+    <text x="400" y="250" class="txt-zone-label" text-anchor="middle">Women's Locker</text>
+    <text x="400" y="260" class="txt-zone-sqft" text-anchor="middle">1,500 SQFT</text>
+  </g>
+
+  <!-- ==================== FLOOR 2 ==================== -->
+  <g id="floor-2">
+    <!-- Outer Walls -->
+    <rect x="700" y="150" width="400" height="700" class="wall-outer" />
+    
+    <!-- Void -->
+    <rect x="705" y="575" width="390" height="270" class="glass" />
+    <text x="900" y="710" class="txt-annotation" text-anchor="middle" style="letter-spacing: 0.12em; text-transform: uppercase;">Void Below</text>
+    
+    <!-- Staircase & Elevator arrival in void -->
+    <rect x="1050" y="750" width="40" height="80" class="wall-inner" />
+    <path d="M 1050 820 L 1090 820 M 1050 810 L 1090 810 M 1050 800 L 1090 800 M 1050 790 L 1090 790 M 1050 780 L 1090 780 M 1050 770 L 1090 770 M 1050 760 L 1090 760" class="stair-step" />
+    <rect x="1015" y="750" width="30" height="35" class="wall-inner" />
+    
+    <!-- Glass Bridge -->
+    <rect x="1035" y="570" width="40" height="180" style="fill: rgba(255,255,255,0.01);" />
+    <line x1="1035" y1="570" x2="1035" y2="750" class="glass" />
+    <line x1="1075" y1="570" x2="1075" y2="750" class="glass" />
+    
+    <!-- Lounge -->
+    <line x1="700" y1="570" x2="1100" y2="570" class="glass" />
+    <line x1="700" y1="430" x2="1100" y2="430" class="wall-inner" />
+    <path d="M 750 510 C 750 480, 800 480, 800 510" style="fill: none; stroke: #333333; stroke-width: 3;" />
+    
+    <!-- Clinic Partitions -->
+    <line x1="870" y1="270" x2="870" y2="430" class="wall-inner" />
+    <line x1="930" y1="270" x2="930" y2="430" class="wall-inner" />
+    
+    <!-- Consult Rooms -->
+    <line x1="700" y1="390" x2="870" y2="390" class="wall-inner" />
+    <line x1="700" y1="350" x2="870" y2="350" class="wall-inner" />
+    <line x1="700" y1="310" x2="870" y2="310" class="wall-inner" />
+    <line x1="700" y1="270" x2="870" y2="270" class="wall-inner" />
+    
+    <!-- IV Bay / Lab Draw -->
+    <line x1="930" y1="330" x2="1100" y2="330" class="wall-inner" />
+    <line x1="1040" y1="330" x2="1040" y2="430" class="wall-inner" />
+    <rect x="945" y="360" width="15" height="25" rx="2" class="eq-cable" />
+    <rect x="975" y="360" width="15" height="25" rx="2" class="eq-cable" />
+    
+    <!-- Practitioner Offices -->
+    <line x1="700" y1="190" x2="1100" y2="190" class="wall-inner" />
+    <line x1="700" y1="270" x2="1100" y2="270" class="wall-inner" />
+    <line x1="800" y1="190" x2="800" y2="270" class="wall-inner" />
+    <line x1="900" y1="190" x2="900" y2="270" class="wall-inner" />
+    <line x1="1000" y1="190" x2="1000" y2="270" class="wall-inner" />
+    
+    <!-- Service -->
+    <line x1="700" y1="150" x2="1100" y2="150" class="wall-inner" />
+    
+    <!-- Labels -->
+    <text x="710" y="843" class="txt-subtitle">II. Mezzanine</text>
+    <text x="900" y="500" class="txt-zone-label" text-anchor="middle">Member Lounge</text>
+    <text x="900" y="512" class="txt-zone-sqft" text-anchor="middle">3,500 SQFT</text>
+    <text x="1000" y="320" class="txt-zone-label" text-anchor="middle" font-size="10px">Clinic Wing (4,000 SQFT)</text>
+    <text x="850" y="240" class="txt-zone-label" text-anchor="middle" font-size="9px">Practitioner Offices</text>
+    <text x="850" y="250" class="txt-zone-sqft" text-anchor="middle">2,000 SQFT</text>
+    <text x="900" y="173" class="txt-zone-label" text-anchor="middle" font-size="9px">Service / Mechanical</text>
+  </g>
+</svg>

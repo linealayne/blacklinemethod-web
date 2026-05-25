@@ -1,0 +1,446 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1000" width="100%" height="100%">
+  <defs>
+    <style>
+      .bg { fill: #0A0A0A; }
+      .grid { stroke: #141414; stroke-width: 1; stroke-dasharray: 4,4; }
+      .border { stroke: #2E2E2E; stroke-width: 1; fill: none; }
+      .wall-outer { stroke: #555555; stroke-width: 4; fill: none; stroke-linejoin: round; }
+      .wall-inner { stroke: #444444; stroke-width: 2; fill: none; stroke-linejoin: round; }
+      .glass { stroke: #888888; stroke-dasharray: 5,2; stroke-width: 1; }
+      .arch-stone { fill: #2C2C2C; stroke: #E8B886; stroke-width: 1.5; }
+      .arch-span { stroke: #E8B886; stroke-width: 1; stroke-dasharray: 3,5; fill: none; opacity: 0.8; }
+      .stair-step { stroke: #444444; stroke-width: 1.2; fill: none; }
+      .door-swing { stroke: #444444; stroke-width: 1; fill: none; stroke-dasharray: 2,2; }
+      
+      /* Equipment and Fixtures */
+      .eq-iron { fill: #1C1C1C; stroke: #555555; stroke-width: 1; }
+      .eq-cable { fill: #111111; stroke: #666666; stroke-width: 1.2; }
+      .eq-platform { fill: #151311; stroke: #D8A060; stroke-width: 1; }
+      .spa-tub { fill: #1A1715; stroke: #D8A060; stroke-width: 1; }
+      .spa-water { fill: #0C1214; stroke: #334E57; stroke-width: 1; }
+      
+      /* Camera markers and sightlines */
+      .cam-marker { fill: #E8B886; stroke: #0A0A0A; stroke-width: 1.5; }
+      .cam-cone { fill: rgba(232, 184, 134, 0.05); stroke: rgba(232, 184, 134, 0.2); stroke-width: 1; stroke-dasharray: 3,3; }
+      .cam-path { stroke: #E8B886; stroke-width: 1.2; stroke-dasharray: 4,4; fill: none; opacity: 0.35; }
+      
+      /* Text Styles */
+      .txt-title { font-family: "Fraunces", Georgia, serif; font-size: 20px; font-weight: 500; fill: #F5F0E8; letter-spacing: 0.05em; }
+      .txt-subtitle { font-family: "Inter Tight", sans-serif; font-size: 11px; font-weight: 600; fill: #B8B8B8; letter-spacing: 0.15em; text-transform: uppercase; }
+      .txt-zone-label { font-family: "Inter Tight", sans-serif; font-size: 11px; font-weight: 700; fill: #F5F0E8; letter-spacing: 0.1em; text-transform: uppercase; }
+      .txt-zone-sqft { font-family: "Inter Tight", sans-serif; font-size: 9px; font-weight: 400; fill: #888888; letter-spacing: 0.05em; }
+      .txt-cam-num { font-family: "Inter Tight", sans-serif; font-size: 8px; font-weight: 700; fill: #0A0A0A; text-anchor: middle; dominant-baseline: central; }
+      .txt-label-dim { font-family: "Inter Tight", sans-serif; font-size: 9px; font-weight: 400; fill: #555555; text-anchor: middle; }
+      .txt-annotation { font-family: "Inter Tight", sans-serif; font-size: 9px; fill: #777777; font-style: italic; }
+      .txt-arch-num { font-family: "Inter Tight", sans-serif; font-size: 8px; font-weight: 700; fill: #E8B886; text-anchor: middle; }
+    </style>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1600" height="1000" class="bg" />
+
+  <!-- Grid Pattern (10ft increments, scaled: 1ft = 4px, so 10ft = 40px) -->
+  <g>
+    <!-- Grid Y lines -->
+    <path d="M 50 150 L 1550 150 M 50 190 L 1550 190 M 50 230 L 1550 230 M 50 270 L 1550 270 M 50 310 L 1550 310 M 50 350 L 1550 350 M 50 390 L 1550 390 M 50 430 L 1550 430 M 50 470 L 1550 470 M 50 510 L 1550 510 M 50 550 L 1550 550 M 50 590 L 1550 590 M 50 630 L 1550 630 M 50 670 L 1550 670 M 50 710 L 1550 710 M 50 750 L 1550 750 M 50 790 L 1550 790 M 50 830 L 1550 830 M 50 870 L 1550 870" class="grid" />
+    <!-- Grid X lines -->
+    <path d="M 100 100 L 100 900 M 140 100 L 140 900 M 180 100 L 180 900 M 220 100 L 220 900 M 260 100 L 260 900 M 300 100 L 300 900 M 340 100 L 340 900 M 380 100 L 380 900 M 420 100 L 420 900 M 460 100 L 460 900 M 500 100 L 500 900 M 700 100 L 700 900 M 740 100 L 740 900 M 780 100 L 780 900 M 820 100 L 820 900 M 860 100 L 860 900 M 900 100 L 900 900 M 940 100 L 940 900 M 980 100 L 980 900 M 1020 100 L 1020 900 M 1060 100 L 1060 900 M 1100 100 L 1100 900" class="grid" />
+  </g>
+
+  <!-- External Boundaries and Outer Frame -->
+  <rect x="30" y="30" width="1540" height="940" class="border" />
+
+  <!-- ==================== FLOOR 1: GROUND LEVEL (17,500 SQFT) ==================== -->
+  <!-- 100ft wide (400px) x 175ft deep (700px) -->
+  <!-- Coordinates: X=100 to X=500, Y=150 to Y=850 -->
+  <g id="floor-1">
+    <!-- Outer Walls -->
+    <rect x="100" y="150" width="400" height="700" class="wall-outer" />
+    
+    <!-- GRAND ENTRY / RECEPTION LOBBY (1,250 SQFT) X=200 to 410, Y=750 to 850 -->
+    <!-- Partition walls -->
+    <line x1="200" y1="750" x2="200" y2="850" class="wall-inner" />
+    <line x1="410" y1="750" x2="410" y2="850" class="wall-inner" />
+    <line x1="200" y1="750" x2="410" y2="750" class="wall-inner" />
+    <!-- Glass Entry Doors (center) -->
+    <rect x="250" y="848" width="100" height="5" style="fill: #111111; stroke: #888888; stroke-width: 1;" />
+    <!-- Reception Desk block -->
+    <rect x="250" y="780" width="100" height="20" class="eq-cable" />
+    <line x1="260" y1="750" x2="350" y2="750" class="glass" />
+    
+    <!-- FRONT STAIRS & ELEVATOR LOBBY (625 SQFT) X=410 to 500, Y=750 to 850 -->
+    <!-- Staircase (climbing from front lobby, Y=750 to 830) -->
+    <rect x="450" y="750" width="40" height="80" class="wall-inner" />
+    <path d="M 450 820 L 490 820 M 450 810 L 490 810 M 450 800 L 490 800 M 450 790 L 490 790 M 450 780 L 490 780 M 450 770 L 490 770 M 450 760 L 490 760" class="stair-step" />
+    <path d="M 470 825 L 470 755" style="stroke: #555555; stroke-width: 1; fill: none; marker-end: url(#arrow);" />
+    
+    <!-- Elevator shaft (ADA compliance, Y=750 to 790) -->
+    <rect x="415" y="750" width="30" height="35" class="wall-inner" />
+    <rect x="420" y="755" width="20" height="25" class="eq-cable" />
+    <!-- Elevator doors symbol -->
+    <line x1="415" y1="770" x2="415" y2="780" style="stroke: #E8B886; stroke-width: 2;" />
+    <text x="430" y="768" class="txt-arch-num" font-size="8px">E</text>
+
+    <!-- STAFF / SERVICE ROOM (625 SQFT) X=100 to 200, Y=750 to 850 -->
+    <rect x="105" y="755" width="90" height="90" class="wall-inner" />
+    
+    <!-- MAIN TRAINING FLOOR (8,500 SQFT) Y=410 to Y=750 -->
+    <!-- 8 EVENLY SPACED SIGNATURE STONE ARCHES (N-S down 60ft central bay) -->
+    <!-- Arches set at Y=445, 485, 525, 565, 605, 645, 685, 725 -->
+    <!-- West Columns (X=175) -->
+    <rect x="170" y="440" width="10" height="10" class="arch-stone" />
+    <rect x="170" y="480" width="10" height="10" class="arch-stone" />
+    <rect x="170" y="520" width="10" height="10" class="arch-stone" />
+    <rect x="170" y="560" width="10" height="10" class="arch-stone" />
+    <rect x="170" y="600" width="10" height="10" class="arch-stone" />
+    <rect x="170" y="640" width="10" height="10" class="arch-stone" />
+    <rect x="170" y="680" width="10" height="10" class="arch-stone" />
+    <rect x="170" y="720" width="10" height="10" class="arch-stone" />
+    <!-- East Columns (X=415) -->
+    <rect x="410" y="440" width="10" height="10" class="arch-stone" />
+    <rect x="410" y="480" width="10" height="10" class="arch-stone" />
+    <rect x="410" y="520" width="10" height="10" class="arch-stone" />
+    <rect x="410" y="560" width="10" height="10" class="arch-stone" />
+    <rect x="410" y="600" width="10" height="10" class="arch-stone" />
+    <rect x="410" y="640" width="10" height="10" class="arch-stone" />
+    <rect x="410" y="680" width="10" height="10" class="arch-stone" />
+    <rect x="410" y="720" width="10" height="10" class="arch-stone" />
+    <!-- Dotted arch curves linking columns -->
+    <path d="M 175 445 Q 295 415 415 445" class="arch-span" />
+    <path d="M 175 485 Q 295 455 415 485" class="arch-span" />
+    <path d="M 175 525 Q 295 495 415 525" class="arch-span" />
+    <path d="M 175 565 Q 295 535 415 565" class="arch-span" />
+    <path d="M 175 605 Q 295 575 415 605" class="arch-span" />
+    <path d="M 175 645 Q 295 615 415 645" class="arch-span" />
+    <path d="M 175 685 Q 295 655 415 685" class="arch-span" />
+    <path d="M 175 725 Q 295 695 415 725" class="arch-span" />
+    <!-- Arch Labels (A1 South to A8 North) -->
+    <text x="155" y="728" class="txt-arch-num">A1</text>
+    <text x="155" y="688" class="txt-arch-num">A2</text>
+    <text x="155" y="648" class="txt-arch-num">A3</text>
+    <text x="155" y="608" class="txt-arch-num">A4</text>
+    <text x="155" y="568" class="txt-arch-num">A5</text>
+    <text x="155" y="528" class="txt-arch-num">A6</text>
+    <text x="155" y="488" class="txt-arch-num">A7</text>
+    <text x="155" y="448" class="txt-arch-num">A8</text>
+
+    <!-- Equipment Areas (Train) -->
+    <!-- Powerlifting Platforms with Wood Inlays (Y=415 to Y=460) -->
+    <rect x="110" y="415" width="40" height="35" class="eq-platform" />
+    <rect x="170" y="415" width="40" height="35" class="eq-platform" />
+    <rect x="230" y="415" width="40" height="35" class="eq-platform" />
+    <!-- Squat Racks outlines -->
+    <rect x="120" y="415" width="20" height="12" class="eq-cable" />
+    <rect x="180" y="415" width="20" height="12" class="eq-cable" />
+    <rect x="240" y="415" width="20" height="12" class="eq-cable" />
+    
+    <!-- Free Weight Dumbbells Racks & Barbells (West edge, X=100 to 150) -->
+    <rect x="105" y="480" width="12" height="110" class="eq-iron" />
+    <rect x="105" y="610" width="12" height="110" class="eq-iron" />
+    <circle cx="135" cy="510" r="7" class="eq-iron" />
+    <circle cx="135" cy="530" r="7" class="eq-iron" />
+    <circle cx="135" cy="550" r="7" class="eq-iron" />
+    
+    <!-- DETAILED CABLE & SELECTORIZED EQUIPMENT (East wall, X=360 to 500) -->
+    <!-- Dual Adjustable Pulley / Cable Crossover Tower (Y=470 to 510) -->
+    <rect x="380" y="470" width="15" height="10" class="eq-cable" />
+    <rect x="380" y="520" width="15" height="10" class="eq-cable" />
+    <line x1="387" y1="480" x2="387" y2="520" style="stroke: #888; stroke-dasharray: 2,2;" /> <!-- Overhead Cable line -->
+    <!-- Lat Pulldown Machine (Y=545 to 570) -->
+    <rect x="375" y="545" width="20" height="25" class="eq-cable" />
+    <rect x="380" y="550" width="10" height="8" style="fill: #222;" /> <!-- Seat -->
+    <line x1="370" y1="565" x2="400" y2="565" style="stroke: #555; stroke-width: 1.5;" /> <!-- Lat Bar -->
+    <!-- Selectorized Seated Row Machine (Y=585 to 610) -->
+    <rect x="375" y="585" width="20" height="25" class="eq-cable" />
+    <rect x="380" y="595" width="10" height="10" style="fill: #222;" />
+    <!-- Leg Press Machine (Y=625 to 660) -->
+    <rect x="370" y="625" width="25" height="35" class="eq-cable" />
+    <path d="M 375 655 L 390 635" style="stroke: #555; stroke-width: 2;" /> <!-- Angled Sled -->
+    <!-- Chest Press (Y=675 to 700) -->
+    <rect x="375" y="675" width="20" height="25" class="eq-cable" />
+    <path d="M 370 687 L 400 687" style="stroke: #888; stroke-width: 1;" stroke-linecap="round" />
+    
+    <!-- RECOVERY WING (3,500 SQFT) Y=270 to Y=410 -->
+    <line x1="100" y1="270" x2="500" y2="270" class="wall-inner" />
+    <line x1="100" y1="410" x2="500" y2="410" class="wall-inner" />
+    <!-- Recovery Entrance (Glass sliding doors) at center -->
+    <line x1="220" y1="410" x2="280" y2="410" class="glass" style="stroke-width: 2;" />
+    
+    <!-- Three Cold Plunge Tubs (Wood-surround, X=120 to 220, Y=290 to 330) -->
+    <rect x="120" y="290" width="25" height="35" rx="2" ry="2" class="spa-tub" />
+    <rect x="120" y="293" width="25" height="29" class="spa-water" />
+    
+    <rect x="160" y="290" width="25" height="35" rx="2" ry="2" class="spa-tub" />
+    <rect x="160" y="293" width="25" height="29" class="spa-water" />
+    
+    <rect x="200" y="290" width="25" height="35" rx="2" ry="2" class="spa-tub" />
+    <rect x="200" y="293" width="25" height="29" class="spa-water" />
+
+    <!-- Sauna (Cedar Wood, X=260 to 330, Y=280 to 330) -->
+    <rect x="260" y="280" width="70" height="50" class="wall-inner" />
+    <line x1="280" y1="330" x2="310" y2="330" class="glass" />
+    <rect x="265" y="285" width="60" height="10" style="fill: #221A15; stroke: #D8A060; stroke-width: 0.8;" />
+    <rect x="265" y="295" width="10" height="30" style="fill: #221A15; stroke: #D8A060; stroke-width: 0.8;" />
+    
+    <!-- Steam Room (Stone/Glass, X=340 to 400, Y=280 to 330) -->
+    <rect x="340" y="280" width="60" height="50" class="wall-inner" />
+    <line x1="350" y1="330" x2="380" y2="330" class="glass" />
+    <!-- Tiled Bench inside Steam room -->
+    <rect x="345" y="285" width="50" height="10" style="fill: #151C20; stroke: #555; stroke-width: 0.8;" />
+    <circle cx="370" cy="305" r="4" style="fill: none; stroke: #444; stroke-dasharray: 2,2;" />
+    
+    <!-- Cooldown Lounge / Contrast Therapy (X=120 to 480, Y=350 to 395) -->
+    <rect x="120" y="355" width="80" height="10" style="fill: #1A1715; stroke: #888888; stroke-width: 0.8;" />
+    <text x="160" y="380" class="txt-annotation" text-anchor="middle">Contrast Area</text>
+    
+    <rect x="260" y="350" width="220" height="45" class="eq-cable" />
+    <text x="370" y="375" class="txt-zone-label" font-size="9px" style="fill: #B8B8B8;">Cooldown Lounge</text>
+    
+    <!-- LOCKER ROOMS (3,000 SQFT total) Y=150 to Y=270 -->
+    <!-- Divided North-South: Men's (Left: X=100 to 300) and Women's (Right: X=300 to 500) -->
+    <line x1="300" y1="150" x2="300" y2="270" class="wall-inner" />
+    <!-- Locker Entrances from Recovery/Circulation corridor -->
+    <line x1="180" y1="270" x2="210" y2="270" class="glass" />
+    <line x1="390" y1="270" x2="420" y2="270" class="glass" />
+    
+    <!-- Men's Locker Details (Left side) -->
+    <rect x="105" y="155" width="25" height="25" class="wall-inner" />
+    <rect x="130" y="155" width="25" height="25" class="wall-inner" />
+    <rect x="155" y="155" width="25" height="25" class="wall-inner" />
+    <rect x="230" y="160" width="15" height="70" class="eq-cable" />
+    <rect x="270" y="160" width="15" height="70" class="eq-cable" />
+    <rect x="250" y="175" width="12" height="40" style="fill: #1A1715; stroke: #888888; stroke-width: 0.8;" />
+    
+    <!-- Women's Locker Details (Right side) -->
+    <rect x="320" y="155" width="25" height="25" class="wall-inner" />
+    <rect x="345" y="155" width="25" height="25" class="wall-inner" />
+    <rect x="370" y="155" width="25" height="25" class="wall-inner" />
+    <rect x="420" y="160" width="15" height="70" class="eq-cable" />
+    <rect x="460" y="160" width="15" height="70" class="eq-cable" />
+    <rect x="440" y="175" width="12" height="40" style="fill: #1A1715; stroke: #888888; stroke-width: 0.8;" />
+
+    <!-- Labels - Floor 1 -->
+    <text x="110" y="843" class="txt-subtitle">Floor 1 — Ground</text>
+    <text x="110" y="828" class="txt-title">TRAIN + RECOVER</text>
+    
+    <text x="305" y="810" class="txt-zone-label" text-anchor="middle">Entry Lobby &amp; Reception</text>
+    <text x="305" y="825" class="txt-zone-sqft" text-anchor="middle">1,250 SQFT</text>
+    
+    <text x="300" y="600" class="txt-zone-label" text-anchor="middle">Main Training Floor</text>
+    <text x="300" y="612" class="txt-zone-sqft" text-anchor="middle">8,500 SQFT</text>
+    <text x="300" y="625" class="txt-annotation" text-anchor="middle">8 Labeled Arches (A1–A8) / East Cable Column</text>
+    
+    <text x="450" y="390" class="txt-zone-label" text-anchor="end">Recovery Wing</text>
+    <text x="450" y="400" class="txt-zone-sqft" text-anchor="end">3,500 SQFT</text>
+    
+    <text x="200" y="250" class="txt-zone-label" text-anchor="middle">Men's Locker</text>
+    <text x="200" y="260" class="txt-zone-sqft" text-anchor="middle">1,500 SQFT</text>
+    
+    <text x="400" y="250" class="txt-zone-label" text-anchor="middle">Women's Locker</text>
+    <text x="400" y="260" class="txt-zone-sqft" text-anchor="middle">1,500 SQFT</text>
+    
+    <text x="150" y="805" class="txt-zone-label" text-anchor="middle" font-size="9px">Staff / Service</text>
+    <text x="455" y="843" class="txt-zone-sqft" text-anchor="middle">Elevator / Stairs</text>
+
+    <!-- Dimensions lines Floor 1 -->
+    <line x1="80" y1="150" x2="80" y2="850" style="stroke: #333; stroke-width: 1;" />
+    <path d="M 75 150 L 85 150 M 75 850 L 85 850" style="stroke: #333; stroke-width: 1;" />
+    <text x="65" y="500" class="txt-label-dim" transform="rotate(-90 65 500)">175 FT</text>
+    
+    <line x1="100" y1="870" x2="500" y2="870" style="stroke: #333; stroke-width: 1;" />
+    <path d="M 100 865 L 100 875 M 500 865 L 500 875" style="stroke: #333; stroke-width: 1;" />
+    <text x="300" y="885" class="txt-label-dim">100 FT</text>
+  </g>
+
+  <!-- ==================== FLOOR 2: MEZZANINE LEVEL (10,500 SQFT) ==================== -->
+  <!-- 100ft wide (400px) x 105ft deep (420px) -->
+  <!-- Coordinates: X=700 to X=1100, Y=150 to Y=570 -->
+  <!-- Void coordinates: Y=570 to Y=850 (70ft deep) -->
+  <g id="floor-2">
+    <!-- Outer Walls Floor 2 -->
+    <rect x="700" y="150" width="400" height="700" class="wall-outer" />
+    
+    <!-- DOUBLE HEIGHT VOID OVERLOOK (Y=570 to Y=850) -->
+    <rect x="705" y="575" width="390" height="270" class="glass" />
+    <text x="900" y="700" class="txt-annotation" text-anchor="middle" style="fill: #555; font-size: 13px; letter-spacing: 0.12em; text-transform: uppercase;">Double Height Void</text>
+    <text x="900" y="720" class="txt-annotation" text-anchor="middle" style="fill: #444; font-size: 10px;">Overlooks Training Floor &amp; Signature Arches Below</text>
+    
+    <!-- STAIRS & ELEVATOR ARRIVAL IN VOID LOBBY (Y=750 to 850) -->
+    <!-- Enclosed landing area in the double-height void -->
+    <rect x="1050" y="750" width="40" height="80" class="wall-inner" />
+    <path d="M 1050 820 L 1090 820 M 1050 810 L 1090 810 M 1050 800 L 1090 800 M 1050 790 L 1090 790 M 1050 780 L 1090 780 M 1050 770 L 1090 770 M 1050 760 L 1090 760" class="stair-step" />
+    
+    <rect x="1015" y="750" width="30" height="35" class="wall-inner" />
+    <rect x="1020" y="755" width="20" height="25" class="eq-cable" />
+    <line x1="1015" y1="770" x2="1015" y2="780" style="stroke: #E8B886; stroke-width: 2;" />
+    
+    <!-- FLOATING GLASS BRIDGE spanning from lobby to Lounge (X=1020 to 1090, Y=570 to 750) -->
+    <rect x="1035" y="570" width="40" height="180" style="fill: rgba(232, 184, 134, 0.03);" />
+    <line x1="1035" y1="570" x2="1035" y2="750" class="glass" style="stroke-width: 1.5;" />
+    <line x1="1075" y1="570" x2="1075" y2="750" class="glass" style="stroke-width: 1.5;" />
+    <text x="1055" y="660" class="txt-annotation" text-anchor="middle" transform="rotate(90 1055 660)" style="fill: #E8B886; font-size: 8px; letter-spacing: 0.1em;">FLOATING GLASS BRIDGE</text>
+    
+    <!-- MEMBER LOUNGE (3,500 SQFT) Y=430 to Y=570 -->
+    <!-- Glass railing along the void -->
+    <line x1="700" y1="570" x2="1100" y2="570" class="glass" style="stroke-width: 2;" />
+    <line x1="700" y1="430" x2="1100" y2="430" class="wall-inner" />
+    <!-- Lounge furnishings -->
+    <path d="M 750 510 C 750 480, 800 480, 800 510" style="fill: none; stroke: #444444; stroke-width: 4;" />
+    <rect x="765" y="515" width="20" height="10" class="eq-cable" />
+    
+    <path d="M 850 510 C 850 480, 900 480, 900 510" style="fill: none; stroke: #444444; stroke-width: 4;" />
+    
+    <!-- Skyline Glass Windows (South Wall facade) -->
+    <line x1="700" y1="849" x2="1100" y2="849" class="glass" style="stroke-width: 2.5;" />
+    
+    <!-- CLINIC WING (4,000 SQFT) Y=270 to Y=430 -->
+    <!-- Corridor runs down the center X=870 to X=930 -->
+    <line x1="870" y1="270" x2="870" y2="430" class="wall-inner" />
+    <line x1="930" y1="270" x2="930" y2="430" class="wall-inner" />
+    
+    <!-- Four Consultation Rooms (West side: X=700 to X=870) -->
+    <!-- Consult 1 (Y=390 to Y=430) -->
+    <line x1="700" y1="390" x2="870" y2="390" class="wall-inner" />
+    <rect x="720" y="400" width="25" height="15" class="eq-platform" style="stroke: #888888;" />
+    <!-- Consult 2 (Y=350 to Y=390) -->
+    <line x1="700" y1="350" x2="870" y2="350" class="wall-inner" />
+    <rect x="720" y="360" width="25" height="15" class="eq-platform" style="stroke: #888888;" />
+    <!-- Consult 3 (Y=310 to Y=350) -->
+    <line x1="700" y1="310" x2="870" y2="310" class="wall-inner" />
+    <!-- Consult 4 (Y=270 to Y=310) -->
+    <line x1="700" y1="270" x2="870" y2="270" class="wall-inner" />
+    
+    <!-- IV Therapy Bay (East side: X=930 to X=1040, Y=330 to Y=430) -->
+    <line x1="930" y1="330" x2="1100" y2="330" class="wall-inner" />
+    <line x1="1040" y1="330" x2="1040" y2="430" class="wall-inner" />
+    <!-- IV Lounge Chairs -->
+    <rect x="945" y="360" width="15" height="25" rx="2" class="eq-cable" />
+    <rect x="975" y="360" width="15" height="25" rx="2" class="eq-cable" />
+    <rect x="1005" y="360" width="15" height="25" rx="2" class="eq-cable" />
+    
+    <!-- Lab Draw Room (East side, X=1040 to X=1100, Y=330 to Y=430) -->
+    <rect x="1050" y="380" width="35" height="10" class="eq-cable" />
+    <circle cx="1068" cy="405" r="5" class="eq-cable" />
+    
+    <!-- PRACTITIONER OFFICES (2,000 SQFT) Y=190 to Y=270 -->
+    <line x1="700" y1="190" x2="1100" y2="190" class="wall-inner" />
+    <line x1="700" y1="270" x2="1100" y2="270" class="wall-inner" />
+    <!-- Offices dividers -->
+    <line x1="800" y1="190" x2="800" y2="270" class="wall-inner" />
+    <line x1="900" y1="190" x2="900" y2="270" class="wall-inner" />
+    <line x1="1000" y1="190" x2="1000" y2="270" class="wall-inner" />
+    
+    <!-- SERVICE & MECHANICAL (1,000 SQFT) Y=150 to Y=190 -->
+    <line x1="700" y1="150" x2="1100" y2="150" class="wall-inner" />
+    
+    <!-- Labels - Floor 2 -->
+    <text x="710" y="843" class="txt-subtitle">Floor 2 — Mezzanine</text>
+    <text x="710" y="828" class="txt-title">HEAL (CLINIC + LOUNGE)</text>
+    
+    <text x="900" y="500" class="txt-zone-label" text-anchor="middle">Member Lounge</text>
+    <text x="900" y="512" class="txt-zone-sqft" text-anchor="middle">3,500 SQFT</text>
+    <text x="900" y="525" class="txt-annotation" text-anchor="middle">Overlooks Main Training Floor &amp; Dallas Skyline</text>
+    
+    <text x="1000" y="320" class="txt-zone-label" text-anchor="middle" font-size="10px">Clinic Wing (4,000 SQFT)</text>
+    <text x="785" y="445" class="txt-annotation" font-size="8px">Consults 1–4</text>
+    <text x="985" y="445" class="txt-annotation" font-size="8px">IV Lounge &amp; Lab Draw</text>
+    
+    <text x="850" y="240" class="txt-zone-label" text-anchor="middle" font-size="9px">Practitioner Offices</text>
+    <text x="850" y="250" class="txt-zone-sqft" text-anchor="middle">2,000 SQFT</text>
+    
+    <text x="900" y="173" class="txt-zone-label" text-anchor="middle" font-size="9px">Service / Mechanical</text>
+    <text x="900" y="183" class="txt-zone-sqft" text-anchor="middle">1,000 SQFT</text>
+
+    <!-- Dimensions lines Floor 2 -->
+    <line x1="1110" y1="150" x2="1110" y2="850" style="stroke: #333; stroke-width: 1;" />
+    <path d="M 1105 150 L 1115 150 M 1105 850 L 1115 850" style="stroke: #333; stroke-width: 1;" />
+    <text x="1120" y="500" class="txt-label-dim" transform="rotate(90 1120 500)">175 FT</text>
+  </g>
+
+  <!-- ==================== CAMERA WALK PATH & MARKERS ==================== -->
+  <g id="camera-path-sequence">
+    <!-- Camera path line -->
+    <path d="M 300 890 L 300 815 L 300 710 L 250 600 L 160 460 L 380 550 M 300 390 L 200 320 L 150 210 M 1060 760 L 1055 580 L 950 500 L 760 350 L 920 320" class="cam-path" />
+
+    <!-- C01: Front Exterior (Dragon Street) -->
+    <polygon points="300,890 250,940 350,940" class="cam-cone" />
+    <circle cx="300" cy="890" r="9" class="cam-marker" />
+    <text x="300" y="890" class="txt-cam-num">01</text>
+    
+    <!-- C02: Entry Vestibule looking in -->
+    <polygon points="300,815 200,730 400,730" class="cam-cone" />
+    <circle cx="300" cy="815" r="9" class="cam-marker" />
+    <text x="300" y="815" class="txt-cam-num">02</text>
+    
+    <!-- C03: Training floor entrance looking down the arches -->
+    <polygon points="300,710 150,470 450,470" class="cam-cone" />
+    <circle cx="300" cy="710" r="9" class="cam-marker" />
+    <text x="300" y="710" class="txt-cam-num">03</text>
+    
+    <!-- C04: Mid Training Floor looking East at cables -->
+    <polygon points="250,600 380,530 380,670" class="cam-cone" />
+    <circle cx="250" cy="600" r="9" class="cam-marker" />
+    <text x="250" y="600" class="txt-cam-num">04</text>
+    
+    <!-- C05: Free weights / Powerlifting platforms close-up -->
+    <polygon points="160,460 110,415 210,415" class="cam-cone" />
+    <circle cx="160" cy="460" r="9" class="cam-marker" />
+    <text x="160" y="460" class="txt-cam-num">05</text>
+
+    <!-- C06: Machine details -->
+    <polygon points="380,550 340,480 340,620" class="cam-cone" opacity="0.5" />
+    <circle cx="380" cy="550" r="9" class="cam-marker" />
+    <text x="380" y="550" class="txt-cam-num">06</text>
+    
+    <!-- C09: Transition to Recovery Wing -->
+    <polygon points="300,390 250,300 350,300" class="cam-cone" />
+    <circle cx="300" cy="390" r="9" class="cam-marker" />
+    <text x="300" y="390" class="txt-cam-num">09</text>
+    
+    <!-- C11: Inside Cold Plunge room -->
+    <polygon points="200,320 120,290 220,290" class="cam-cone" />
+    <circle cx="200" cy="320" r="9" class="cam-marker" />
+    <text x="200" y="320" class="txt-cam-num">11</text>
+
+    <!-- C13: Locker Room Showers -->
+    <polygon points="150,210 105,155 205,155" class="cam-cone" />
+    <circle cx="150" cy="210" r="9" class="cam-marker" />
+    <text x="150" y="210" class="txt-cam-num">13</text>
+
+    <!-- C16: Stairs ascending / arrival on Floor 2 void bridge -->
+    <polygon points="1060,760 980,720 1040,680" class="cam-cone" />
+    <circle cx="1060" cy="760" r="9" class="cam-marker" />
+    <text x="1060" y="760" class="txt-cam-num">16</text>
+
+    <!-- C17: Lounge overlooking training floor void and skyline -->
+    <polygon points="950,500 705,575 1100,850" class="cam-cone" />
+    <circle cx="950" cy="500" r="9" class="cam-marker" />
+    <text x="950" y="500" class="txt-cam-num">17</text>
+
+    <!-- C20: Clinic consulting room (doctor oak desk) -->
+    <polygon points="760,350 700,310 740,390" class="cam-cone" />
+    <circle cx="760" cy="350" r="9" class="cam-marker" />
+    <text x="760" y="350" class="txt-cam-num">20</text>
+
+    <!-- C21: IV Therapy lounge -->
+    <polygon points="920,320 945,360 1005,360" class="cam-cone" />
+    <circle cx="920" cy="320" r="9" class="cam-marker" />
+    <text x="920" y="320" class="txt-cam-num">21</text>
+  </g>
+
+  <!-- ==================== TITLE BLOCK ==================== -->
+  <g id="title-block" transform="translate(50, 60)">
+    <text x="0" y="20" class="txt-title" font-size="24px" style="font-weight: 700; letter-spacing: 0.15em;">BLACKLINE METHOD</text>
+    <text x="0" y="35" class="txt-subtitle">Scaled Warehouse Conversion (28,000 SQFT Total)</text>
+    <text x="0" y="50" class="txt-annotation" style="fill: #888;">Address: 1418 Dragon Street, Dallas, TX (Design District)</text>
+  </g>
+
+  <!-- Vertically stacked metadata box to prevent overlap collisions -->
+  <g transform="translate(1150, 60)">
+    <rect x="0" y="0" width="350" height="85" fill="none" stroke="#2E2E2E" stroke-width="1" />
+    <text x="15" y="20" class="txt-subtitle" font-size="9px" style="fill: #B8B8B8;">Scale: 1 ft = 4 px (100' x 175' Footprint)</text>
+    <text x="15" y="36" class="txt-subtitle" font-size="9px" style="fill: #B8B8B8;">Date: May 2026</text>
+    <text x="15" y="52" class="txt-subtitle" font-size="9px" style="fill: #B8B8B8;">Drawing No: A-101</text>
+    <text x="15" y="68" class="txt-subtitle" font-size="9px" style="fill: #B8B8B8;">Version: v3.0 (Equinox-Flagship Scale)</text>
+  </g>
+</svg>
