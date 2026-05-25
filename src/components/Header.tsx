@@ -4,11 +4,13 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Menu, X } from 'lucide-react'
+import { Button } from '@/components/ui/button'
 
 const NAV_LINKS = [
-  { label: 'Philosophy', href: '#philosophy' },
-  { label: 'Membership', href: '#membership' },
-  { label: 'Contact', href: '#contact' },
+  { label: 'Philosophy', href: '/philosophy' },
+  { label: 'The Method', href: '/method' },
+  { label: 'Process', href: '/process' },
+  { label: 'Insights', href: '/insights' },
 ]
 
 export function Header() {
@@ -61,6 +63,12 @@ export function Header() {
             ))}
           </nav>
 
+          <div className="hidden md:block">
+            <Button asChild size="sm">
+              <Link href="/contact">request a consult</Link>
+            </Button>
+          </div>
+
           {/* Mobile trigger */}
           <button
             className="md:hidden text-offwhite/70 transition-colors duration-600 hover:text-amber p-1"
@@ -107,7 +115,7 @@ export function Header() {
 
             {/* Nav links */}
             <nav className="flex flex-col justify-center flex-1 px-6 gap-10">
-              {NAV_LINKS.map((link, i) => (
+              {[...NAV_LINKS, { label: 'Contact', href: '/contact' }].map((link, i) => (
                 <motion.div
                   key={link.href}
                   initial={{ opacity: 0, x: 24 }}
@@ -132,7 +140,7 @@ export function Header() {
             {/* Menu footer */}
             <div className="px-6 pb-10 border-t border-hairline pt-8">
               <p className="font-sans text-[10px] tracking-[0.2em] uppercase text-offwhite/20">
-                Dallas Design District · By appointment
+                Dallas, Texas · By appointment · Remote and in-person
               </p>
             </div>
           </motion.div>

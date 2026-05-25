@@ -1,152 +1,155 @@
-# Blackline — Style Bible
+# Blackline Method — Style Bible
 
-The authoritative source for visual direction, materiality, palette, 
-typography, voice, and atmosphere. Every design decision references 
-this file. When in doubt, reread it.
+## Brand Identity
 
----
+**Name:** Blackline Method  
+**Type:** Private optimization practice  
+**Location:** Dallas, Texas — remote and in-person, by appointment  
+**Founders:** Layne Dowdy and Spencer (last name omitted here — use first names only in copy)  
+**Contact:** layne@blacklinemethod.com / spencer@blacklinemethod.com  
 
-## 1. Brand
-
-**Name:** Blackline  
-**Tagline:** Train. Recover. Heal.  
-**Positioning:** A private training and wellness concierge for ultra-
-high-net-worth individuals in Dallas. Membership is capped, vetted, 
-and by application only.
+Blackline is not a gym. It is not a clinic. It is not a facility. It is a relationship-driven coaching practice that operates at the intersection of four domains: hormones, training, nutrition, and the structure of how a client lives.
 
 ---
 
-## 2. The building
+## Positioning
 
-A single building reading as three distinct spaces, connected by 
-stair transitions on the scroll journey. Each space has its own 
-materiality so they read visually distinct.
-
-### Exterior
-- Stucco / concrete facade, mid-grey, mottled texture
-- Minimal black wordmark "BLACKLINE" — no glow, no neon, no logotype 
-  with serifs
-- Floor-to-ceiling smoked glass entry doors with black steel frame
-- Subtle warm uplighting on the facade at night
-- Sidewalk parked cars in foreground (one dark SUV — luxury wellness 
-  clientele cue)
-- Reference: /references/facade-yard-gym-template.png and 
-  /references/facade-night-elevated.png
-
-### Floor 1 — Training (the main floor)
-- **Signature feature: repeating stone arches** running the length 
-  of the main floor. See /references/architecture-arches-signature.png. 
-  These are non-negotiable. They are the building's identity.
-- Matte black walls and ceiling
-- Polished black concrete floor with slight reflectivity
-- Black rubber tile under squat racks and platform areas
-- Equipment: all matte black, brushed stainless accents only on 
-  handles and dumbbell ends, no visible equipment-brand logos
-- Lighting: warm tungsten pendants (2700K) over equipment stations, 
-  casting focused pools of light. Linear warm LED strips at the base 
-  of mirrors. No overhead fluorescent.
-- Mirrors with warm LED accent strips behind them
-- Layout: open floor, generous negative space between stations, 
-  intentionally underpopulated
-
-### Lower level — Recovery
-- Darker still, theatrical, intimate
-- Black floors, black walls, single warm linear light sources
-- Cold plunge room: 3 wood-clad plunge tubs in a row, vertical warm 
-  LED strips on the back wall (reference: /references/recovery-cold-
-  plunge-tubs.png)
-- Sauna room: cedar interior glimpsed through smoked glass
-- Contrast therapy room: low ceilings, single overhead warm pendant, 
-  a single bench, towels stacked
-- Shower area: dark stone tile, recessed downlights (reference: 
-  /references/recovery-shower-stone.png)
-- Water feature/lounge: ambient warm uplighting on textured walls 
-  (reference: /references/recovery-spa-water-feature.png)
-- Each room treated as its own small chapel — quiet, private, 
-  separated by smoked glass
-
-### Floor 2 — Clinic
-- **Tonal shift.** Visually different. Warmer, lighter, calmer.
-- Pale plaster walls, light oak floors
-- A viewer scrolling should sense "this is a different building" 
-  because it's the medical space, not the training space
-- Consultation rooms: linen-upholstered chairs, single oak desk, a 
-  stethoscope visible, a tablet on the desk
-- Doctors in white coats over dark scrubs — restrained, expensive
-- Soft natural daylight from a clerestory window
-- Reference: /references/interior-mood-cove-warm.png for the warm-wood 
-  tone direction, but cleaner and more medical than that image
+Blackline is a private optimization practice for men and women who want to run their own biology — not be managed by a system that only acts after something breaks. It is not a gym. It is not a clinic. It is a relationship-driven coaching practice that operates where four domains meet: hormones, training, nutrition, and the structure of how a client lives. Symptoms are read first. Bloodwork is read in context against symptoms, history, and goals — not against population reference ranges. Protocols are designed around how a client actually lives. Hormone optimization guidance is provided by Spencer; pharmaceutical intervention, when indicated, is coordinated with a licensed physician. The goal is to teach clients to understand and operate their own systems, not to make them dependent on a provider.
 
 ---
 
-## 3. Palette
+## Voice Rules
 
-| Token | Hex | Use |
-|-------|-----|-----|
-| Matte black | `#0A0A0A` | Dominant — floors 1 and recovery |
-| Warm white | `#F5F0E8` | Dominant — clinic; body type on black bg |
-| Warm amber LED | `#E8B886` | Light-source accent only, never as paint |
-| Brushed stainless | `#B8B8B8` | Chapter markers, hairlines, secondary type |
-| Muted oxblood | `#5C1F1F` | RESERVED — only for the "Apply for Membership" CTA |
+### Tone
+- Declarative, never enthusiastic.
+- Periods, not exclamation points.
+- Confident and restrained.
+- The implied reader is intelligent, self-directed, and skeptical of marketing.
+- "Engagements are limited. That is by design." is the reference tone.
 
-No other colors anywhere on the site. No gradients. No accents that 
-aren't on this list.
+### Words to use
+- optimization, protocol, system, biology, private, by appointment, individual, context, synthesis, calibration, substrate, domain, marker, panel
 
----
+### Words to never use
+- elevate, premium, luxury, transform, unleash, unlock, experience the difference
+- your best self, wellness journey, holistic, cutting-edge, game-changing
+- Train. Recover. Heal. (retired tagline — do not use)
+- world-class, unparalleled, best-in-class
 
-## 4. Typography
-
-| Role | Font | Weight | Notes |
-|------|------|--------|-------|
-| Editorial headlines | Fraunces | 500-700 | Tracked tight, generous leading |
-| Heavy serif display | Fraunces | 900 | Chapter words ("Plunge.", "Heal."), tracked generously |
-| Grotesque body | Inter Tight | 400 | Tracked +0.01em, line-height 1.6 |
-| Small caps / labels | Inter Tight | 600 | Uppercase, tracked +0.1em, 12-13px |
-
-All free Google Fonts. If a paid alternative (Reckless, Editorial New, 
-GT Super, Söhne) is dramatically better, ask before installing.
+### Structural rules
+- Lowercase headlines (it is part of the visual identity — do not capitalize)
+- No member count cap stated anywhere. Use: "engagements are limited," "we take a small number of clients," "by application only"
+- No physical street address anywhere in the codebase
+- Critique of standard medical care is always structural, never personal. Never say "broken medical system" or attack physicians as individuals. The system was built for triage; it was simply never built for optimization.
 
 ---
 
-## 5. Voice
+## Critical Content Rule
 
-- **Declarative, not enthusiastic.** Periods, never exclamation points.
-- **Three words per chapter, maximum.** "Plunge." "Sweat." "Restore."
-- **Confident, restrained, slightly imperious.** "Membership is not 
-  for everyone. That's the point."
-- **Clinical precision over motivation.** "Strength. Mobility. Sleep. 
-  Tailored to your bloodwork." not "Unlock your best self."
-- **Never** use: "elevate," "premium," "luxury," "transform," 
-  "unleash," "imagine if," "experience the difference"
-- **Never** use exclamation points, emoji, ALL-CAPS shouting, or 
-  motivational fitness language
+**This site must not name any pharmaceutical, peptide, hormone-by-protocol, supplement-by-brand, dose, or compound.**
 
----
+Not anywhere. Not in Insights articles, not in page copy, not in comments.
 
-## 6. Atmosphere
+- No "TRT"
+- No "GLP-1"
+- No peptides by name (no TB-500, no BPC-157, no nothing)
+- No specific dosing
+- No brand names
 
-If the site had to be summarized as a feeling rather than a list:
+**Permitted:** discussing hormone optimization in general terms, naming lab markers when explaining what they are and what they measure (e.g., SHBG, LH, FSH, estradiol, HDH, TSH, free T3 — education about the marker is fine, protocol design is not).
 
-> An after-hours private members' club, the kind where you ring a bell 
-> and a host opens the door. Warm pendant pools of light against a 
-> matte black floor. The hum of a cold plunge in the next room. The 
-> sound of a single trainer correcting a member's posture in a quiet 
-> voice. Upstairs, a doctor reviews bloodwork at an oak desk in 
-> daylight. Nobody is in a hurry.
-
-Not: a gym. Not: a spa. Not: a clinic. All three, woven into one 
-ritual, in one building.
+This rule is non-negotiable for legal and brand reasons.
 
 ---
 
-## 7. What to AVOID at all costs
+## Palette
 
-- Bright fluorescent overhead lighting in the gym (reads commercial)
-- Cool/clinical white-on-white in the gym areas (save white for clinic)
-- Chrome equipment dominance (matte black only)
-- Smiling people in group hugs (no stock-photo fitness energy)
-- Testimonial walls, press logo strips, "as seen in" sections
-- Generic AI gym-photo aesthetic (the references show real materials 
-  with real texture — never generate or use images that feel synthetic)
-- Rounded corners above 2px anywhere
-- Drop shadows for separation (use 1px hairlines instead)
+Pulled from `tailwind.config.ts`:
+
+| Name      | Hex       | Usage                                    |
+|-----------|-----------|------------------------------------------|
+| black     | `#0A0A0A` | All backgrounds                          |
+| offwhite  | `#F5F5F0` | Primary text, logo                       |
+| amber     | `#C8965A` | Accents, eyebrows, hover states, dividers|
+| hairline  | `#2A2A2A` | Borders, dividers                        |
+| muted     | `#6B6B6B` | Secondary text                           |
+
+No new colors. No gradients (except the hero scroll cue fade, which is a transparency ramp, not a color gradient).
+
+---
+
+## Typography
+
+**Serif — Headlines and editorial body:** Fraunces  
+- Weight: 300 (light), 400  
+- Style: normal + italic  
+- Applied as: `font-serif`  
+- Use: all headlines (lowercase), italic deks in Insights, pull quotes  
+
+**Sans — UI labels, body copy, navigation:** Inter  
+- Weight: 400, 500, 600  
+- Applied as: `font-sans`  
+- Use: all navigation, labels, body paragraphs, form elements  
+
+**Headline sizing:** `clamp(2.75rem, 5vw, 5.5rem)` for section h2, `clamp(3rem, 8vw, 8rem)` for hero and page h1.  
+**Article body:** 16–17px, max-width ~640px, line-height ~1.85.
+
+---
+
+## Insights Editorial Guardrails
+
+### Categories
+- Diagnostic Philosophy
+- Endocrinology
+- Diagnostics
+- Training & Physiology
+
+### Article rules
+- Essays only. Not listicles. Not "5 tips." Not "ultimate guides."
+- 500–800 words. Well-written and readable.
+- No invented statistics. Write around a claim that needs a number to be credible — don't fabricate it.
+- Same voice as the marketing pages: declarative, restrained, confident.
+- No compound names, doses, or protocols (see Critical Content Rule above).
+- Each article ends with a byline ("Written by Layne" or "Written by Spencer") and a CTA to /contact.
+
+---
+
+## What the Site Is Not
+
+- Not a gym
+- Not a clinic
+- Not a supplement company
+- Not a physical facility (the 28,000 sqft Dallas space is a long-term vision — it does not exist yet and must not appear on the site)
+- Not a membership-based business in the traditional sense (no membership page, no cap stated, no "150 members" language)
+
+---
+
+## Component Design System
+
+### Section rhythm
+- Eyebrow: `font-sans text-[10px] tracking-[0.3em] uppercase text-offwhite/20`, margin-bottom: 10 (2.5rem)
+- H2: `font-serif font-light text-offwhite lowercase tracking-wider leading-[1.05]`
+- Body: `font-sans text-sm text-offwhite/50 leading-relaxed tracking-wide`
+- Section padding: `py-32 md:py-44`
+- Max content width: `max-w-7xl mx-auto px-6 md:px-12`
+
+### Dividers
+- Standard: `h-px bg-hairline`
+- Accent: `.hairline-amber` (amber tint)
+
+### Fade animation
+- `FadeInSection` wraps all sections — opacity 0 → 1, y 28 → 0, duration 0.9s, easing `[0.22, 1, 0.36, 1]`
+- Stagger with `delay` prop (0.08–0.18 increments)
+
+### Button system
+- All buttons: `src/components/ui/button.tsx` — do not create alternate button styles
+- CTA text: "request a consult" (lowercase, link to /contact only)
+
+---
+
+## TODOs at Launch
+
+- [ ] Set `RESEND_API_KEY` in Vercel environment variables to enable email delivery from contact form
+- [ ] Verify domain `blacklinemethod.com` in Resend before sending emails
+- [ ] Add Instagram handle to footer once confirmed
+- [ ] Add Open Graph image (`/opengraph-image.tsx` already scaffolded — needs real visual)

@@ -7,28 +7,23 @@ export function HeroSection() {
       className="relative h-screen bg-black flex items-center justify-center overflow-hidden"
       aria-label="Hero"
     >
-      {/* HERO_SCROLL_ANIMATION_PLACEHOLDER - will be replaced with 30-frame canvas scroll sequence.
-          The canvas element should be absolutely positioned to fill this div and driven by
-          window.scrollY progress mapped to the frame index. See /sequence/ for source frames. */}
-      <div
-        id="hero-scroll-animation-placeholder"
-        aria-hidden="true"
-        className="absolute inset-0 pointer-events-none z-0"
-      />
-
       {/* Hero content */}
       <div className="relative z-10 text-center px-6 max-w-5xl mx-auto">
         <h1 className="font-serif font-light text-offwhite lowercase leading-[1.05] tracking-wider text-[clamp(2.5rem,7vw,7rem)]">
-          the standard for<br className="hidden sm:block" /> private training
+          run your own biology.
         </h1>
 
         <p className="mt-8 font-sans text-offwhite/35 uppercase tracking-[0.3em] text-[11px]">
-          dallas design district&nbsp;&nbsp;·&nbsp;&nbsp;by appointment
+          Dallas, Texas&nbsp;&nbsp;·&nbsp;&nbsp;By appointment
+        </p>
+
+        <p className="mt-6 font-serif italic text-offwhite/30 text-base md:text-lg tracking-wide max-w-md mx-auto">
+          a private optimization practice for hormones, training, nutrition, and the way you live.
         </p>
 
         <div className="mt-12">
           <Button asChild size="lg">
-            <Link href="#membership">request membership</Link>
+            <Link href="/contact">request a consult</Link>
           </Button>
         </div>
       </div>

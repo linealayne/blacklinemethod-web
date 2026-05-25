@@ -1,4 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { Resend } from 'resend'
+
+const resend = new Resend(process.env.RESEND_API_KEY)
 
 export async function POST(request: NextRequest) {
   try {
@@ -16,7 +19,6 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Basic email format guard
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
     if (!emailRegex.test(email)) {
       return NextResponse.json(
@@ -25,15 +27,12 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // TODO: Replace with email service (Resend recommended — `npm i resend`)
-    // import { Resend } from 'resend'
-    // const resend = new Resend(process.env.RESEND_API_KEY)
-    // await resend.emails.send({ from: '...', to: 'info@blacklinemethod.com', ... })
-    console.log('[contact]', {
-      name: name.trim(),
-      email: email.trim(),
-      message: message.trim(),
-      timestamp: new Date().toISOString(),
+    await resend.emails.send({
+      from: 'Blackline Method <hello@blacklinemethod.com>',
+      to: ['layne@blacklinemethod.com', 'spencer@blacklinemethod.com'],
+      replyTo: email.trim(),
+      subject: `Consult request from ${name.trim()}`,
+      text: `Name: ${name.trim()}\nEmail: ${email.trim()}\n\n${message.trim()}`,
     })
 
     return NextResponse.json({ success: true }, { status: 200 })

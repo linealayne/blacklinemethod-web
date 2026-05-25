@@ -20,22 +20,21 @@ const inter = Inter({
 })
 
 export const metadata: Metadata = {
-  title: 'Blackline Method — Private Training, Dallas Design District',
+  title: 'Blackline Method — Private Optimization Practice, Dallas',
   description:
-    'A private training and wellness facility in the Dallas Design District. Strength, recovery, and clinical care — in one building. By application only.',
+    'A private optimization practice for hormones, training, nutrition, and the structure of how you live. By appointment. Dallas, Texas.',
   keywords: [
-    'private gym Dallas',
-    'Design District Dallas',
-    'personal training Dallas',
-    'luxury gym Dallas',
-    'wellness Dallas',
-    'blood work fitness',
     'hormone optimization Dallas',
+    'private optimization practice',
+    'bloodwork interpretation Dallas',
+    'performance optimization Dallas',
+    'private coaching Dallas',
+    'endocrine optimization',
   ],
   openGraph: {
-    title: 'Blackline Method — Private Training, Dallas Design District',
+    title: 'Blackline Method — Private Optimization Practice',
     description:
-      'Train. Recover. Heal. A private facility in the Dallas Design District, limited to 150 members.',
+      'Run your own biology. A private optimization practice for hormones, training, nutrition, and the way you live. By appointment.',
     url: 'https://blacklinemethod.com',
     siteName: 'Blackline Method',
     locale: 'en_US',
@@ -43,9 +42,9 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Blackline Method — Private Training, Dallas Design District',
+    title: 'Blackline Method — Private Optimization Practice',
     description:
-      'Train. Recover. Heal. A private facility in the Dallas Design District, limited to 150 members.',
+      'Run your own biology. A private optimization practice for hormones, training, nutrition, and the way you live.',
   },
   metadataBase: new URL('https://blacklinemethod.com'),
   robots: {
