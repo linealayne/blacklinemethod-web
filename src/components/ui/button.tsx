@@ -8,7 +8,8 @@ const buttonVariants = cva(
     'inline-flex items-center justify-center',
     'font-sans text-xs tracking-[0.2em] uppercase',
     'rounded-[1px]',
-    'transition-all duration-600 ease-out',
+    'transition-[background-color,color,border-color,box-shadow,transform] duration-600 ease-lux',
+    'active:scale-[0.98] active:duration-150',
     'disabled:pointer-events-none disabled:opacity-40',
     'focus-visible:outline focus-visible:outline-1 focus-visible:outline-amber focus-visible:outline-offset-2',
   ].join(' '),
@@ -18,12 +19,15 @@ const buttonVariants = cva(
         default:
           'border border-amber text-amber bg-transparent hover:bg-amber hover:text-black',
         ghost:
-          'border border-hairline text-offwhite/50 bg-transparent hover:border-amber hover:text-amber',
+          'border border-hairline text-offwhite/60 bg-transparent hover:border-amber hover:text-amber',
       },
       size: {
         default: 'px-8 py-3',
         sm: 'px-5 py-2 text-[10px]',
         lg: 'px-12 py-4',
+      },
+      glow: {
+        true: 'hover:shadow-[0_0_48px_rgba(200,150,90,0.22)]',
       },
     },
     defaultVariants: {
@@ -40,11 +44,11 @@ export interface ButtonProps
 }
 
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ className, variant, size, asChild = false, ...props }, ref) => {
+  ({ className, variant, size, glow, asChild = false, ...props }, ref) => {
     const Comp = asChild ? Slot : 'button'
     return (
       <Comp
-        className={cn(buttonVariants({ variant, size, className }))}
+        className={cn(buttonVariants({ variant, size, glow, className }))}
         ref={ref}
         {...props}
       />
