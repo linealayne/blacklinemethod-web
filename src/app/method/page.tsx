@@ -1,11 +1,12 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
-import { FadeInSection } from '@/components/FadeInSection'
-import { MethodDiagram } from '@/components/MethodDiagram'
+import { Reveal } from '@/components/motion/Reveal'
+import { SplitReveal } from '@/components/motion/SplitReveal'
+import { MethodOrbitIdle } from '@/components/MethodOrbitIdle'
 import { Button } from '@/components/ui/button'
 
 export const metadata: Metadata = {
-  title: 'The Method — Blackline Method',
+  title: 'The Method | Blackline Method',
   description:
     'Hormones, training, nutrition, and lifestyle as four interconnected pillars of one system. The Blackline Method works across all four simultaneously.',
 }
@@ -59,61 +60,58 @@ const PILLARS = [
 
 export default function MethodPage() {
   return (
-    <div className="bg-black min-h-screen pt-40 pb-32">
+    <div className="bg-black min-h-screen pt-36 md:pt-40 pb-24">
       {/* Hero */}
-      <section aria-label="Method introduction" className="px-6 md:px-12 max-w-7xl mx-auto mb-24">
-        <FadeInSection>
-          <span className="block font-sans text-[10px] tracking-[0.3em] uppercase text-offwhite/20 mb-10">
-            the method
-          </span>
-          <h1 className="font-serif font-light text-offwhite lowercase leading-[1.05] tracking-wider text-[clamp(3rem,8vw,8rem)] mb-12 max-w-5xl">
-            four pillars. one system.
-          </h1>
-          <p className="font-sans text-sm text-offwhite/45 leading-relaxed tracking-wide max-w-lg">
-            Hormones, training, nutrition, and lifestyle are not four separate services. They are
-            one circular system. Adjusting one without understanding the others produces incomplete
-            results. The Blackline Method addresses all four simultaneously — because that is what
-            it takes to actually move the system.
-          </p>
-        </FadeInSection>
+      <section aria-label="Method introduction" className="px-6 md:px-12 max-w-7xl mx-auto mb-16 md:mb-20">
+        <Reveal as="p" className="bl-label mb-8">
+          the method
+        </Reveal>
+        <SplitReveal
+          as="h1"
+          className="font-serif font-light text-offwhite lowercase leading-[1.05] tracking-wider text-[clamp(3rem,8vw,8rem)] mb-10 max-w-5xl"
+        >
+          four pillars. one system.
+        </SplitReveal>
+        <Reveal as="p" delay={0.3} className="font-sans text-sm md:text-[15px] text-body leading-relaxed tracking-wide max-w-lg">
+          Hormones, training, nutrition, and lifestyle are not four separate services. They are one
+          circular system. Adjusting one without understanding the others produces incomplete
+          results. The Blackline Method addresses all four simultaneously — because that is what it
+          takes to actually move the system.
+        </Reveal>
       </section>
 
-      {/* Diagram */}
-      <section aria-label="System diagram" className="px-6 md:px-12 max-w-7xl mx-auto mb-32">
-        <FadeInSection delay={0.12}>
-          <div className="flex items-center justify-center py-16 border border-hairline">
-            <MethodDiagram className="w-full max-w-[560px] h-auto" />
+      {/* Orbit */}
+      <section aria-label="System diagram" className="px-6 md:px-12 max-w-7xl mx-auto mb-16 md:mb-24">
+        <Reveal delay={0.2}>
+          <div className="py-10 md:py-14 border border-hairline">
+            <MethodOrbitIdle />
           </div>
-        </FadeInSection>
+        </Reveal>
       </section>
 
       {/* Pillars */}
-      {PILLARS.map((pillar, i) => (
+      {PILLARS.map((pillar) => (
         <div key={pillar.id}>
           <div className="mx-6 md:mx-12 h-px bg-hairline" aria-hidden="true" />
-          <section
-            aria-label={pillar.label}
-            className="px-6 md:px-12 max-w-7xl mx-auto py-32 md:py-44"
-          >
-            <div className="grid md:grid-cols-2 gap-16 md:gap-24 items-start">
-              <FadeInSection>
-                <span className="block font-sans text-[10px] tracking-[0.3em] uppercase text-offwhite/20 mb-6">
-                  {pillar.index}
-                </span>
-                <span className="block font-sans text-[11px] tracking-[0.22em] uppercase text-amber/60 mb-8">
-                  {pillar.label}
-                </span>
-                <h2 className="font-serif font-light text-offwhite lowercase leading-[1.05] tracking-wider text-[clamp(2.25rem,4vw,4rem)]">
+          <section aria-label={pillar.label} className="px-6 md:px-12 max-w-7xl mx-auto py-24 md:py-32">
+            <div className="grid md:grid-cols-2 gap-12 md:gap-24 items-start">
+              <div>
+                <Reveal stagger className="mb-8">
+                  <span className="block bl-label mb-4">{pillar.index}</span>
+                  <span className="block bl-label bl-label-amber">{pillar.label}</span>
+                </Reveal>
+                <SplitReveal
+                  as="h2"
+                  className="font-serif font-light text-offwhite lowercase leading-[1.05] tracking-wider text-[clamp(2.25rem,4vw,4rem)]"
+                >
                   {pillar.headline}
-                </h2>
-              </FadeInSection>
-              <FadeInSection delay={0.14}>
-                <div className="space-y-6 font-sans text-sm text-offwhite/50 leading-relaxed tracking-wide pt-4 md:pt-20">
-                  {pillar.body.map((para, j) => (
-                    <p key={j}>{para}</p>
-                  ))}
-                </div>
-              </FadeInSection>
+                </SplitReveal>
+              </div>
+              <Reveal stagger delay={0.15} className="space-y-6 font-sans text-sm md:text-[15px] text-body leading-relaxed tracking-wide md:pt-20">
+                {pillar.body.map((para, j) => (
+                  <p key={j}>{para}</p>
+                ))}
+              </Reveal>
             </div>
           </section>
         </div>
@@ -121,17 +119,17 @@ export default function MethodPage() {
 
       {/* CTA */}
       <div className="mx-6 md:mx-12 h-px bg-hairline" aria-hidden="true" />
-      <section aria-label="Contact CTA" className="px-6 md:px-12 max-w-7xl mx-auto pt-20 pb-10">
-        <FadeInSection>
+      <section aria-label="Contact CTA" className="px-6 md:px-12 max-w-7xl mx-auto pt-16 pb-6">
+        <Reveal>
           <div className="flex flex-col sm:flex-row sm:items-center gap-8">
-            <p className="font-serif text-xl text-offwhite/70 font-light tracking-wide">
+            <p className="font-serif text-xl text-offwhite/80 font-light tracking-wide">
               Engagements are limited. That is by design.
             </p>
-            <Button asChild className="shrink-0">
+            <Button asChild className="shrink-0" glow>
               <Link href="/contact">request a consult</Link>
             </Button>
           </div>
-        </FadeInSection>
+        </Reveal>
       </section>
     </div>
   )
