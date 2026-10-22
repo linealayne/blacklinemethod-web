@@ -150,7 +150,7 @@ export default function ProcessPage() {
               </p>
               <ul className="space-y-3">
                 {tier.includes.map((item) => (
-                  <li key={item} className="flex gap-3 font-sans text-[13px] text-body-dim tracking-wide leading-relaxed">
+                  <li key={item} className="flex gap-3 font-sans text-[13px] text-body-dim tracking-wide leading-[21px]">
                     <span className="mt-[10px] h-px w-3 shrink-0 bg-amber-muted" aria-hidden="true" />
                     {item}
                   </li>
@@ -179,7 +179,7 @@ export default function ProcessPage() {
             <p className="bl-label bl-label-amber mb-8">We do</p>
             <ul className="space-y-5">
               {WE_DO.map((item) => (
-                <li key={item} className="flex gap-4 font-sans text-sm md:text-[15px] text-body tracking-wide leading-relaxed">
+                <li key={item} className="flex gap-4 font-sans text-sm md:text-[15px] text-body tracking-wide leading-[25px]">
                   <span className="mt-[11px] h-px w-3 shrink-0 bg-amber-muted" aria-hidden="true" />
                   {item}
                 </li>
@@ -191,7 +191,7 @@ export default function ProcessPage() {
             <p className="bl-label mb-8">We don&apos;t</p>
             <ul className="space-y-5">
               {WE_DONT.map((item) => (
-                <li key={item} className="flex gap-4 font-sans text-sm md:text-[15px] text-body-dim tracking-wide leading-relaxed">
+                <li key={item} className="flex gap-4 font-sans text-sm md:text-[15px] text-body-dim tracking-wide leading-[25px]">
                   <span className="mt-[11px] h-px w-3 shrink-0 bg-label" aria-hidden="true" />
                   {item}
                 </li>
