@@ -49,8 +49,69 @@ typography:
     fontWeight: 400
     lineHeight: 1
     letterSpacing: "0.3em"
+  label-micro:
+    fontFamily: "Inter, system-ui, sans-serif"
+    fontSize: "10px"
+    fontWeight: 400
+    lineHeight: 1
+    letterSpacing: "0.25em"
+  note:
+    fontFamily: "Inter, system-ui, sans-serif"
+    fontSize: "12px"
+    fontWeight: 400
+    lineHeight: 1.5
+    letterSpacing: "0.025em"
+  list:
+    fontFamily: "Inter, system-ui, sans-serif"
+    fontSize: "13px"
+    fontWeight: 400
+    lineHeight: 1.65
+    letterSpacing: "0.025em"
+  article:
+    fontFamily: "Inter, system-ui, sans-serif"
+    fontSize: "17px"
+    fontWeight: 400
+    lineHeight: 1.85
+    letterSpacing: "0.01em"
+  article-sm:
+    fontFamily: "Inter, system-ui, sans-serif"
+    fontSize: "16px"
+    fontWeight: 400
+    lineHeight: 1.85
+    letterSpacing: "0.01em"
+  contrast:
+    fontFamily: "Fraunces, Georgia, serif"
+    fontSize: "2.1rem"
+    fontWeight: 300
+    lineHeight: 1.15
+    letterSpacing: "0.025em"
+  contrast-sm:
+    fontFamily: "Fraunces, Georgia, serif"
+    fontSize: "1.6rem"
+    fontWeight: 300
+    lineHeight: 1.15
+    letterSpacing: "0.025em"
+  status:
+    fontFamily: "Fraunces, Georgia, serif"
+    fontSize: "1.75rem"
+    fontWeight: 300
+    lineHeight: 1.3
+    letterSpacing: "0.025em"
+  menu:
+    fontFamily: "Fraunces, Georgia, serif"
+    fontSize: "2.6rem"
+    fontWeight: 300
+    lineHeight: 1.15
+    letterSpacing: "0.025em"
+  principle:
+    fontFamily: "Fraunces, Georgia, serif"
+    fontSize: "clamp(2.9rem, 9vw, 8.5rem)"
+    fontWeight: 300
+    lineHeight: 0.98
+    letterSpacing: "0.025em"
 rounded:
   hairline: "1px"
+  scrollbar: "8px"
   dot: "9999px"
 spacing:
   gutter: "24px"
@@ -185,12 +246,12 @@ Rectilinear with 1px corners. Buttons, inputs, and tier panels are hairline-stro
 - **Magnetic (closing CTA only, desktop pointers only):** the button follows the pointer by 28 percent inside a 56px zone and eases back on leave.
 
 ### Inputs / Fields
-- **Style:** transparent, hairline stroke, 48px tall, 16px side padding, off-white text, Body Dim placeholder, amber caret.
+- **Style:** transparent, a slightly lifted grey stroke (#5E5E5B, 3:1 on black) rather than the hairline so the field boundary meets the non-text contrast minimum, 48px tall, 16px side padding, off-white text, Body Dim placeholder, amber caret.
 - **Focus:** stroke turns amber (no ring). Every other focusable element gets a 1px amber outline offset 3px.
 - **Disabled:** 40 percent opacity.
 
 ### Navigation
-- Fixed 80px bar; transparent until 100px of scroll, then black at 90 percent with a blur and a hairline. Wordmark is the serif BLACKLINE tracked 0.35em. Desktop links are Label grey, amber on hover, from 1024px. Below that: a hamburger opens a full-screen Ink overlay whose five lowercase serif links slide up through masks in sequence; Escape closes; focus moves to the close control and returns to the trigger.
+- Fixed 80px bar; transparent until 100px of scroll, then black at 90 percent with a blur and a hairline. Wordmark is the serif BLACKLINE tracked 0.35em. Desktop links are Label grey, amber on hover, from 1024px. Below that: a hamburger opens a full-screen Ink overlay whose five lowercase serif links slide up through masks in sequence, with a consult button at the foot; Escape closes; focus is trapped inside, moves to the close control, and returns to the trigger.
 
 ### Section label and headline
 - Label (bl-label), 32px, then a lowercase serif headline revealed line by line through masks (SplitReveal). Body copy follows with a fade-and-rise (Reveal). Both fire once, when the element passes 86 percent of the viewport.
@@ -208,7 +269,7 @@ Rectilinear with 1px corners. Buttons, inputs, and tier panels are hairline-stro
 - Hairline-divided rows; muted-amber category tag, serif title, Body Dim dek, "Read →" on the right. Hover draws a 1px amber underline under the title, nudges the arrow 4px, and lifts the row 2px. No layout shift.
 
 ### Signature: the two 3D moments
-- **Hero field:** 4,200 points on desktop (1,500 on phones), amber and gold, additive, dpr capped at 1.5, drifting as dust, gathering into a slowly rotating double helix over 5.5 seconds after the loader, breathing, pushed by the cursor, loosening and fading as the hero scrolls away. Bloom on desktop only. Behind a radial darkening so the headline always reads.
+- **Hero field:** 4,200 points on desktop (1,500 on phones), amber and gold, additive, dpr capped at 1.5, drifting as dust, gathering into a slowly rotating double helix over 5.5 seconds after the loader, breathing, pushed by the cursor, loosening and fading as the hero scrolls away. A second, larger, fainter point layer gives the desktop field its soft halo. Behind a radial darkening so the headline always reads.
 - **Orbit:** a gold "you" point with a soft glow, four amber nodes on a tilted ring (one thin amber line, one fainter dashed halo), labels in Label grey that turn gold when in front. Scrubbed by scroll on the homepage; slow idle rotation on /method. Static SVG diagram when WebGL or motion is unavailable.
 
 ## Do's and Don'ts

@@ -21,7 +21,7 @@ Blackline Method is a live, real business: a private optimization practice in Da
 ## Stack and commands
 
 - Next.js 14.2 App Router, React 18, Tailwind 3, TypeScript. Deployed on Vercel. Do not upgrade Next or React without asking.
-- Motion: gsap 3.15 (+ ScrollTrigger, SplitText, Draggable, @gsap/react), lenis. 3D: three 0.160, @react-three/fiber 8, @react-three/drei 9, @react-three/postprocessing 2 (these are the React 18 compatible majors; fiber 9 needs React 19).
+- Motion: gsap 3.15 (+ ScrollTrigger, SplitText, Draggable, @gsap/react), lenis. 3D: three 0.160 and @react-three/fiber 8 only (fiber 9 needs React 19). No drei, no postprocessing: the orbit draws its own ring and projects DOM labels; the hero fakes bloom with a second soft point layer.
 - `npm run dev` for development. `npm run build` needs `RESEND_API_KEY` set; locally use a placeholder: `RESEND_API_KEY=re_local_build_placeholder npm run build`. The contact route reads the real key at request time on Vercel.
 - Type check: `npx tsc --noEmit -p .`. Design detector: `~/.claude/skills/impeccable/scripts/impeccable detect --json src/app src/components`.
 - Local screenshots go in `.playwright-mcp/` (gitignored). Port 3000 on this machine belongs to another project; use 3017 for `next start` and 3018 for `next dev`.
@@ -45,14 +45,16 @@ Fonts: Fraunces 300/400 (lowercase headlines, italic leads) and Inter 400/500/60
 
 ## Motion system
 
-Flags are set on `<html>` before first paint by the inline script in `src/lib/flags.ts` (rendered in `app/layout.tsx`): `bl-motion` or `bl-reduced`, `bl-nowebgl`, `bl-no-loader` (returning visitor this session), later `bl-hydrated` and `bl-loader-done`. `motionFlags()` reads them synchronously; `useMotion()` (MotionProvider) exposes them to React after mount. Reduced motion or no WebGL means: no particles, no orbit, no pinning, no loader, no smooth scroll, no grain drift; everything renders static and readable.
+Flags are set on `<html>` before first paint by the inline script in `src/lib/flags.ts` (rendered in `app/layout.tsx`): `bl-motion` or `bl-reduced`, `bl-nowebgl` (API absent; the real context probe runs lazily via `supportsWebGL()`), `bl-no-loader` (returning visitor this session), later `bl-hydrated` and `bl-loader-done`.
+
+Expensive set-up waits for the visitor: `useFirstInteraction()` (`src/lib/useFirstInteraction.ts`) turns true on the first pointer move, touch, wheel, key, or scroll, or after 6s of quiet. The hero field, the orbit, and both pinned ScrollTriggers wait for it, so the page is readable and interactive first (and Lighthouse measures the page, not the choreography). `motionFlags()` reads them synchronously; `useMotion()` (MotionProvider) exposes them to React after mount. Reduced motion or no WebGL means: no particles, no orbit, no pinning, no loader, no smooth scroll, no grain drift; everything renders static and readable.
 
 Components in `src/components/motion/`:
 
 - `SmoothScroll`: Lenis synced to ScrollTrigger (`lerp 0.09`, `wheelMultiplier 1`, `touchMultiplier 1.4`). Exposes `window.__lenis`.
-- `Loader`: first visit per session; wordmark letter-spaces 0.1em to 0.35em over 0.7s, amber rule draws over 0.6s from 0.25s, fades over 0.4s from 0.95s (about 1.35s total). Knobs in `LOADER`. Server-rendered so there is no flash; CSS hides it for returning visitors and reduced motion.
+- `Loader`: first visit per session; wordmark letter-spaces 0.1em to 0.35em over 0.6s, amber rule draws over 0.5s from 0.2s, fades over 0.4s from 0.75s (about 1.15s total). The hero reveal is handed off as the fade begins. Knobs in `LOADER`. Server-rendered so there is no flash; CSS hides it for returning visitors and reduced motion.
 - `PageTransition`: capture-phase click listener on same-origin links; veil in 0.22s, `router.push`, scroll reset, `ScrollTrigger.refresh()`, veil out 0.3s. Knobs `DUR.veilIn`, `DUR.veilOut` in `src/lib/motion.ts`.
-- `Reveal`: fade-and-rise for body (y 24px, 0.9s, power3.out, stagger 0.08s with `stagger`). `SplitReveal`: masked line-by-line headline reveal (SplitText lines + masks, 1.1s per line, stagger 0.09s, expo.out). Both fire once at `top 86%`. Elements carry `data-reveal`; on returning visits CSS hides them until hydration so nothing flashes.
+- `Reveal`: fade-and-rise for body (y 24px, 0.9s, power3.out, stagger 0.08s with `stagger`). `SplitReveal`: masked line-by-line headline reveal (SplitText lines + masks, 1.1s per line, stagger 0.09s, expo.out); the split is created lazily after fonts load and only when the headline is within 40% of a viewport. Both reveal once when the element crosses `top 86%`, observed with IntersectionObserver (no per-element ScrollTriggers, no layout reads at hydration). Elements carry `data-reveal`; on returning visits CSS hides them until hydration so nothing flashes.
 - `Magnetic`: desktop-only pointer pull (strength 0.28, 56px zone, 0.7s quickTo). `Grain`: CSS grain at 0.035 opacity, 6-step drift.
 - Global knobs: `EASE`, `DUR`, `REVEAL_START` in `src/lib/motion.ts`. GSAP defaults in `src/lib/gsap.ts`.
 
@@ -62,16 +64,17 @@ Section choreography (knobs live in each file's CONFIG object):
 - `DifferentModelSection`: `MODEL` (row stagger 0.42s, system side settles to 0.42 opacity).
 - `PrinciplesSection`: `PRINCIPLES` (pin +=250% desktop / +=200% phones, scrub 0.6, slide 36px). Static stacked layout when reduced.
 - `RangeExplainer`: `RANGE` (reference band 0.10 to 0.90 of the track, optimal band 0.60 to 0.74, initial 0.32, keyboard step 0.02). Draggable with role="slider"; no numbers shown.
-- `MethodSection`: `METHOD` (pin +=320% desktop / +=280% phones, scrub 0.7, phones pin only the orbit block at `center center`). Windows come from `three/orbit-config.ts`.
+- `MethodSection`: `METHOD` (pin +=320% desktop / +=340% phones, scrub 0.7, phones pin only the orbit block at `center center`). Windows come from `three/orbit-config.ts` (`rotateShare 0.3`: 30% of each window rotates, 70% holds).
 - `ProcessTimeline`: `TIMELINE` (start top 72%, end bottom 78%, scrub 0.6, bracket at 0.1). Horizontal from md, vertical on phones.
-- `Header`: `MENU` (open 0.5s, close 0.22s, link stagger 0.07s). Desktop nav from `lg` (1024px).
+- `Header`: `MENU` (open 0.5s, close 0.22s, link stagger 0.07s). Desktop nav from `lg` (1024px); the phone menu traps focus and carries a consult button.
+- Short desktop viewports (under 820px tall): `.bl-pinned` sections align to the top under the header (globals.css).
 
 ## 3D components (`src/components/three/`)
 
 Both are loaded with `next/dynamic` (`ssr: false`), only on motion-capable WebGL clients, after idle or when near the viewport. Both cap `dpr` at 1.5 and set `frameloop="never"` when off screen or the tab is hidden (`active` prop). Text is always real HTML; canvases are `aria-hidden`.
 
-- `HeroField.tsx`: custom ShaderMaterial points. Knobs in `HERO_FIELD`: `countDesktop 4200`, `countPhone 1500`, `helixRadius 1.15`, `helixHeight 5.6`, `turns 2.1`, `rungFraction 0.16`, `gatherDuration 5.5`, `gatherDelay 0.5`, `rotateSpeed 0.11`, `breathe 0.035`, `pushStrength 0.45`, `pushRadius 2.2`, `pointSize 2.4`, `opacity 0.62`, `warmFraction 0.35`, `bloom` (desktop only: intensity 0.5, threshold 0.08). Uniforms `uGather` (0 dust, 1 helix) and `uScroll` (0 at hero top, 1 scrolled out) drive the gather and loosening. `handles.pointer` is NDC from the hero section (cursor on desktop, device tilt on phones).
-- `OrbitScene.tsx` with `orbit-config.ts`: `ORBIT` knobs `radius 1.8`, `tilt 0.62` (0 edge-on, PI/2 full circle), `tiltEnd 0.95`, `camZ 7.2`, `camZEnd 9.2`, `phoneCamOffset 1.6`, `intro 0.08`, `windowSize 0.19` per pillar, `rotateShare 0.45`, `idleSpeed 0.16`, `smoothing 7`. `activeIndexFor(progress)` returns the pillar in front; the DOM timeline in `MethodSection` uses the same windows so text and orbit stay in step. `mode="idle"` on /method.
+- `HeroField.tsx`: custom ShaderMaterial points. Knobs in `HERO_FIELD`: `countDesktop 4200`, `countPhone 1500`, `helixRadius 1.15`, `helixHeight 5.6`, `turns 2.1`, `rungFraction 0.16`, `gatherDuration 5.5`, `gatherDelay 0.5`, `rotateSpeed 0.11`, `breathe 0.035`, `pushStrength 0.45`, `pushRadius 2.2`, `pointSize 2.4`, `opacity 0.62`, `warmFraction 0.35`, `glow` (desktop only second point layer standing in for bloom: `sizeFactor 3.4`, `opacity 0.09`). Uniforms `uGather` (0 dust, 1 helix) and `uScroll` (0 at hero top, 1 scrolled out) drive the gather and loosening. `handles.pointer` is NDC from the hero section (cursor on desktop, device tilt on phones).
+- `OrbitScene.tsx` with `orbit-config.ts`: `ORBIT` knobs `radius 1.8`, `tilt 0.62` (0 edge-on, PI/2 full circle), `tiltEnd 0.95`, `camZ 7.2`, `camZEnd 9.2`, `phoneCamOffset 1.6`, `intro 0.08`, `windowSize 0.19` per pillar, `rotateShare 0.3`, `idleSpeed 0.16`, `smoothing 7`. Labels are DOM spans projected each frame; they sit above far-side nodes and below near-side nodes. `activeIndexFor(progress)` returns the pillar in front; the DOM timeline in `MethodSection` uses the same windows so text and orbit stay in step. `mode="idle"` on /method.
 - Fallback: `MethodDiagram.tsx` (static SVG) when WebGL or motion is unavailable.
 
 ## Routes that must keep working
@@ -82,4 +85,4 @@ Both are loaded with `next/dynamic` (`ssr: false`), only on motion-capable WebGL
 
 - Screenshots at 1440x900, 1920x1080, 1280x720, 768x1024, 390x844, 375x667. Pinned sections do not survive full-page captures; scroll to positions inside the pin spacer instead.
 - Settle reveals before judging a capture (scroll through once; reveals fire once).
-- Lighthouse: run against a production build (`next start -p 3017`), mobile and desktop presets, on the homepage.
+- Lighthouse: run against a production build (`next start -p 3017`), mobile and desktop presets, on the homepage. Stop `next dev` first: a build while dev runs on the same `.next` corrupts both. Headless scores on this machine swing widely between runs; use three-run medians.

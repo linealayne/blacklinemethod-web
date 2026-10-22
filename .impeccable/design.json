@@ -37,10 +37,10 @@
       { "name": "duration-line", "value": "1.1s, stagger 0.09s", "purpose": "Per headline line." },
       { "name": "duration-rise", "value": "0.9s, stagger 0.08s", "purpose": "Per body block." },
       { "name": "duration-veil", "value": "0.22s in, 0.3s out", "purpose": "Route fade through ink." },
-      { "name": "duration-loader", "value": "1.35s total", "purpose": "Wordmark letter-spaces in over 0.7s, rule draws over 0.6s, fade 0.4s." },
-      { "name": "lenis-lerp", "value": "0.09", "purpose": "Smooth scroll interpolation." },
+      { "name": "duration-loader", "value": "1.15s total", "purpose": "Wordmark letter-spaces in over 0.6s, rule draws over 0.5s, fade 0.4s; hero reveal hands off as the fade begins." },
+      { "name": "lenis-lerp", "value": "0.12", "purpose": "Smooth scroll interpolation." },
       { "name": "pin-principles", "value": "+=250% desktop, +=200% phones, scrub 0.6", "purpose": "Pinned 01/02/03 crossfade." },
-      { "name": "pin-method", "value": "+=320% desktop, +=280% phones, scrub 0.7", "purpose": "Pinned orbit." }
+      { "name": "pin-method", "value": "+=320% desktop, +=340% phones, scrub 0.7", "purpose": "Pinned orbit." }
     ],
     "breakpoints": [
       { "name": "sm", "value": "640px" },
@@ -71,7 +71,7 @@
       "refersTo": "input",
       "description": "Transparent field with a hairline stroke that turns amber on focus.",
       "html": "<label class=\"ds-label\" for=\"ds-name\">Name</label><input id=\"ds-name\" class=\"ds-input\" placeholder=\"Your name\" />",
-      "css": ".ds-label { display: block; font-family: Inter, system-ui, sans-serif; font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase; color: #8C8A84; margin-bottom: 8px; } .ds-input { display: block; width: 100%; height: 48px; padding: 8px 16px; font-family: Inter, system-ui, sans-serif; font-size: 14px; color: #F5F5F0; background: transparent; border: 1px solid #2A2A2A; border-radius: 1px; caret-color: #C8965A; transition: border-color 600ms; } .ds-input::placeholder { color: #85847F; } .ds-input:focus-visible { outline: none; border-color: #C8965A; }"
+      "css": ".ds-label { display: block; font-family: Inter, system-ui, sans-serif; font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase; color: #8C8A84; margin-bottom: 8px; } .ds-input { display: block; width: 100%; height: 48px; padding: 8px 16px; font-family: Inter, system-ui, sans-serif; font-size: 14px; color: #F5F5F0; background: transparent; border: 1px solid #5E5E5B; border-radius: 1px; caret-color: #C8965A; transition: border-color 600ms; } .ds-input::placeholder { color: #85847F; } .ds-input:focus-visible { outline: none; border-color: #C8965A; }"
     },
     {
       "name": "Navigation",
