@@ -18,7 +18,7 @@ export const DUR = {
   riseStagger: 0.08,
   veilIn: 0.22,
   veilOut: 0.3,
-  loader: 1.35, // total loader time, under 1.5s
+  loader: 1.15, // total loader time, under 1.5s
 } as const
 
 export const REVEAL_START = 'top 86%'

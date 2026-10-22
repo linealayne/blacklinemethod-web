@@ -15,7 +15,7 @@ const fraunces = Fraunces({
   weight: ['300', '400'],
   style: ['normal', 'italic'],
   variable: '--font-fraunces',
-  display: 'swap',
+  display: 'block',
 })
 
 const inter = Inter({
@@ -87,11 +87,14 @@ export default function RootLayout({
       </head>
       <body>
         <MotionProvider>
+          <a href="#bl-main" className="bl-skip">
+            Skip to content
+          </a>
           <Loader />
           <SmoothScroll />
           <PageTransition />
           <Header />
-          <main>{children}</main>
+          <main id="bl-main">{children}</main>
           <Footer />
           <Grain />
         </MotionProvider>

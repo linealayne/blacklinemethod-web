@@ -109,12 +109,35 @@ html.bl-motion.bl-no-loader:not(.bl-hydrated) [data-reveal] {
    and the headline stays painted for LCP. */
 @keyframes bl-reveal-safety { to { opacity: 1; } }
 
+/* Pinned sections on short desktop viewports: align to the top under the header */
+@media (min-width: 768px) and (max-height: 820px) {
+  .bl-pinned { align-items: flex-start; }
+  .bl-pinned > div { padding-top: 6.5rem; padding-bottom: 2rem; }
+}
+
+/* Skip link: visible only when focused */
+.bl-skip {
+  position: fixed;
+  top: 12px;
+  left: 12px;
+  z-index: 300;
+  padding: 10px 16px;
+  background: var(--bl-ink);
+  color: var(--bl-amber);
+  border: 1px solid var(--bl-amber);
+  font-family: var(--font-inter), system-ui, sans-serif;
+  font-size: 11px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  transform: translateY(-200%);
+}
+.bl-skip:focus-visible { transform: translateY(0); }
+
 /* SplitText line masks: give descenders room so the clip never bites */
 .bl-line-mask {
   padding-bottom: 0.14em;
   margin-bottom: -0.14em;
 }
-.bl-line { will-change: transform; }
 
 /* ------------------------------------------------------------------
    Loader (first visit per session). Hidden immediately for returning

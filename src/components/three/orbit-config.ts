@@ -11,7 +11,7 @@ export const ORBIT = {
   phoneCamOffset: 1.6, // extra camera distance on phones so labels fit the small canvas
   intro: 0.08, // share of progress spent settling in
   windowSize: 0.19, // share of progress per pillar
-  rotateShare: 0.45, // share of each window spent rotating (rest holds)
+  rotateShare: 0.3, // share of each window spent rotating (rest holds)
   nodeRadius: 0.05,
   ringOpacity: 0.6,
   haloScale: 1.38,

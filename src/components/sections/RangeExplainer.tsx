@@ -45,6 +45,7 @@ export function RangeExplainer() {
   const fraction = useRef(RANGE.initial)
   const draggable = useRef<Draggable | null>(null)
   const [status, setStatus] = useState<Status>(statusFor(RANGE.initial))
+  const [valueNow, setValueNow] = useState(Math.round(RANGE.initial * 100))
 
   const place = useCallback((f: number, animate = false) => {
     const track = trackRef.current
@@ -57,6 +58,7 @@ export function RangeExplainer() {
     else gsap.set(marker, { x })
     draggable.current?.update()
     setStatus(statusFor(clamped))
+    setValueNow(Math.round(clamped * 100))
   }, [])
 
   useGSAP(
@@ -73,6 +75,7 @@ export function RangeExplainer() {
         onDrag() {
           fraction.current = this.x / track.clientWidth
           setStatus(statusFor(fraction.current))
+          setValueNow(Math.round(fraction.current * 100))
         },
       })
       draggable.current = d
@@ -137,7 +140,7 @@ export function RangeExplainer() {
           </div>
 
           <Reveal delay={0.1}>
-            <div className="pt-10 pb-2 select-none">
+            <div className="pt-10 pb-2">
               {/* labels above */}
               <div className="relative h-5 mb-3 font-sans text-[10px] tracking-[0.25em] uppercase text-label">
                 <span className="absolute" style={{ left: pct(RANGE.reference[0]) }}>
@@ -170,10 +173,10 @@ export function RangeExplainer() {
                   aria-label="Illustrative marker. Move to see how the reading is described."
                   aria-valuemin={0}
                   aria-valuemax={100}
-                  aria-valuenow={Math.round(fraction.current * 100)}
+                  aria-valuenow={valueNow}
                   aria-valuetext={STATUS_TEXT[status]}
                   onKeyDown={onKeyDown}
-                  className="absolute top-0 bottom-0 left-0 w-11 -ml-[22px] touch-none outline-none group"
+                  className="absolute top-0 bottom-0 left-0 w-11 -ml-[22px] touch-none group rounded-[1px]"
                 >
                   <span className="absolute left-1/2 top-0 bottom-0 w-px bg-offwhite/80 -translate-x-1/2 transition-colors duration-300 group-focus-visible:bg-amber" />
                   <span className="absolute left-1/2 top-1/2 w-3 h-3 -translate-x-1/2 -translate-y-1/2 rounded-full bg-black border border-offwhite/80 shadow-[0_0_18px_rgba(226,196,143,0.45)] transition-[border-color,box-shadow] duration-300 group-focus-visible:border-amber group-hover:border-gold" />
@@ -194,7 +197,6 @@ export function RangeExplainer() {
               <div className="mt-10 min-h-[4.5rem]">
                 <p
                   ref={statusRef}
-                  aria-live="polite"
                   className="font-serif font-light text-offwhite text-2xl md:text-[1.75rem] tracking-wide"
                 >
                   {STATUS_TEXT[status]}

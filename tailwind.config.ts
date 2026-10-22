@@ -11,6 +11,7 @@ import type { Config } from 'tailwindcss'
  *   body / body-dim  body copy greys that clear WCAG AA (7.2:1 and 5.4:1)
  */
 const config: Config = {
+  future: { hoverOnlyWhenSupported: true },
   content: [
     './src/pages/**/*.{js,ts,jsx,tsx,mdx}',
     './src/components/**/*.{js,ts,jsx,tsx,mdx}',

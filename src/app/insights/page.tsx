@@ -36,6 +36,7 @@ export default function InsightsPage() {
               year: 'numeric',
               month: 'long',
               day: 'numeric',
+              timeZone: 'UTC',
             })
 
             return (

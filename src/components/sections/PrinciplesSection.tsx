@@ -7,6 +7,7 @@ import { Reveal } from '@/components/motion/Reveal'
 import { gsap, useGSAP } from '@/lib/gsap'
 import { motionFlags } from '@/lib/flags'
 import { isPhone } from '@/lib/motion'
+import { useFirstInteraction } from '@/lib/useFirstInteraction'
 
 export const TENETS = [
   {
@@ -14,7 +15,7 @@ export const TENETS = [
     index: '01',
     name: 'symptoms first.',
     description:
-      'Bloodwork is read in context — against symptoms, history, and goals. Not against population reference ranges. A value in range is not the same as a value that is adequate for you.',
+      'Bloodwork is read in context, against symptoms, history, and goals. Not against population reference ranges. A value in range is not the same as a value that is adequate for you.',
   },
   {
     id: 'individual',
@@ -44,17 +45,18 @@ export function PrinciplesSection() {
   const { mounted, reduced } = useMotion()
   const sectionRef = useRef<HTMLElement>(null)
   const isStatic = mounted && reduced
+  const go = useFirstInteraction(mounted && !reduced)
 
   useGSAP(
     () => {
       const section = sectionRef.current
-      if (!section || motionFlags().reduced) return
+      if (!section || !go || motionFlags().reduced) return
       const slides = gsap.utils.toArray<HTMLElement>('[data-slide]', section)
       const bars = gsap.utils.toArray<HTMLElement>('[data-bar]', section)
       const marks = gsap.utils.toArray<HTMLElement>('[data-mark]', section)
 
       // Initial state: first slide visible, others hidden below
-      slides.forEach((s, i) => gsap.set(s, { autoAlpha: i === 0 ? 1 : 0, y: i === 0 ? 0 : PRINCIPLES.slideY }))
+      slides.forEach((s, i) => gsap.set(s, { opacity: i === 0 ? 1 : 0, y: i === 0 ? 0 : PRINCIPLES.slideY, pointerEvents: i === 0 ? 'auto' : 'none' }))
       bars.forEach((b, i) => gsap.set(b, { scaleX: i === 0 ? 1 : 0 }))
       marks.forEach((m, i) => gsap.set(m, { color: i === 0 ? '#C8965A' : '#8C8A84' }))
 
@@ -75,8 +77,8 @@ export function PrinciplesSection() {
       const swap = 1
       let t = hold
       for (let i = 1; i < slides.length; i++) {
-        tl.to(slides[i - 1], { autoAlpha: 0, y: -PRINCIPLES.slideY, duration: swap }, t)
-        tl.fromTo(slides[i], { autoAlpha: 0, y: PRINCIPLES.slideY }, { autoAlpha: 1, y: 0, duration: swap }, t + swap * 0.25)
+        tl.to(slides[i - 1], { opacity: 0, y: -PRINCIPLES.slideY, pointerEvents: 'none', duration: swap }, t)
+        tl.fromTo(slides[i], { opacity: 0, y: PRINCIPLES.slideY }, { opacity: 1, y: 0, pointerEvents: 'auto', duration: swap }, t + swap * 0.25)
         tl.to(bars[i - 1], { scaleX: 0, transformOrigin: 'right center', duration: swap * 0.6 }, t)
         tl.to(bars[i], { scaleX: 1, transformOrigin: 'left center', duration: swap * 0.6 }, t + swap * 0.3)
         tl.to(marks[i - 1], { color: '#8C8A84', duration: swap * 0.5 }, t)
@@ -85,7 +87,7 @@ export function PrinciplesSection() {
       }
       tl.to({}, { duration: hold * 0.4 })
     },
-    { scope: sectionRef }
+    { scope: sectionRef, dependencies: [go], revertOnUpdate: true }
   )
 
   return (
@@ -95,7 +97,7 @@ export function PrinciplesSection() {
         ref={sectionRef}
         className={[
           'bg-black border-t border-hairline',
-          isStatic ? '' : 'min-h-[100svh] flex items-center',
+          isStatic ? '' : 'bl-pinned min-h-[100svh] flex items-center',
         ].join(' ')}
         aria-label="Philosophy"
       >

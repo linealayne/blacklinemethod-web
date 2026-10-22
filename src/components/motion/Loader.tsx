@@ -11,11 +11,11 @@ import { gsap, useGSAP } from '@/lib/gsap'
  * immediately for returning visitors.
  */
 export const LOADER = {
-  wordIn: 0.7,
-  ruleDraw: 0.6,
-  ruleAt: 0.25,
+  wordIn: 0.6,
+  ruleDraw: 0.5,
+  ruleAt: 0.2,
   fadeOut: 0.4,
-  fadeAt: 0.95,
+  fadeAt: 0.75,
   spacingFrom: '0.1em',
   spacingTo: '0.35em',
 }
@@ -33,6 +33,8 @@ export function Loader() {
         html.classList.add('bl-loader-done')
         window.dispatchEvent(new Event('bl:loader-done'))
       }
+      // The hero starts revealing as the overlay begins to fade
+      const handoff = () => window.dispatchEvent(new Event('bl:loader-done'))
 
       if (html.classList.contains('bl-no-loader') || html.classList.contains('bl-reduced')) {
         finish()
@@ -54,6 +56,7 @@ export function Loader() {
         { opacity: 1, letterSpacing: LOADER.spacingTo, duration: LOADER.wordIn, ease: 'power3.out' }
       )
         .to(rule, { scaleX: 1, duration: LOADER.ruleDraw, ease: 'power3.inOut' }, LOADER.ruleAt)
+        .call(handoff, [], LOADER.fadeAt)
         .to(el, { autoAlpha: 0, duration: LOADER.fadeOut, ease: 'power2.inOut' }, LOADER.fadeAt)
     },
     { scope: ref }

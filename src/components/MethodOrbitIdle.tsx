@@ -6,6 +6,7 @@ import { useMotion } from '@/components/motion/MotionProvider'
 import { MethodDiagram } from '@/components/MethodDiagram'
 import { isPhone } from '@/lib/motion'
 import type { OrbitHandles } from '@/components/three/orbit-config'
+import { supportsWebGL } from '@/components/three/webgl'
 
 const OrbitScene = dynamic(() => import('@/components/three/OrbitScene'), { ssr: false })
 
@@ -16,7 +17,11 @@ export function MethodOrbitIdle({ className = '' }: { className?: string }) {
   const handles = useRef<OrbitHandles>({ progress: { value: 1 } }).current
   const [active, setActive] = useState(true)
   const [phone, setPhone] = useState(false)
-  const isStatic = !mounted || reduced || !webgl
+  const [gl, setGl] = useState<boolean | null>(null)
+  useEffect(() => {
+    if (mounted && !reduced && webgl && gl === null) setGl(supportsWebGL())
+  }, [mounted, reduced, webgl, gl])
+  const isStatic = !mounted || reduced || !webgl || gl === false
 
   useEffect(() => {
     const el = wrap.current
@@ -40,11 +45,15 @@ export function MethodOrbitIdle({ className = '' }: { className?: string }) {
   }, [isStatic])
 
   return (
-    <div ref={wrap} className={`relative mx-auto aspect-square w-full max-w-[320px] md:max-w-[560px] ${className}`}>
+    <div
+      ref={wrap}
+      aria-hidden={isStatic ? undefined : true}
+      className={`relative mx-auto aspect-square w-full max-w-[320px] md:max-w-[560px] ${className}`}
+    >
       {isStatic ? (
         <MethodDiagram className="w-full h-auto" />
       ) : (
-        <OrbitScene handles={handles} mode="idle" active={active} phone={phone} />
+        gl === true && <OrbitScene handles={handles} mode="idle" active={active} phone={phone} />
       )}
     </div>
   )

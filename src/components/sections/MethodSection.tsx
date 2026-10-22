@@ -10,6 +10,8 @@ import { SplitReveal } from '@/components/motion/SplitReveal'
 import { gsap, useGSAP } from '@/lib/gsap'
 import { motionFlags } from '@/lib/flags'
 import { ORBIT, ORBIT_PULLBACK, type OrbitHandles } from '@/components/three/orbit-config'
+import { useFirstInteraction } from '@/lib/useFirstInteraction'
+import { supportsWebGL } from '@/components/three/webgl'
 
 const OrbitScene = dynamic(() => import('@/components/three/OrbitScene'), { ssr: false })
 
@@ -43,7 +45,7 @@ export const PILLARS = [
 /** Pinned orbit choreography */
 const METHOD = {
   pinDesktop: '+=320%',
-  pinPhone: '+=280%',
+  pinPhone: '+=340%',
   scrub: 0.7,
   phonePinStart: 'center center', // the orbit block sits centred in the viewport while pinned
 }
@@ -57,7 +59,14 @@ export function MethodSection() {
   const [active, setActive] = useState(true)
   const [phone, setPhone] = useState(false)
   const [show3d, setShow3d] = useState(false)
-  const isStatic = mounted && (reduced || !webgl)
+  const [gl, setGl] = useState<boolean | null>(null)
+  const isStatic = mounted && (reduced || !webgl || gl === false)
+  const go = useFirstInteraction(mounted && !isStatic)
+
+  // Real WebGL probe, deferred off the critical path
+  useEffect(() => {
+    if (go && gl === null) setGl(supportsWebGL())
+  }, [go, gl])
 
   useEffect(() => {
     if (!mounted || isStatic) return
@@ -75,7 +84,7 @@ export function MethodSection() {
           io.disconnect()
         }
       },
-      { rootMargin: '600px 0px' }
+      { rootMargin: '900px 0px' }
     )
     io.observe(el)
     return () => {
@@ -108,7 +117,7 @@ export function MethodSection() {
     () => {
       const section = sectionRef.current
       const stage = stageWrap.current
-      if (!section || !stage) return
+      if (!section || !stage || !go || gl !== true) return
       const flags = motionFlags()
       if (flags.reduced || !flags.webgl) return
 
@@ -121,8 +130,8 @@ export function MethodSection() {
         { desktop: '(min-width: 768px)', phone: '(max-width: 767px)' },
         (ctx) => {
           const { desktop } = ctx.conditions as { desktop: boolean }
-          gsap.set(pillars, { autoAlpha: 0, y: 20 })
-          gsap.set(whole, { autoAlpha: 0, y: 20 })
+          gsap.set(pillars, { opacity: 0, y: 20 })
+          gsap.set(whole, { opacity: 0, y: 20 })
           gsap.set(cta, { autoAlpha: 0, y: 12 })
 
           const tl = gsap.timeline({
@@ -142,21 +151,21 @@ export function MethodSection() {
 
           // Timeline time is normalised to 1 so positions equal scroll progress.
           const w = ORBIT.windowSize
-          const inDur = w * 0.3
-          const outDur = w * 0.22
+          const inDur = w * 0.18
+          const outDur = w * 0.14
           pillars.forEach((p, i) => {
             const start = ORBIT.intro + i * w + w * 0.1
-            tl.to(p, { autoAlpha: 1, y: 0, duration: inDur }, start)
-            tl.to(p, { autoAlpha: 0, y: -16, duration: outDur }, start + w - outDur - w * 0.08)
+            tl.to(p, { opacity: 1, y: 0, duration: inDur }, start)
+            tl.to(p, { opacity: 0, y: -16, duration: outDur }, start + w - outDur - w * 0.08)
           })
-          tl.to(whole, { autoAlpha: 1, y: 0, duration: 0.07 }, ORBIT_PULLBACK + 0.02)
+          tl.to(whole, { opacity: 1, y: 0, duration: 0.07 }, ORBIT_PULLBACK + 0.02)
           tl.to(cta, { autoAlpha: 1, y: 0, duration: 0.05 }, ORBIT_PULLBACK + 0.09)
           tl.to({}, { duration: 0.01 }, 0.99)
         }
       )
       return () => mm.revert()
     },
-    { scope: sectionRef, dependencies: [isStatic], revertOnUpdate: true }
+    { scope: sectionRef, dependencies: [isStatic, go, gl], revertOnUpdate: true }
   )
 
   const bodyClass = 'font-sans text-sm md:text-[15px] text-body leading-relaxed tracking-wide max-w-md'
@@ -164,7 +173,7 @@ export function MethodSection() {
   return (
     <section
       ref={sectionRef}
-      className={['bg-black border-t border-hairline', isStatic ? '' : 'md:min-h-[100svh] md:flex md:items-center'].join(' ')}
+      className={['bg-black border-t border-hairline', isStatic ? '' : 'bl-pinned md:min-h-[100svh] md:flex md:items-center'].join(' ')}
       aria-label="The Method"
     >
       <div className="max-w-7xl mx-auto px-6 md:px-12 w-full py-20 md:py-20">
@@ -191,12 +200,13 @@ export function MethodSection() {
             <div className="md:col-start-2 md:row-start-1 md:row-span-2">
               <div
                 ref={canvasWrap}
+                aria-hidden={isStatic ? undefined : true}
                 className="relative mx-auto aspect-square w-full max-w-[250px] sm:max-w-[320px] md:max-w-[520px]"
               >
                 {isStatic ? (
                   <MethodDiagram className="w-full h-auto opacity-80" />
                 ) : (
-                  show3d && <OrbitScene handles={handles} mode="scrub" active={active} phone={phone} />
+                  show3d && gl === true && <OrbitScene handles={handles} mode="scrub" active={active} phone={phone} />
                 )}
               </div>
             </div>

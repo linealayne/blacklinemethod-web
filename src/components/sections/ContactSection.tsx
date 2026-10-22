@@ -16,6 +16,16 @@ const INITIAL_FORM: FormState = { name: '', email: '', message: '' }
 export function ContactSection() {
   const [form, setForm] = useState<FormState>(INITIAL_FORM)
   const [status, setStatus] = useState<Status>('idle')
+  const [errorMessage, setErrorMessage] = useState<string | null>(null)
+  const [fieldErrors, setFieldErrors] = useState<Partial<Record<keyof FormState, string>>>({})
+
+  const validate = (f: FormState) => {
+    const errors: Partial<Record<keyof FormState, string>> = {}
+    if (!f.name.trim()) errors.name = 'Please add your name.'
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(f.email.trim())) errors.email = 'Please check the email address.'
+    if (!f.message.trim()) errors.message = 'A few lines on your background and goals helps us prepare.'
+    return errors
+  }
 
   const update = (field: keyof FormState) =>
     (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
@@ -23,6 +33,13 @@ export function ContactSection() {
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
+    const errors = validate(form)
+    setFieldErrors(errors)
+    if (Object.keys(errors).length > 0) {
+      const first = Object.keys(errors)[0] as keyof FormState
+      document.getElementById(`contact-${first}`)?.focus()
+      return
+    }
     setStatus('loading')
 
     try {
@@ -36,9 +53,18 @@ export function ContactSection() {
         setStatus('success')
         setForm(INITIAL_FORM)
       } else {
+        let message: string | null = null
+        try {
+          const data = (await res.json()) as { error?: string }
+          if (res.status === 400 && data?.error) message = data.error
+        } catch {
+          /* no JSON body */
+        }
+        setErrorMessage(message)
         setStatus('error')
       }
     } catch {
+      setErrorMessage(null)
       setStatus('error')
     }
   }
@@ -118,7 +144,12 @@ export function ContactSection() {
                     onChange={update('name')}
                     required
                     disabled={status === 'loading'}
+                    aria-invalid={fieldErrors.name ? true : undefined}
+                    aria-describedby={fieldErrors.name ? 'contact-name-error' : undefined}
                   />
+                  {fieldErrors.name && (
+                    <p id="contact-name-error" className="font-sans text-[12px] text-amber tracking-wide">{fieldErrors.name}</p>
+                  )}
                 </div>
 
                 <div className="space-y-2">
@@ -132,7 +163,12 @@ export function ContactSection() {
                     onChange={update('email')}
                     required
                     disabled={status === 'loading'}
+                    aria-invalid={fieldErrors.email ? true : undefined}
+                    aria-describedby={fieldErrors.email ? 'contact-email-error' : undefined}
                   />
+                  {fieldErrors.email && (
+                    <p id="contact-email-error" className="font-sans text-[12px] text-amber tracking-wide">{fieldErrors.email}</p>
+                  )}
                 </div>
 
                 <div className="space-y-2">
@@ -145,7 +181,12 @@ export function ContactSection() {
                     required
                     rows={6}
                     disabled={status === 'loading'}
+                    aria-invalid={fieldErrors.message ? true : undefined}
+                    aria-describedby={fieldErrors.message ? 'contact-message-error' : undefined}
                   />
+                  {fieldErrors.message && (
+                    <p id="contact-message-error" className="font-sans text-[12px] text-amber tracking-wide">{fieldErrors.message}</p>
+                  )}
                 </div>
 
                 {status === 'error' && (
@@ -153,7 +194,7 @@ export function ContactSection() {
                     className="font-sans text-[12px] text-amber tracking-wide"
                     role="alert"
                   >
-                    Something went wrong. Please try again or email us directly.
+                    {errorMessage ?? 'Something went wrong. Please try again or email us directly.'}
                   </p>
                 )}
 
@@ -165,6 +206,9 @@ export function ContactSection() {
                 >
                   {status === 'loading' ? 'Sending...' : 'Send request'}
                 </Button>
+                <p className="font-sans text-xs text-body-dim tracking-wide leading-relaxed">
+                  Read by Layne and Spencer only. We reply within two business days.
+                </p>
               </form>
             )}
           </Reveal>

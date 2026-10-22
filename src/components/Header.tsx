@@ -80,7 +80,24 @@ export function Header() {
   useEffect(() => {
     if (!menuOpen) return
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') close()
+      if (e.key === 'Escape') {
+        close()
+        return
+      }
+      if (e.key !== 'Tab' || !overlayRef.current) return
+      const focusables = Array.from(
+        overlayRef.current.querySelectorAll<HTMLElement>('a[href], button:not([disabled])')
+      ).filter((el) => el.tabIndex !== -1)
+      if (focusables.length === 0) return
+      const first = focusables[0]
+      const last = focusables[focusables.length - 1]
+      if (e.shiftKey && document.activeElement === first) {
+        e.preventDefault()
+        last.focus()
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault()
+        first.focus()
+      }
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
@@ -192,7 +209,12 @@ export function Header() {
           ))}
         </nav>
 
-        <div className="px-6 pb-10 border-t border-hairline pt-8" data-menu-foot>
+        <div className="px-6 pb-10 border-t border-hairline pt-8 space-y-6" data-menu-foot>
+          <Button asChild size="lg" className="w-full" glow>
+            <Link href="/contact" onClick={close} tabIndex={menuOpen ? 0 : -1}>
+              request a consult
+            </Link>
+          </Button>
           <p className="bl-label text-[10px]">Dallas, Texas · By appointment · Remote and in-person</p>
         </div>
       </div>

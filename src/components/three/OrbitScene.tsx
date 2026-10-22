@@ -3,8 +3,8 @@
 import { useEffect, useMemo, useRef } from 'react'
 import * as THREE from 'three'
 import { Canvas, useFrame, useThree } from '@react-three/fiber'
-import { Html, Line } from '@react-three/drei'
 import { gsap } from '@/lib/gsap'
+import { ORBIT, ORBIT_PULLBACK, PILLAR_LABELS, activeIndexFor, type OrbitHandles } from './orbit-config'
 
 /**
  * The four pillars orbit "You": a softly glowing centre point, four small
@@ -13,8 +13,10 @@ import { gsap } from '@/lib/gsap'
  * Scrub mode: driven by handles.progress (0..1 across the pinned section).
  * Intro, then each pillar rotates to the front in turn, then the orbit
  * pulls back to show the whole system. Idle mode: slow continuous rotation.
+ *
+ * Labels are plain DOM spans in an overlay beside the canvas, positioned by
+ * projecting the node positions each frame (no drei, no extra bundles).
  */
-import { ORBIT, ORBIT_PULLBACK, PILLAR_LABELS, activeIndexFor, type OrbitHandles } from "./orbit-config"
 
 function phiFor(i: number) {
   // node i sits at theta = i * PI/2; front means theta - phi = PI/2
@@ -39,19 +41,31 @@ function makeGlowTexture() {
   return tex
 }
 
+function ringGeometry(radius: number, segments = 160) {
+  const pts: THREE.Vector3[] = []
+  for (let i = 0; i <= segments; i++) {
+    const a = (i / segments) * Math.PI * 2
+    pts.push(new THREE.Vector3(Math.cos(a) * radius, 0, Math.sin(a) * radius))
+  }
+  return new THREE.BufferGeometry().setFromPoints(pts)
+}
+
 interface SceneProps {
   handles: OrbitHandles
   mode: 'scrub' | 'idle'
   phone: boolean
+  labels: React.MutableRefObject<(HTMLSpanElement | null)[]>
+  centreLabel: React.MutableRefObject<HTMLSpanElement | null>
 }
 
-function Scene({ handles, mode, phone }: SceneProps) {
+function Scene({ handles, mode, phone, labels, centreLabel }: SceneProps) {
   const group = useRef<THREE.Group>(null)
   const camera = useThree((s) => s.camera)
+  const size = useThree((s) => s.size)
   const glow = useMemo(() => makeGlowTexture(), [])
   useEffect(() => () => glow.dispose(), [glow])
 
-  const labelRefs = useRef<(HTMLSpanElement | null)[]>([])
+  const nodeRefs = useRef<(THREE.Object3D | null)[]>([])
   const nodeMats = useRef<(THREE.MeshBasicMaterial | null)[]>([])
 
   const nodes = useMemo(
@@ -66,19 +80,37 @@ function Scene({ handles, mode, phone }: SceneProps) {
     []
   )
 
-  const ringPoints = useMemo(() => {
-    const pts: [number, number, number][] = []
-    const n = 160
-    for (let i = 0; i <= n; i++) {
-      const a = (i / n) * Math.PI * 2
-      pts.push([Math.cos(a) * ORBIT.radius, 0, Math.sin(a) * ORBIT.radius])
-    }
-    return pts
+  const ring = useMemo(() => {
+    const line = new THREE.LineLoop(
+      ringGeometry(ORBIT.radius),
+      new THREE.LineBasicMaterial({ color: ORBIT.colors.amber, transparent: true, opacity: ORBIT.ringOpacity })
+    )
+    const halo = new THREE.LineLoop(
+      ringGeometry(ORBIT.radius * ORBIT.haloScale, 200),
+      new THREE.LineDashedMaterial({
+        color: ORBIT.colors.amber,
+        transparent: true,
+        opacity: ORBIT.haloOpacity,
+        dashSize: 0.08,
+        gapSize: 0.16,
+      })
+    )
+    halo.computeLineDistances()
+    return { line, halo }
   }, [])
+  useEffect(
+    () => () => {
+      ring.line.geometry.dispose()
+      ;(ring.line.material as THREE.Material).dispose()
+      ring.halo.geometry.dispose()
+      ;(ring.halo.material as THREE.Material).dispose()
+    },
+    [ring]
+  )
 
-  const haloPoints = useMemo(
-    () => ringPoints.map(([x, y, z]) => [x * ORBIT.haloScale, y, z * ORBIT.haloScale] as [number, number, number]),
-    [ringPoints]
+  const colours = useMemo(
+    () => ({ gold: new THREE.Color(ORBIT.colors.gold), amber: new THREE.Color(ORBIT.colors.amber) }),
+    []
   )
 
   // Scrubbed state and the timeline that shapes it
@@ -109,8 +141,27 @@ function Scene({ handles, mode, phone }: SceneProps) {
 
   const smoothP = useRef(0)
   const idlePhi = useRef(0)
+  const lastActive = useRef<number | null>(null)
+  const tmp = useMemo(() => new THREE.Vector3(), [])
 
-  useFrame((_, delta) => {
+  // Labels sit above nodes on the far side of the ring and below nodes on the
+  // near side, so the front label never collides with the centre label.
+  const placeLabel = (el: HTMLSpanElement | null, obj: THREE.Object3D | null, centreY?: number) => {
+    if (!el || !obj) return
+    obj.getWorldPosition(tmp)
+    tmp.project(camera)
+    const x = ((tmp.x + 1) / 2) * size.width
+    const y = ((1 - tmp.y) / 2) * size.height
+    if (centreY !== undefined) {
+      const below = y > centreY + 4
+      const next = below ? "1.6em" : "-1.6em"
+      if (el.style.marginTop !== next) el.style.marginTop = next
+    }
+    el.style.transform = `translate(-50%, -50%) translate(${x.toFixed(1)}px, ${y.toFixed(1)}px)`
+    return y
+  }
+
+  useFrame((frame, delta) => {
     const dt = Math.min(delta, 0.05)
     const g = group.current
     if (!g) return
@@ -132,28 +183,34 @@ function Scene({ handles, mode, phone }: SceneProps) {
       camera.position.z = phone ? ORBIT.camZ + ORBIT.phoneCamOffset : ORBIT.camZ + 0.4
     }
     // gentle breathing of the whole orbit
-    g.position.y = Math.sin(performance.now() * 0.0006) * 0.04
+    g.position.y = Math.sin(frame.clock.elapsedTime * 0.6) * 0.04
+    g.updateMatrixWorld()
 
+    // labels follow their nodes
+    const centreY = placeLabel(centreLabel.current, g)
+    for (let i = 0; i < PILLAR_LABELS.length; i++) {
+      placeLabel(labels.current[i], nodeRefs.current[i], centreY)
+    }
+
+    if (lastActive.current === active) return
+    lastActive.current = active
     for (let i = 0; i < PILLAR_LABELS.length; i++) {
       const isActive = active === i
       const whole = active === 4 || active === -1
-      const el = labelRefs.current[i]
+      const el = labels.current[i]
       if (el) {
         el.style.opacity = isActive || whole ? '1' : '0.42'
         el.style.color = isActive ? ORBIT.colors.gold : ORBIT.colors.dim
       }
       const m = nodeMats.current[i]
-      if (m) m.color.set(isActive ? ORBIT.colors.gold : ORBIT.colors.amber)
+      if (m) m.color.copy(isActive ? colours.gold : colours.amber)
     }
   })
 
-  const labelSize = phone ? '10px' : '11px'
-
   return (
     <group ref={group} rotation={[ORBIT.tilt, 0, 0]}>
-      {/* the ring */}
-      <Line points={ringPoints} color={ORBIT.colors.amber} lineWidth={1} transparent opacity={ORBIT.ringOpacity} />
-      <Line points={haloPoints} color={ORBIT.colors.amber} lineWidth={1} transparent opacity={ORBIT.haloOpacity} dashed dashSize={0.08} gapSize={0.16} />
+      <primitive object={ring.line} />
+      <primitive object={ring.halo} />
 
       {/* You */}
       <mesh>
@@ -163,19 +220,16 @@ function Scene({ handles, mode, phone }: SceneProps) {
       <sprite scale={[1.3, 1.3, 1]}>
         <spriteMaterial map={glow} transparent opacity={0.85} depthWrite={false} blending={THREE.AdditiveBlending} />
       </sprite>
-      <Html center zIndexRange={[2, 1]} style={{ pointerEvents: 'none' }} position={[0, -0.42, 0]}>
-        <span
-          aria-hidden="true"
-          className="font-sans uppercase whitespace-nowrap"
-          style={{ fontSize: labelSize, letterSpacing: '0.3em', color: ORBIT.colors.gold, opacity: 0.9 }}
-        >
-          you
-        </span>
-      </Html>
 
       {/* pillars */}
       {nodes.map((n, i) => (
-        <group key={n.label} position={n.position}>
+        <group
+          key={n.label}
+          position={n.position}
+          ref={(o) => {
+            nodeRefs.current[i] = o
+          }}
+        >
           <mesh>
             <sphereGeometry args={[ORBIT.nodeRadius, 20, 20]} />
             <meshBasicMaterial
@@ -188,23 +242,6 @@ function Scene({ handles, mode, phone }: SceneProps) {
           <sprite scale={[0.42, 0.42, 1]}>
             <spriteMaterial map={glow} transparent opacity={0.55} depthWrite={false} blending={THREE.AdditiveBlending} />
           </sprite>
-          <Html center zIndexRange={[2, 1]} style={{ pointerEvents: 'none' }} position={[0, 0.3, 0]}>
-            <span
-              ref={(el) => {
-                labelRefs.current[i] = el
-              }}
-              aria-hidden="true"
-              className="font-sans uppercase whitespace-nowrap"
-              style={{
-                fontSize: labelSize,
-                letterSpacing: '0.26em',
-                color: ORBIT.colors.dim,
-                transition: 'color 600ms cubic-bezier(0.22,1,0.36,1), opacity 600ms cubic-bezier(0.22,1,0.36,1)',
-              }}
-            >
-              {n.label}
-            </span>
-          </Html>
         </group>
       ))}
     </group>
@@ -219,17 +256,55 @@ interface OrbitSceneProps {
 }
 
 export default function OrbitScene({ handles, mode = 'scrub', active, phone }: OrbitSceneProps) {
+  const labels = useRef<(HTMLSpanElement | null)[]>([])
+  const centreLabel = useRef<HTMLSpanElement | null>(null)
+  const labelStyle: React.CSSProperties = {
+    position: 'absolute',
+    left: 0,
+    top: 0,
+    fontSize: phone ? '10px' : '11px',
+    letterSpacing: '0.26em',
+    color: ORBIT.colors.dim,
+    whiteSpace: 'nowrap',
+    transition: 'color 600ms cubic-bezier(0.22,1,0.36,1), opacity 600ms cubic-bezier(0.22,1,0.36,1)',
+    willChange: 'transform',
+  }
+
   return (
-    <Canvas
-      dpr={[1, 1.5]}
-      flat
-      frameloop={active ? 'always' : 'never'}
-      gl={{ antialias: true, alpha: true, powerPreference: 'high-performance', stencil: false }}
-      camera={{ position: [0, 0, ORBIT.camZ], fov: 40, near: 0.1, far: 50 }}
-      onCreated={({ gl }) => gl.setClearColor(0x000000, 0)}
-      style={{ position: 'absolute', inset: 0 }}
-    >
-      <Scene handles={handles} mode={mode} phone={phone} />
-    </Canvas>
+    <>
+      <Canvas
+        dpr={[1, 1.5]}
+        flat
+        frameloop={active ? 'always' : 'never'}
+        gl={{ antialias: true, alpha: true, powerPreference: 'default', stencil: false }}
+        camera={{ position: [0, 0, ORBIT.camZ], fov: 40, near: 0.1, far: 50 }}
+        onCreated={({ gl }) => gl.setClearColor(0x000000, 0)}
+        style={{ position: 'absolute', inset: 0 }}
+      >
+        <Scene handles={handles} mode={mode} phone={phone} labels={labels} centreLabel={centreLabel} />
+      </Canvas>
+      {/* label overlay: decoration only; the pillar names exist as real text beside the orbit */}
+      <div className="absolute inset-0 pointer-events-none" aria-hidden="true">
+        {PILLAR_LABELS.map((label, i) => (
+          <span
+            key={label}
+            ref={(el) => {
+              labels.current[i] = el
+            }}
+            className="font-sans uppercase"
+            style={{ ...labelStyle, marginTop: '-1.6em' }}
+          >
+            {label}
+          </span>
+        ))}
+        <span
+          ref={centreLabel}
+          className="font-sans uppercase"
+          style={{ ...labelStyle, color: ORBIT.colors.gold, opacity: 0.9, letterSpacing: '0.3em', marginTop: '1.7em' }}
+        >
+          you
+        </span>
+      </div>
+    </>
   )
 }

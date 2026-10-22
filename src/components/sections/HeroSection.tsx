@@ -8,12 +8,15 @@ import { useMotion } from '@/components/motion/MotionProvider'
 import { gsap, ScrollTrigger, SplitText, useGSAP } from '@/lib/gsap'
 import { motionFlags } from '@/lib/flags'
 import { isFinePointer, isPhone } from '@/lib/motion'
+import { useFirstInteraction } from '@/lib/useFirstInteraction'
 import type { HeroHandles } from '@/components/three/HeroField'
+import { supportsWebGL } from '@/components/three/webgl'
 
 const HeroField = dynamic(() => import('@/components/three/HeroField'), { ssr: false })
 
 /** Hero reveal choreography (seconds) */
 const HERO = {
+  idleLoadDelay: 6000, // ms before the field loads with no interaction at all
   lineDuration: 1.3,
   lineStagger: 0.1,
   subDuration: 0.9,
@@ -28,6 +31,7 @@ export function HeroSection() {
   const contentRef = useRef<HTMLDivElement>(null)
   const h1Ref = useRef<HTMLHeadingElement>(null)
   const tlRef = useRef<gsap.core.Timeline | null>(null)
+  const loaderDoneRef = useRef(false)
   const handles = useRef<HeroHandles>({
     pointer: { x: 0, y: 0, active: 0 },
     scroll: { value: 0 },
@@ -37,22 +41,17 @@ export function HeroSection() {
   const [active, setActive] = useState(true)
   const [phone, setPhone] = useState(false)
 
-  // Lazy-load WebGL after the page is interactive; text renders first.
+  // Lazy-load WebGL once the loader is done and the visitor has moved, scrolled,
+  // or touched (or after a quiet while). Text renders first, always.
+  const go = useFirstInteraction(mounted && !reduced && webgl && loaderDone, HERO.idleLoadDelay)
   useEffect(() => {
-    if (!mounted || reduced || !webgl) return
+    if (!go) return
+    if (!supportsWebGL()) return
     setPhone(isPhone())
-    const start = () => setShow3d(true)
-    const w = window as Window & {
-      requestIdleCallback?: (cb: () => void, opts?: { timeout: number }) => number
-      cancelIdleCallback?: (id: number) => void
-    }
-    if (w.requestIdleCallback) {
-      const id = w.requestIdleCallback(start, { timeout: 2000 })
-      return () => w.cancelIdleCallback?.(id)
-    }
-    const id = window.setTimeout(start, 800)
-    return () => window.clearTimeout(id)
-  }, [mounted, reduced, webgl])
+    setShow3d(true)
+    // warm the orbit chunk too: three is shared, the rest is small
+    import('@/components/three/OrbitScene').catch(() => {})
+  }, [go])
 
   // Pause rendering when the hero is off screen or the tab is hidden.
   useEffect(() => {
@@ -117,8 +116,15 @@ export function HeroSection() {
 
       const subs = content.querySelectorAll('[data-hero-sub]')
       gsap.set(subs, { opacity: 0, y: 18 })
+      // Returning visitors have no loader covering the page: hide until split.
+      if (motionFlags().loaderDone) gsap.set(h1, { opacity: 0 })
 
-      const split = SplitText.create(h1, {
+      let split: SplitText | null = null
+      let cancelled = false
+      const fontsReady: Promise<unknown> = document.fonts?.ready ?? Promise.resolve()
+      fontsReady.then(() => {
+        if (cancelled) return
+        split = SplitText.create(h1, {
         type: 'lines',
         mask: 'lines',
         linesClass: 'bl-line',
@@ -140,10 +146,12 @@ export function HeroSection() {
           const prev = tlRef.current
           tlRef.current = tl
           if (prev && prev.progress() > 0) tl.progress(1)
+          else if (loaderDoneRef.current) tl.play()
           return tl
         },
+        })
+        gsap.set(h1, { opacity: 1 })
       })
-      gsap.set(h1, { opacity: 1 })
 
       // Scrolling past the hero: copy drifts up and fades; the field loosens.
       ScrollTrigger.create({
@@ -158,12 +166,16 @@ export function HeroSection() {
         },
       })
 
-      return () => split.revert()
+      return () => {
+        cancelled = true
+        split?.revert()
+      }
     },
     { scope: sectionRef }
   )
 
   useEffect(() => {
+    loaderDoneRef.current = loaderDone
     if (loaderDone) tlRef.current?.play()
   }, [loaderDone])
 
@@ -171,7 +183,7 @@ export function HeroSection() {
     <section
       ref={sectionRef}
       className="relative min-h-[100svh] bg-black flex items-center justify-center overflow-hidden"
-      aria-label="Hero"
+      aria-label="Introduction"
     >
       {/* Particle field (decorative, lazy) */}
       <div className="absolute inset-0 pointer-events-none" aria-hidden="true">

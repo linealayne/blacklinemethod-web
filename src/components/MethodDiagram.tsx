@@ -86,10 +86,10 @@ export function MethodDiagram({ className = '' }: MethodDiagramProps) {
           className="font-sans"
           style={{
             fontFamily: 'var(--font-inter), system-ui, sans-serif',
-            fontSize: '9px',
+            fontSize: '11px',
             letterSpacing: '0.22em',
-            fill: '#F5F5F0',
-            fillOpacity: 0.35,
+            fill: '#8C8A84',
+            fillOpacity: 1,
           }}
         >
           {p.label}
@@ -106,10 +106,10 @@ export function MethodDiagram({ className = '' }: MethodDiagramProps) {
         dominantBaseline="middle"
         style={{
           fontFamily: 'var(--font-inter), system-ui, sans-serif',
-          fontSize: '8px',
+          fontSize: '10px',
           letterSpacing: '0.28em',
-          fill: '#F5F5F0',
-          fillOpacity: 0.6,
+          fill: '#E2C48F',
+          fillOpacity: 0.95,
         }}
       >
         YOU

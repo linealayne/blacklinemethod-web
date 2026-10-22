@@ -25,18 +25,19 @@ export function ArticleLayout({
     year: 'numeric',
     month: 'long',
     day: 'numeric',
+    timeZone: 'UTC',
   })
 
   return (
     <article className="bg-black min-h-screen pt-36 md:pt-40 pb-24 px-6">
       <div className="max-w-[640px] mx-auto">
         {/* Eyebrow */}
-        <Reveal className="flex items-center gap-4 mb-10">
+        <Reveal className="flex flex-wrap items-center gap-x-4 gap-y-2 mb-10">
           <span className="font-sans text-[10px] tracking-[0.3em] uppercase text-amber-muted">
             {category}
           </span>
-          <span className="text-hairline" aria-hidden="true">·</span>
-          <span className="font-sans text-[10px] tracking-[0.2em] uppercase text-label">
+          <span className="text-hairline hidden sm:inline" aria-hidden="true">·</span>
+          <span className="font-sans text-[10px] tracking-[0.2em] uppercase text-label whitespace-nowrap">
             {formattedDate}
           </span>
         </Reveal>

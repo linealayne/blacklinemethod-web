@@ -30,7 +30,7 @@ export async function generateMetadata({
   if (!article) return {}
 
   return {
-    title: `${article.title} — Blackline Method`,
+    title: `${article.title} | Blackline Method`,
     description: article.dek,
   }
 }

@@ -83,7 +83,7 @@ export default function MethodPage() {
       {/* Orbit */}
       <section aria-label="System diagram" className="px-6 md:px-12 max-w-7xl mx-auto mb-16 md:mb-24">
         <Reveal delay={0.2}>
-          <div className="py-10 md:py-14 border border-hairline">
+          <div className="py-10 md:py-14 border border-hairline max-w-3xl mx-auto">
             <MethodOrbitIdle />
           </div>
         </Reveal>

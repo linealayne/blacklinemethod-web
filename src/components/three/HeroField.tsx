@@ -3,7 +3,6 @@
 import { useEffect, useMemo, useRef } from 'react'
 import * as THREE from 'three'
 import { Canvas, useFrame, useThree } from '@react-three/fiber'
-import { EffectComposer, Bloom } from '@react-three/postprocessing'
 import { gsap } from '@/lib/gsap'
 
 /**
@@ -31,7 +30,7 @@ export const HERO_FIELD = {
   pointSize: 2.4, // px at dpr 1 at mid depth
   opacity: 0.62,
   warmFraction: 0.35, // share of warm-white vs amber points
-  bloom: { intensity: 0.5, threshold: 0.08, smoothing: 0.3, radius: 0.7 },
+  glow: { sizeFactor: 3.4, opacity: 0.09 }, // desktop-only soft halo layer standing in for bloom
   colors: { amber: '#C8965A', warm: '#E2C48F', ground: '#0A0A0A' },
 }
 
@@ -167,7 +166,7 @@ function buildGeometry(count: number) {
   return geometry
 }
 
-function Particles({ count, handles, start }: { count: number; handles: HeroHandles; start: boolean }) {
+function Particles({ count, handles, start, glow }: { count: number; handles: HeroHandles; start: boolean; glow: boolean }) {
   const geometry = useMemo(() => buildGeometry(count), [count])
   const gl = useThree((s) => s.gl)
   const uniforms = useMemo(
@@ -209,6 +208,15 @@ function Particles({ count, handles, start }: { count: number; handles: HeroHand
     }
   }, [start, uniforms])
 
+  const glowUniforms = useMemo(
+    () => ({
+      ...uniforms,
+      uSize: { value: HERO_FIELD.pointSize * HERO_FIELD.glow.sizeFactor },
+      uOpacity: { value: HERO_FIELD.glow.opacity },
+    }),
+    [uniforms]
+  )
+
   const smooth = useRef({ x: 0, y: 0, a: 0 })
 
   useFrame((state, delta) => {
@@ -228,17 +236,32 @@ function Particles({ count, handles, start }: { count: number; handles: HeroHand
   })
 
   return (
-    <points geometry={geometry} frustumCulled={false}>
-      <shaderMaterial
-        uniforms={uniforms}
-        vertexShader={VERT}
-        fragmentShader={FRAG}
-        transparent
-        depthWrite={false}
-        depthTest={false}
-        blending={THREE.AdditiveBlending}
-      />
-    </points>
+    <>
+      <points geometry={geometry} frustumCulled={false}>
+        <shaderMaterial
+          uniforms={uniforms}
+          vertexShader={VERT}
+          fragmentShader={FRAG}
+          transparent
+          depthWrite={false}
+          depthTest={false}
+          blending={THREE.AdditiveBlending}
+        />
+      </points>
+      {glow && (
+        <points geometry={geometry} frustumCulled={false}>
+          <shaderMaterial
+            uniforms={glowUniforms}
+            vertexShader={VERT}
+            fragmentShader={FRAG}
+            transparent
+            depthWrite={false}
+            depthTest={false}
+            blending={THREE.AdditiveBlending}
+          />
+        </points>
+      )}
+    </>
   )
 }
 
@@ -258,23 +281,12 @@ export default function HeroField({ handles, start, active, phone }: HeroFieldPr
       dpr={[1, 1.5]}
       flat
       frameloop={active ? 'always' : 'never'}
-      gl={{ antialias: false, alpha: false, powerPreference: 'high-performance', stencil: false }}
+      gl={{ antialias: false, alpha: false, powerPreference: 'default', stencil: false }}
       camera={{ position: [0, 0, 7], fov: 45, near: 0.1, far: 50 }}
       onCreated={({ gl }) => gl.setClearColor(HERO_FIELD.colors.ground, 1)}
       style={{ position: 'absolute', inset: 0 }}
     >
-      <Particles count={count} handles={handles} start={start} />
-      {!phone && (
-        <EffectComposer multisampling={0}>
-          <Bloom
-            intensity={HERO_FIELD.bloom.intensity}
-            luminanceThreshold={HERO_FIELD.bloom.threshold}
-            luminanceSmoothing={HERO_FIELD.bloom.smoothing}
-            radius={HERO_FIELD.bloom.radius}
-            mipmapBlur
-          />
-        </EffectComposer>
-      )}
+      <Particles count={count} handles={handles} start={start} glow={!phone} />
     </Canvas>
   )
 }

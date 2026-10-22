@@ -36,7 +36,7 @@ export function ProcessTimeline({ steps, bracket = true }: { steps: TimelineStep
         (ctx) => {
           const { desktop } = ctx.conditions as { desktop: boolean }
           gsap.set(fill, desktop ? { scaleX: 0, scaleY: 1 } : { scaleY: 0, scaleX: 1 })
-          gsap.set(bodies, { opacity: 0.22, y: 10 })
+          gsap.set(bodies, { opacity: 0, y: 10 })
           gsap.set(dots, { borderColor: '#2A2A2A', backgroundColor: '#0A0A0A', boxShadow: '0 0 0 rgba(0,0,0,0)' })
           if (bracketEl) gsap.set(bracketEl, { opacity: 0 })
 

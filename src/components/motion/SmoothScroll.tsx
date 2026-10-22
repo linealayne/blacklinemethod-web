@@ -13,7 +13,7 @@ declare global {
 
 /** Lenis smooth scrolling synced to ScrollTrigger. Off for reduced motion. */
 export const SMOOTH_SCROLL = {
-  lerp: 0.09, // lower = floatier, higher = tighter
+  lerp: 0.12, // lower = floatier, higher = tighter
   wheelMultiplier: 1,
   touchMultiplier: 1.4,
 }
