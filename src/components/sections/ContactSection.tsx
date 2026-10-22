@@ -37,7 +37,9 @@ export function ContactSection() {
     setFieldErrors(errors)
     if (Object.keys(errors).length > 0) {
       const first = Object.keys(errors)[0] as keyof FormState
-      document.getElementById(`contact-${first}`)?.focus()
+      const el = document.getElementById(`contact-${first}`)
+      el?.scrollIntoView({ block: 'center', behavior: 'smooth' })
+      el?.focus({ preventScroll: true })
       return
     }
     setStatus('loading')
@@ -161,6 +163,11 @@ export function ContactSection() {
                     placeholder="your@email.com"
                     value={form.email}
                     onChange={update('email')}
+                    onBlur={() => {
+                      const trimmed = form.email.trim()
+                      const bad = trimmed.length > 0 && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmed)
+                      setFieldErrors((prev) => ({ ...prev, email: bad ? 'Please check the email address.' : undefined }))
+                    }}
                     required
                     disabled={status === 'loading'}
                     aria-invalid={fieldErrors.email ? true : undefined}

@@ -132,7 +132,7 @@ export function MethodSection() {
           const { desktop } = ctx.conditions as { desktop: boolean }
           gsap.set(pillars, { opacity: 0, y: 20 })
           gsap.set(whole, { opacity: 0, y: 20 })
-          gsap.set(cta, { autoAlpha: 0, y: 12 })
+          gsap.set(cta, { opacity: 0, y: 12, pointerEvents: 'none' })
 
           const tl = gsap.timeline({
             defaults: { ease: 'power2.inOut' },
@@ -159,7 +159,7 @@ export function MethodSection() {
             tl.to(p, { opacity: 0, y: -16, duration: outDur }, start + w - outDur - w * 0.08)
           })
           tl.to(whole, { opacity: 1, y: 0, duration: 0.07 }, ORBIT_PULLBACK + 0.02)
-          tl.to(cta, { autoAlpha: 1, y: 0, duration: 0.05 }, ORBIT_PULLBACK + 0.09)
+          tl.to(cta, { opacity: 1, y: 0, pointerEvents: 'auto', duration: 0.05 }, ORBIT_PULLBACK + 0.09)
           tl.to({}, { duration: 0.01 }, 0.99)
         }
       )

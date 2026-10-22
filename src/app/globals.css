@@ -61,7 +61,8 @@
   ::-webkit-scrollbar-track { background: var(--bl-ink); }
   ::-webkit-scrollbar-thumb { background: #3a3a38; border: 2px solid var(--bl-ink); border-radius: 8px; }
   ::-webkit-scrollbar-thumb:hover { background: #4a4a47; }
-  input, textarea { caret-color: var(--bl-amber); }
+  input, textarea { caret-color: var(--bl-amber); scroll-margin-top: 7rem; }
+  [id] { scroll-margin-top: 6rem; }
 
   /* Focus ring: amber hairline, no browser default */
   *:focus-visible {

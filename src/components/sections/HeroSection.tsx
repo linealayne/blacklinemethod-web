@@ -195,7 +195,7 @@ export function HeroSection() {
         aria-hidden="true"
         style={{
           background:
-            'radial-gradient(ellipse 58% 42% at 50% 52%, rgba(10,10,10,0.6) 0%, rgba(10,10,10,0.25) 45%, rgba(10,10,10,0) 72%)',
+            'radial-gradient(ellipse 60% 54% at 50% 56%, rgba(10,10,10,0.62) 0%, rgba(10,10,10,0.3) 50%, rgba(10,10,10,0) 74%)',
         }}
       />
 
