@@ -1,36 +1,224 @@
+'use client'
+
+import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
+import dynamic from 'next/dynamic'
 import { Button } from '@/components/ui/button'
+import { useMotion } from '@/components/motion/MotionProvider'
+import { gsap, ScrollTrigger, SplitText, useGSAP } from '@/lib/gsap'
+import { motionFlags } from '@/lib/flags'
+import { isFinePointer, isPhone } from '@/lib/motion'
+import type { HeroHandles } from '@/components/three/HeroField'
+
+const HeroField = dynamic(() => import('@/components/three/HeroField'), { ssr: false })
+
+/** Hero reveal choreography (seconds) */
+const HERO = {
+  lineDuration: 1.3,
+  lineStagger: 0.1,
+  subDuration: 0.9,
+  subStagger: 0.1,
+  subOverlap: 0.75, // how early the sub elements start before the lines finish
+  fadeStart: 0.3, // scroll progress where the copy starts to fade
+}
 
 export function HeroSection() {
+  const { mounted, reduced, webgl, loaderDone } = useMotion()
+  const sectionRef = useRef<HTMLElement>(null)
+  const contentRef = useRef<HTMLDivElement>(null)
+  const h1Ref = useRef<HTMLHeadingElement>(null)
+  const tlRef = useRef<gsap.core.Timeline | null>(null)
+  const handles = useRef<HeroHandles>({
+    pointer: { x: 0, y: 0, active: 0 },
+    scroll: { value: 0 },
+  }).current
+
+  const [show3d, setShow3d] = useState(false)
+  const [active, setActive] = useState(true)
+  const [phone, setPhone] = useState(false)
+
+  // Lazy-load WebGL after the page is interactive; text renders first.
+  useEffect(() => {
+    if (!mounted || reduced || !webgl) return
+    setPhone(isPhone())
+    const start = () => setShow3d(true)
+    const w = window as Window & {
+      requestIdleCallback?: (cb: () => void, opts?: { timeout: number }) => number
+      cancelIdleCallback?: (id: number) => void
+    }
+    if (w.requestIdleCallback) {
+      const id = w.requestIdleCallback(start, { timeout: 2000 })
+      return () => w.cancelIdleCallback?.(id)
+    }
+    const id = window.setTimeout(start, 800)
+    return () => window.clearTimeout(id)
+  }, [mounted, reduced, webgl])
+
+  // Pause rendering when the hero is off screen or the tab is hidden.
+  useEffect(() => {
+    const el = sectionRef.current
+    if (!el || !show3d) return
+    let inView = true
+    const update = () => setActive(inView && !document.hidden)
+    const io = new IntersectionObserver(
+      ([entry]) => {
+        inView = entry.isIntersecting
+        update()
+      },
+      { threshold: 0 }
+    )
+    io.observe(el)
+    document.addEventListener('visibilitychange', update)
+    return () => {
+      io.disconnect()
+      document.removeEventListener('visibilitychange', update)
+    }
+  }, [show3d])
+
+  // Pointer (desktop) or device tilt (phones) feeds the particle push.
+  useEffect(() => {
+    const el = sectionRef.current
+    if (!el || !show3d) return
+    const p = handles.pointer
+    if (isFinePointer()) {
+      const onMove = (e: PointerEvent) => {
+        const r = el.getBoundingClientRect()
+        p.x = ((e.clientX - r.left) / r.width) * 2 - 1
+        p.y = -(((e.clientY - r.top) / r.height) * 2 - 1)
+        p.active = 1
+      }
+      const onLeave = () => {
+        p.active = 0
+      }
+      el.addEventListener('pointermove', onMove, { passive: true })
+      el.addEventListener('pointerleave', onLeave)
+      return () => {
+        el.removeEventListener('pointermove', onMove)
+        el.removeEventListener('pointerleave', onLeave)
+      }
+    }
+    const onTilt = (e: DeviceOrientationEvent) => {
+      if (e.gamma == null || e.beta == null) return
+      p.x = Math.max(-1, Math.min(1, e.gamma / 25)) * 0.6
+      p.y = Math.max(-1, Math.min(1, (e.beta - 40) / 25)) * 0.6
+      p.active = 0.7
+    }
+    window.addEventListener('deviceorientation', onTilt)
+    return () => window.removeEventListener('deviceorientation', onTilt)
+  }, [show3d, handles])
+
+  // Headline: masked line reveal after the loader; subhead and button fade up after it.
+  useGSAP(
+    () => {
+      const h1 = h1Ref.current
+      const content = contentRef.current
+      const section = sectionRef.current
+      if (!h1 || !content || !section || motionFlags().reduced) return
+
+      const subs = content.querySelectorAll('[data-hero-sub]')
+      gsap.set(subs, { opacity: 0, y: 18 })
+
+      const split = SplitText.create(h1, {
+        type: 'lines',
+        mask: 'lines',
+        linesClass: 'bl-line',
+        autoSplit: true,
+        onSplit(self) {
+          gsap.set(self.lines, { yPercent: 110 })
+          const tl = gsap.timeline({ paused: true })
+          tl.to(self.lines, {
+            yPercent: 0,
+            duration: HERO.lineDuration,
+            ease: 'expo.out',
+            stagger: HERO.lineStagger,
+          })
+          tl.to(
+            subs,
+            { opacity: 1, y: 0, duration: HERO.subDuration, ease: 'power3.out', stagger: HERO.subStagger },
+            `-=${HERO.subOverlap}`
+          )
+          const prev = tlRef.current
+          tlRef.current = tl
+          if (prev && prev.progress() > 0) tl.progress(1)
+          return tl
+        },
+      })
+      gsap.set(h1, { opacity: 1 })
+
+      // Scrolling past the hero: copy drifts up and fades; the field loosens.
+      ScrollTrigger.create({
+        trigger: section,
+        start: 'top top',
+        end: 'bottom top',
+        scrub: true,
+        onUpdate: (self) => {
+          handles.scroll.value = self.progress
+          const f = gsap.utils.clamp(0, 1, (self.progress - HERO.fadeStart) / (0.95 - HERO.fadeStart))
+          gsap.set(content, { yPercent: -10 * self.progress, opacity: 1 - f })
+        },
+      })
+
+      return () => split.revert()
+    },
+    { scope: sectionRef }
+  )
+
+  useEffect(() => {
+    if (loaderDone) tlRef.current?.play()
+  }, [loaderDone])
+
   return (
     <section
-      className="relative h-screen bg-black flex items-center justify-center overflow-hidden"
+      ref={sectionRef}
+      className="relative min-h-[100svh] bg-black flex items-center justify-center overflow-hidden"
       aria-label="Hero"
     >
-      {/* Hero content */}
-      <div className="relative z-10 text-center px-6 max-w-5xl mx-auto">
-        <h1 className="font-serif font-light text-offwhite lowercase leading-[1.05] tracking-wider text-[clamp(2.5rem,7vw,7rem)]">
+      {/* Particle field (decorative, lazy) */}
+      <div className="absolute inset-0 pointer-events-none" aria-hidden="true">
+        {show3d && <HeroField handles={handles} start={loaderDone} active={active} phone={phone} />}
+      </div>
+      {/* Soft darkening behind the words so the headline always reads */}
+      <div
+        className="absolute inset-0 pointer-events-none"
+        aria-hidden="true"
+        style={{
+          background:
+            'radial-gradient(ellipse 58% 42% at 50% 52%, rgba(10,10,10,0.6) 0%, rgba(10,10,10,0.25) 45%, rgba(10,10,10,0) 72%)',
+        }}
+      />
+
+      <div ref={contentRef} className="relative z-10 text-center px-6 max-w-5xl mx-auto pt-16 pb-10">
+        <h1
+          ref={h1Ref}
+          data-reveal=""
+          className="font-serif font-light text-offwhite lowercase leading-[1.05] tracking-wider text-[clamp(2.75rem,7vw,7rem)]"
+        >
           run your own biology.
         </h1>
 
-        <p className="mt-8 font-sans text-offwhite/35 uppercase tracking-[0.3em] text-[11px]">
+        <p data-hero-sub data-reveal="" className="mt-8 bl-label">
           Dallas, Texas&nbsp;&nbsp;·&nbsp;&nbsp;By appointment
         </p>
 
-        <p className="mt-6 font-serif italic text-offwhite/30 text-base md:text-lg tracking-wide max-w-md mx-auto">
-          a private optimization practice for hormones, training, nutrition, and the way you live.
+        <p
+          data-hero-sub
+          data-reveal=""
+          className="mt-6 font-serif italic text-body-dim text-base md:text-lg tracking-wide max-w-md mx-auto"
+        >
+          a private optimization practice built around one person at a time. hormones, training,
+          nutrition, and the way you live.
         </p>
 
-        <div className="mt-12">
-          <Button asChild size="lg">
+        <div data-hero-sub data-reveal="" className="mt-12">
+          <Button asChild size="lg" glow>
             <Link href="/contact">request a consult</Link>
           </Button>
         </div>
       </div>
 
       {/* Scroll cue */}
-      <div className="absolute bottom-10 left-1/2 -translate-x-1/2" aria-hidden="true">
-        <div className="w-px h-14 bg-gradient-to-b from-offwhite/0 to-offwhite/15 mx-auto" />
+      <div className="absolute bottom-8 left-1/2 -translate-x-1/2" aria-hidden="true" data-hero-sub data-reveal="">
+        <div className="w-px h-14 bg-gradient-to-b from-offwhite/0 to-offwhite/25 mx-auto" />
       </div>
     </section>
   )

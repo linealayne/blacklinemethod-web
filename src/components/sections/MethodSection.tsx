@@ -1,8 +1,19 @@
-import Link from 'next/link'
-import { FadeInSection } from '@/components/FadeInSection'
-import { MethodDiagram } from '@/components/MethodDiagram'
+'use client'
 
-const PILLARS = [
+import { useEffect, useRef, useState } from 'react'
+import Link from 'next/link'
+import dynamic from 'next/dynamic'
+import { useMotion } from '@/components/motion/MotionProvider'
+import { MethodDiagram } from '@/components/MethodDiagram'
+import { Reveal } from '@/components/motion/Reveal'
+import { SplitReveal } from '@/components/motion/SplitReveal'
+import { gsap, useGSAP } from '@/lib/gsap'
+import { motionFlags } from '@/lib/flags'
+import { ORBIT, ORBIT_PULLBACK, type OrbitHandles } from '@/components/three/orbit-config'
+
+const OrbitScene = dynamic(() => import('@/components/three/OrbitScene'), { ssr: false })
+
+export const PILLARS = [
   {
     id: 'hormones',
     label: 'Hormones',
@@ -29,66 +40,206 @@ const PILLARS = [
   },
 ]
 
+/** Pinned orbit choreography */
+const METHOD = {
+  pinDesktop: '+=320%',
+  pinPhone: '+=280%',
+  scrub: 0.7,
+  phonePinStart: 'center center', // the orbit block sits centred in the viewport while pinned
+}
+
 export function MethodSection() {
+  const { mounted, reduced, webgl } = useMotion()
+  const sectionRef = useRef<HTMLElement>(null)
+  const stageWrap = useRef<HTMLDivElement>(null)
+  const canvasWrap = useRef<HTMLDivElement>(null)
+  const handles = useRef<OrbitHandles>({ progress: { value: 0 } }).current
+  const [active, setActive] = useState(true)
+  const [phone, setPhone] = useState(false)
+  const [show3d, setShow3d] = useState(false)
+  const isStatic = mounted && (reduced || !webgl)
+
+  useEffect(() => {
+    if (!mounted || isStatic) return
+    const mq = window.matchMedia('(max-width: 767px)')
+    const sync = () => setPhone(mq.matches)
+    sync()
+    mq.addEventListener('change', sync)
+    const el = canvasWrap.current
+    if (!el) return () => mq.removeEventListener('change', sync)
+    // Load the orbit only when the section is near
+    const io = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setShow3d(true)
+          io.disconnect()
+        }
+      },
+      { rootMargin: '600px 0px' }
+    )
+    io.observe(el)
+    return () => {
+      io.disconnect()
+      mq.removeEventListener('change', sync)
+    }
+  }, [mounted, isStatic])
+
+  useEffect(() => {
+    const el = sectionRef.current
+    if (!el || !show3d) return
+    let inView = true
+    const update = () => setActive(inView && !document.hidden)
+    const io = new IntersectionObserver(
+      ([entry]) => {
+        inView = entry.isIntersecting
+        update()
+      },
+      { threshold: 0 }
+    )
+    io.observe(el)
+    document.addEventListener('visibilitychange', update)
+    return () => {
+      io.disconnect()
+      document.removeEventListener('visibilitychange', update)
+    }
+  }, [show3d])
+
+  useGSAP(
+    () => {
+      const section = sectionRef.current
+      const stage = stageWrap.current
+      if (!section || !stage) return
+      const flags = motionFlags()
+      if (flags.reduced || !flags.webgl) return
+
+      const pillars = gsap.utils.toArray<HTMLElement>('[data-pillar]', section)
+      const whole = section.querySelector<HTMLElement>('[data-whole]')
+      const cta = section.querySelector<HTMLElement>('[data-cta]')
+
+      const mm = gsap.matchMedia()
+      mm.add(
+        { desktop: '(min-width: 768px)', phone: '(max-width: 767px)' },
+        (ctx) => {
+          const { desktop } = ctx.conditions as { desktop: boolean }
+          gsap.set(pillars, { autoAlpha: 0, y: 20 })
+          gsap.set(whole, { autoAlpha: 0, y: 20 })
+          gsap.set(cta, { autoAlpha: 0, y: 12 })
+
+          const tl = gsap.timeline({
+            defaults: { ease: 'power2.inOut' },
+            scrollTrigger: {
+              trigger: desktop ? section : stage,
+              pin: desktop ? section : stage,
+              start: desktop ? 'top top' : METHOD.phonePinStart,
+              end: desktop ? METHOD.pinDesktop : METHOD.pinPhone,
+              scrub: METHOD.scrub,
+              anticipatePin: 1,
+              onUpdate: (self) => {
+                handles.progress.value = self.progress
+              },
+            },
+          })
+
+          // Timeline time is normalised to 1 so positions equal scroll progress.
+          const w = ORBIT.windowSize
+          const inDur = w * 0.3
+          const outDur = w * 0.22
+          pillars.forEach((p, i) => {
+            const start = ORBIT.intro + i * w + w * 0.1
+            tl.to(p, { autoAlpha: 1, y: 0, duration: inDur }, start)
+            tl.to(p, { autoAlpha: 0, y: -16, duration: outDur }, start + w - outDur - w * 0.08)
+          })
+          tl.to(whole, { autoAlpha: 1, y: 0, duration: 0.07 }, ORBIT_PULLBACK + 0.02)
+          tl.to(cta, { autoAlpha: 1, y: 0, duration: 0.05 }, ORBIT_PULLBACK + 0.09)
+          tl.to({}, { duration: 0.01 }, 0.99)
+        }
+      )
+      return () => mm.revert()
+    },
+    { scope: sectionRef, dependencies: [isStatic], revertOnUpdate: true }
+  )
+
+  const bodyClass = 'font-sans text-sm md:text-[15px] text-body leading-relaxed tracking-wide max-w-md'
+
   return (
-    <section className="bg-black border-t border-hairline" aria-label="The Method">
-      <div className="max-w-7xl mx-auto px-6 md:px-12 py-32 md:py-44">
-        <div className="grid md:grid-cols-2 gap-16 md:gap-24 items-start">
-          {/* Left: intro + pillars */}
-          <div>
-            <FadeInSection>
-              <span className="block font-sans text-[10px] tracking-[0.3em] uppercase text-offwhite/20 mb-10">
-                the method
-              </span>
-              <h2 className="font-serif font-light text-offwhite lowercase tracking-wider leading-[1.05] text-[clamp(2.75rem,5vw,5.5rem)] mb-12">
-                four pillars. one system.
-              </h2>
-              <p className="font-sans text-sm text-offwhite/50 leading-relaxed tracking-wide mb-14 max-w-md">
-                Hormones, training, nutrition, and lifestyle are not separate services. They are one
-                circular system. Adjusting one without understanding the others produces incomplete
-                results. The Blackline Method works across all four simultaneously.
-              </p>
-            </FadeInSection>
-
-            <div className="space-y-10">
-              {PILLARS.map((pillar, i) => (
-                <FadeInSection key={pillar.id} delay={0.08 * i}>
-                  <div className="flex gap-6">
-                    <div className="pt-1">
-                      <div className="w-1.5 h-1.5 rounded-full bg-amber/40 mt-1" aria-hidden="true" />
-                    </div>
-                    <div>
-                      <p className="font-sans text-[11px] tracking-[0.2em] uppercase text-amber/60 mb-2">
-                        {pillar.label}
-                      </p>
-                      <p className="font-sans text-sm text-offwhite/45 leading-relaxed tracking-wide">
-                        {pillar.description}
-                      </p>
-                    </div>
-                  </div>
-                </FadeInSection>
-              ))}
-            </div>
-
-            <FadeInSection delay={0.36}>
-              <div className="mt-14">
-                <Link
-                  href="/method"
-                  className="font-sans text-[11px] tracking-[0.2em] uppercase text-amber/60 transition-colors duration-600 hover:text-amber inline-flex items-center gap-3"
-                >
-                  Explore the full method
-                  <span aria-hidden="true">→</span>
-                </Link>
-              </div>
-            </FadeInSection>
+    <section
+      ref={sectionRef}
+      className={['bg-black border-t border-hairline', isStatic ? '' : 'md:min-h-[100svh] md:flex md:items-center'].join(' ')}
+      aria-label="The Method"
+    >
+      <div className="max-w-7xl mx-auto px-6 md:px-12 w-full py-20 md:py-20">
+        <div className="md:grid md:grid-cols-2 md:gap-x-20 md:items-center">
+          {/* Heading: scrolls normally on phones, left column on desktop */}
+          <div className="md:col-start-1 md:row-start-1">
+            <Reveal as="p" className="bl-label mb-8">
+              the method
+            </Reveal>
+            <SplitReveal
+              as="h2"
+              className="font-serif font-light text-offwhite lowercase tracking-wider leading-[1.05] text-[clamp(2.5rem,4.8vw,5rem)]"
+            >
+              four pillars. one system.
+            </SplitReveal>
+            <Reveal as="p" delay={0.2} className={`mt-8 ${bodyClass}`}>
+              Hormones, training, nutrition, and lifestyle are not separate services. They are one
+              circular system. The Blackline Method works across all four simultaneously.
+            </Reveal>
           </div>
 
-          {/* Right: diagram */}
-          <FadeInSection delay={0.18}>
-            <div className="flex items-center justify-center py-8">
-              <MethodDiagram className="w-full max-w-[420px] h-auto opacity-80" />
+          {/* On phones this block is what gets pinned; on desktop it dissolves into the grid */}
+          <div ref={stageWrap} className="mt-10 md:mt-0 md:contents">
+            <div className="md:col-start-2 md:row-start-1 md:row-span-2">
+              <div
+                ref={canvasWrap}
+                className="relative mx-auto aspect-square w-full max-w-[250px] sm:max-w-[320px] md:max-w-[520px]"
+              >
+                {isStatic ? (
+                  <MethodDiagram className="w-full h-auto opacity-80" />
+                ) : (
+                  show3d && <OrbitScene handles={handles} mode="scrub" active={active} phone={phone} />
+                )}
+              </div>
             </div>
-          </FadeInSection>
+
+            <div className="mt-8 md:mt-10 md:col-start-1 md:row-start-2">
+              {isStatic ? (
+                <div className="space-y-9">
+                  {PILLARS.map((pillar) => (
+                    <div key={pillar.id}>
+                      <p className="bl-label bl-label-amber mb-3">{pillar.label}</p>
+                      <p className={bodyClass}>{pillar.description}</p>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="grid min-h-[9.5rem] md:min-h-[8.5rem]">
+                  {PILLARS.map((pillar) => (
+                    <div key={pillar.id} data-pillar className="[grid-area:1/1]">
+                      <p className="bl-label bl-label-amber mb-3">{pillar.label}</p>
+                      <p className={bodyClass}>{pillar.description}</p>
+                    </div>
+                  ))}
+                  <div data-whole className="[grid-area:1/1]">
+                    <p className="bl-label bl-label-amber mb-3">One system</p>
+                    <p className={bodyClass}>
+                      Adjusting one without understanding the others produces incomplete results. The
+                      four are read together, around you.
+                    </p>
+                  </div>
+                </div>
+              )}
+
+              <div className="mt-10 md:mt-12" data-cta>
+                <Link
+                  href="/method"
+                  className="group inline-flex items-center gap-3 min-h-[44px] font-sans text-[11px] tracking-[0.2em] uppercase text-amber-muted transition-colors duration-600 hover:text-amber"
+                >
+                  <span className="bl-underline">Explore the full method</span>
+                  <span aria-hidden="true" className="transition-transform duration-600 ease-lux group-hover:translate-x-1">→</span>
+                </Link>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </section>

@@ -1,7 +1,8 @@
 'use client'
 
 import { useState } from 'react'
-import { FadeInSection } from '@/components/FadeInSection'
+import { Reveal } from '@/components/motion/Reveal'
+import { SplitReveal } from '@/components/motion/SplitReveal'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
@@ -44,17 +45,20 @@ export function ContactSection() {
 
   return (
     <section aria-label="Contact">
-      <div className="max-w-7xl mx-auto px-6 md:px-12 py-32 md:py-44">
-        <div className="grid md:grid-cols-2 gap-16 md:gap-24">
+      <div className="max-w-7xl mx-auto px-6 md:px-12 pt-36 md:pt-40 pb-24 md:pb-32">
+        <div className="grid md:grid-cols-2 gap-14 md:gap-24">
           {/* Left: contact info */}
-          <FadeInSection>
-            <span className="block font-sans text-[10px] tracking-[0.3em] uppercase text-offwhite/20 mb-10">
+          <div>
+            <Reveal as="p" className="bl-label mb-8">
               request a consult
-            </span>
-            <h1 className="font-serif font-light text-offwhite lowercase tracking-wider leading-[1.05] text-[clamp(2.5rem,4.5vw,4.5rem)] mb-12">
+            </Reveal>
+            <SplitReveal
+              as="h1"
+              className="font-serif font-light text-offwhite lowercase tracking-wider leading-[1.05] text-[clamp(2.5rem,4.5vw,4.5rem)] mb-12"
+            >
               the first conversation.
-            </h1>
-            <div className="space-y-6 font-sans text-sm text-offwhite/40 tracking-wide leading-relaxed max-w-sm">
+            </SplitReveal>
+            <Reveal stagger delay={0.25} className="space-y-6 font-sans text-sm md:text-[15px] text-body tracking-wide leading-relaxed max-w-sm">
               <p>
                 The initial consult is ninety minutes. We cover your history, your current state,
                 your goals, and what has and hasn&apos;t worked. Nothing is prescribed in that session.
@@ -64,35 +68,35 @@ export function ContactSection() {
                 Engagements are limited. We take a small number of clients. If there is mutual fit,
                 we proceed.
               </p>
-              <div className="pt-2 space-y-2">
+              <div className="pt-2 flex flex-col items-start">
                 <a
                   href="mailto:layne@blacklinemethod.com"
-                  className="block transition-colors duration-600 hover:text-amber"
+                  className="inline-flex items-center min-h-[40px] transition-colors duration-600 hover:text-amber"
                 >
                   layne@blacklinemethod.com
                 </a>
                 <a
                   href="mailto:spencer@blacklinemethod.com"
-                  className="block transition-colors duration-600 hover:text-amber"
+                  className="inline-flex items-center min-h-[40px] transition-colors duration-600 hover:text-amber"
                 >
                   spencer@blacklinemethod.com
                 </a>
               </div>
-              <p className="text-offwhite/20 text-[11px] tracking-[0.1em] pt-2">
+              <p className="bl-label text-[10px] pt-2">
                 Dallas, Texas · Remote and in-person · By appointment only.
               </p>
-            </div>
-          </FadeInSection>
+            </Reveal>
+          </div>
 
           {/* Right: form or success state */}
-          <FadeInSection delay={0.18}>
+          <Reveal delay={0.18}>
             {status === 'success' ? (
-              <div className="flex flex-col justify-center h-full min-h-[320px]">
+              <div className="flex flex-col justify-center h-full min-h-[320px]" role="status">
                 <div className="w-8 h-px bg-amber mb-8" aria-hidden="true" />
-                <p className="font-serif text-2xl text-offwhite/80 font-light tracking-wide mb-4">
+                <p className="font-serif text-2xl text-offwhite/90 font-light tracking-wide mb-4">
                   Request received.
                 </p>
-                <p className="font-sans text-sm text-offwhite/35 tracking-wide leading-relaxed">
+                <p className="font-sans text-sm text-body tracking-wide leading-relaxed">
                   We will be in touch within two business days.
                 </p>
               </div>
@@ -146,7 +150,7 @@ export function ContactSection() {
 
                 {status === 'error' && (
                   <p
-                    className="font-sans text-[11px] text-amber/70 tracking-wide"
+                    className="font-sans text-[12px] text-amber tracking-wide"
                     role="alert"
                   >
                     Something went wrong. Please try again or email us directly.
@@ -157,12 +161,13 @@ export function ContactSection() {
                   type="submit"
                   disabled={status === 'loading'}
                   className="w-full sm:w-auto"
+                  glow
                 >
                   {status === 'loading' ? 'Sending...' : 'Send request'}
                 </Button>
               </form>
             )}
-          </FadeInSection>
+          </Reveal>
         </div>
       </div>
     </section>
