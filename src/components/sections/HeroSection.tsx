@@ -5,10 +5,10 @@ import Link from 'next/link'
 import dynamic from 'next/dynamic'
 import { Button } from '@/components/ui/button'
 import { useMotion } from '@/components/motion/MotionProvider'
-import { gsap, ScrollTrigger, SplitText, useGSAP } from '@/lib/gsap'
 import { motionFlags } from '@/lib/flags'
 import { isFinePointer, isPhone } from '@/lib/motion'
 import { useFirstInteraction } from '@/lib/useFirstInteraction'
+import { useGsapEffect } from '@/lib/useGsap'
 import type { HeroHandles } from '@/components/three/HeroField'
 import { supportsWebGL } from '@/components/three/webgl'
 
@@ -16,21 +16,25 @@ const HeroField = dynamic(() => import('@/components/three/HeroField'), { ssr: f
 
 /** Hero reveal choreography (seconds) */
 const HERO = {
-  idleLoadDelay: 6000, // ms before the field loads with no interaction at all
   lineDuration: 1.3,
   lineStagger: 0.1,
-  subDuration: 0.9,
-  subStagger: 0.1,
   subOverlap: 0.75, // how early the sub elements start before the lines finish
   fadeStart: 0.3, // scroll progress where the copy starts to fade
 }
 
+/**
+ * The headline is never hidden before paint: it is the page's largest text
+ * and paints in the metric-matched fallback at first paint, then swaps to
+ * Fraunces. The masked line reveal only runs when the loader runs (desktop
+ * first visit, under the overlay). Everywhere else the subhead and button
+ * simply rise in sequence through the CSS reveal.
+ */
 export function HeroSection() {
   const { mounted, reduced, webgl, loaderDone } = useMotion()
   const sectionRef = useRef<HTMLElement>(null)
   const contentRef = useRef<HTMLDivElement>(null)
   const h1Ref = useRef<HTMLHeadingElement>(null)
-  const tlRef = useRef<gsap.core.Timeline | null>(null)
+  const playRef = useRef<(() => void) | null>(null)
   const loaderDoneRef = useRef(false)
   const handles = useRef<HeroHandles>({
     pointer: { x: 0, y: 0, active: 0 },
@@ -43,7 +47,7 @@ export function HeroSection() {
 
   // Lazy-load WebGL once the loader is done and the visitor has moved, scrolled,
   // or touched (or after a quiet while). Text renders first, always.
-  const go = useFirstInteraction(mounted && !reduced && webgl && loaderDone, HERO.idleLoadDelay)
+  const go = useFirstInteraction(mounted && !reduced && webgl && loaderDone)
   useEffect(() => {
     if (!go) return
     if (!supportsWebGL()) return
@@ -106,25 +110,46 @@ export function HeroSection() {
     return () => window.removeEventListener('deviceorientation', onTilt)
   }, [show3d, handles])
 
-  // Headline: masked line reveal after the loader; subhead and button fade up after it.
-  useGSAP(
-    () => {
+  // Sub elements: the CSS reveal handles the rise; we only decide when.
+  // No loader (phones, tablets, returning visitors): right away.
+  // Loader running: once the headline lines have mostly arrived (see below).
+  useEffect(() => {
+    if (!mounted) return
+    const flags = motionFlags()
+    if (flags.reduced || flags.loaderDone) revealSubs(contentRef.current)
+  }, [mounted])
+
+  // Desktop first visit: masked line reveal under the loader, then the subs.
+  useGsapEffect(
+    async ({ gsap, ScrollTrigger, loadSplitText }) => {
       const h1 = h1Ref.current
       const content = contentRef.current
       const section = sectionRef.current
-      if (!h1 || !content || !section || motionFlags().reduced) return
+      if (!h1 || !content || !section) return
+      const flags = motionFlags()
+      if (flags.reduced) return
 
-      const subs = content.querySelectorAll('[data-hero-sub]')
-      gsap.set(subs, { opacity: 0, y: 18 })
-      // Returning visitors have no loader covering the page: hide until split.
-      if (motionFlags().loaderDone) gsap.set(h1, { opacity: 0 })
+      const ctx = gsap.context(() => {
+        // Scrolling past the hero: copy drifts up and fades; the field loosens.
+        ScrollTrigger.create({
+          trigger: section,
+          start: 'top top',
+          end: 'bottom top',
+          scrub: true,
+          onUpdate: (self) => {
+            handles.scroll.value = self.progress
+            const f = gsap.utils.clamp(0, 1, (self.progress - HERO.fadeStart) / (0.95 - HERO.fadeStart))
+            gsap.set(content, { yPercent: -10 * self.progress, opacity: 1 - f })
+          },
+        })
+      }, section)
 
-      let split: SplitText | null = null
-      let cancelled = false
-      const fontsReady: Promise<unknown> = document.fonts?.ready ?? Promise.resolve()
-      fontsReady.then(() => {
-        if (cancelled) return
-        split = SplitText.create(h1, {
+      if (flags.loaderDone) return () => ctx.revert()
+
+      // Loader is up: split now, reveal when it hands off.
+      const SplitText = await loadSplitText()
+      if (document.fonts?.ready) await document.fonts.ready
+      const split = SplitText.create(h1, {
         type: 'lines',
         mask: 'lines',
         linesClass: 'bl-line',
@@ -138,45 +163,24 @@ export function HeroSection() {
             ease: 'expo.out',
             stagger: HERO.lineStagger,
           })
-          tl.to(
-            subs,
-            { opacity: 1, y: 0, duration: HERO.subDuration, ease: 'power3.out', stagger: HERO.subStagger },
-            `-=${HERO.subOverlap}`
-          )
-          const prev = tlRef.current
-          tlRef.current = tl
-          if (prev && prev.progress() > 0) tl.progress(1)
-          else if (loaderDoneRef.current) tl.play()
+          tl.call(() => revealSubs(content), [], `-=${HERO.subOverlap}`)
+          playRef.current = () => tl.play()
+          if (loaderDoneRef.current) tl.play()
           return tl
         },
-        })
-        gsap.set(h1, { opacity: 1 })
       })
-
-      // Scrolling past the hero: copy drifts up and fades; the field loosens.
-      ScrollTrigger.create({
-        trigger: section,
-        start: 'top top',
-        end: 'bottom top',
-        scrub: true,
-        onUpdate: (self) => {
-          handles.scroll.value = self.progress
-          const f = gsap.utils.clamp(0, 1, (self.progress - HERO.fadeStart) / (0.95 - HERO.fadeStart))
-          gsap.set(content, { yPercent: -10 * self.progress, opacity: 1 - f })
-        },
-      })
-
       return () => {
-        cancelled = true
-        split?.revert()
+        split.revert()
+        ctx.revert()
       }
     },
-    { scope: sectionRef }
+    [mounted],
+    { immediate: typeof window !== 'undefined' && !motionFlags().loaderDone }
   )
 
   useEffect(() => {
     loaderDoneRef.current = loaderDone
-    if (loaderDone) tlRef.current?.play()
+    if (loaderDone) playRef.current?.()
   }, [loaderDone])
 
   return (
@@ -202,13 +206,12 @@ export function HeroSection() {
       <div ref={contentRef} className="relative z-10 text-center px-6 max-w-5xl mx-auto pt-16 pb-10">
         <h1
           ref={h1Ref}
-          data-reveal=""
           className="font-serif font-light text-offwhite lowercase leading-[1.05] tracking-wider text-[clamp(2.75rem,7vw,7rem)]"
         >
           run your own biology.
         </h1>
 
-        <p data-hero-sub data-reveal="" className="mt-8 bl-label">
+        <p data-hero-sub data-reveal="" className="mt-8 bl-label" style={{ '--bl-rise': '18px' } as React.CSSProperties}>
           Dallas, Texas&nbsp;&nbsp;·&nbsp;&nbsp;By appointment
         </p>
 
@@ -216,12 +219,13 @@ export function HeroSection() {
           data-hero-sub
           data-reveal=""
           className="mt-6 font-serif italic text-body-dim text-base md:text-lg tracking-wide max-w-md mx-auto"
+          style={{ '--bl-rise': '18px', '--bl-delay': '0.1s' } as React.CSSProperties}
         >
           a private optimization practice built around one person at a time. hormones, training,
           nutrition, and the way you live.
         </p>
 
-        <div data-hero-sub data-reveal="" className="mt-12">
+        <div data-hero-sub data-reveal="" className="mt-12" style={{ '--bl-rise': '18px', '--bl-delay': '0.2s' } as React.CSSProperties}>
           <Button asChild size="lg" glow>
             <Link href="/contact">request a consult</Link>
           </Button>
@@ -229,9 +233,21 @@ export function HeroSection() {
       </div>
 
       {/* Scroll cue */}
-      <div className="absolute bottom-8 left-1/2 -translate-x-1/2" aria-hidden="true" data-hero-sub data-reveal="">
+      <div
+        className="absolute bottom-8 left-1/2 -translate-x-1/2"
+        aria-hidden="true"
+        data-hero-sub
+        data-reveal=""
+        style={{ '--bl-rise': '0px', '--bl-delay': '0.5s' } as React.CSSProperties}
+      >
         <div className="w-px h-14 bg-gradient-to-b from-offwhite/0 to-offwhite/25 mx-auto" />
       </div>
     </section>
   )
+}
+
+function revealSubs(root: HTMLElement | null) {
+  if (!root) return
+  const section = root.closest('section') ?? root
+  section.querySelectorAll('[data-hero-sub]').forEach((el) => el.classList.add('bl-in'))
 }

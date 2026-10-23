@@ -3,6 +3,7 @@ import Link from 'next/link'
 import { Reveal } from '@/components/motion/Reveal'
 import { SplitReveal } from '@/components/motion/SplitReveal'
 import { Button } from '@/components/ui/button'
+import { PracticeCards } from '@/components/sections/PracticeSection'
 
 export const metadata: Metadata = {
   title: 'Philosophy | Blackline Method',
@@ -93,6 +94,24 @@ export default function PhilosophyPage() {
           </section>
         </div>
       ))}
+
+      {/* The practice */}
+      <div className="mx-6 md:mx-12 h-px bg-hairline" aria-hidden="true" />
+      <section aria-label="The practice" className="px-6 md:px-12 max-w-7xl mx-auto py-24 md:py-32">
+        <Reveal as="p" className="bl-label mb-8">
+          the practice
+        </Reveal>
+        <SplitReveal
+          as="h2"
+          className="font-serif font-light text-offwhite lowercase leading-[1.05] tracking-wider text-[clamp(2.5rem,5vw,5.5rem)]"
+        >
+          the practice.
+        </SplitReveal>
+        <Reveal as="p" delay={0.2} className="mt-8 font-serif italic text-body text-lg md:text-xl leading-relaxed max-w-xl">
+          two people. a small number of clients. by design.
+        </Reveal>
+        <PracticeCards className="mt-14 md:mt-16" />
+      </section>
 
       {/* CTA */}
       <section aria-label="Contact CTA" className="px-6 md:px-12 max-w-7xl mx-auto border-t border-hairline pt-16 pb-6">

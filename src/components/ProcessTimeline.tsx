@@ -1,8 +1,8 @@
 'use client'
 
 import { useRef } from 'react'
-import { gsap, useGSAP } from '@/lib/gsap'
 import { motionFlags } from '@/lib/flags'
+import { useGsapEffect } from '@/lib/useGsap'
 
 export interface TimelineStep {
   index: string
@@ -21,20 +21,19 @@ const TIMELINE = {
 export function ProcessTimeline({ steps, bracket = true }: { steps: TimelineStep[]; bracket?: boolean }) {
   const rootRef = useRef<HTMLDivElement>(null)
 
-  useGSAP(
-    () => {
+  useGsapEffect(
+    ({ gsap, ScrollTrigger }) => {
       const root = rootRef.current
       if (!root || motionFlags().reduced) return
-      const fill = root.querySelector<HTMLElement>('[data-rail-fill]')
-      const dots = gsap.utils.toArray<HTMLElement>('[data-dot]', root)
-      const bodies = gsap.utils.toArray<HTMLElement>('[data-step-body]', root)
-      const bracketEl = root.querySelector<HTMLElement>('[data-bracket]')
+      const ctx = gsap.context(() => {
+        const fill = root.querySelector<HTMLElement>('[data-rail-fill]')
+        const dots = gsap.utils.toArray<HTMLElement>('[data-dot]', root)
+        const bodies = gsap.utils.toArray<HTMLElement>('[data-step-body]', root)
+        const bracketEl = root.querySelector<HTMLElement>('[data-bracket]')
 
-      const mm = gsap.matchMedia()
-      mm.add(
-        { desktop: '(min-width: 768px)', phone: '(max-width: 767px)' },
-        (ctx) => {
-          const { desktop } = ctx.conditions as { desktop: boolean }
+        const mm = gsap.matchMedia()
+        mm.add({ desktop: '(min-width: 768px)', phone: '(max-width: 767px)' }, (mctx) => {
+          const { desktop } = mctx.conditions as { desktop: boolean }
           gsap.set(fill, desktop ? { scaleX: 0, scaleY: 1 } : { scaleY: 0, scaleX: 1 })
           gsap.set(bodies, { opacity: 0, y: 10 })
           gsap.set(dots, { borderColor: '#2A2A2A', backgroundColor: '#0A0A0A', boxShadow: '0 0 0 rgba(0,0,0,0)' })
@@ -47,8 +46,6 @@ export function ProcessTimeline({ steps, bracket = true }: { steps: TimelineStep
           tl.to(fill, desktop ? { scaleX: 1, duration: 1 } : { scaleY: 1, duration: 1 }, 0)
           const n = steps.length
           steps.forEach((_, i) => {
-            // the line reaches dot i at i/(n-1) of the fill on desktop (dots at column starts
-            // span 0..~0.69 of the width), earlier on phones where dots sit at each block's top
             const reach = desktop ? (i / n) * 0.98 + 0.01 : (i / n) * 0.9 + 0.03
             tl.to(
               dots[i],
@@ -58,11 +55,12 @@ export function ProcessTimeline({ steps, bracket = true }: { steps: TimelineStep
             tl.to(bodies[i], { opacity: 1, y: 0, duration: 0.12, ease: 'power2.out' }, reach + 0.01)
           })
           if (bracketEl) tl.to(bracketEl, { opacity: 1, duration: 0.1, ease: 'power2.out' }, TIMELINE.bracketAt)
-        }
-      )
-      return () => mm.revert()
+        })
+        ScrollTrigger.refresh()
+      }, root)
+      return () => ctx.revert()
     },
-    { scope: rootRef }
+    [steps.length]
   )
 
   return (

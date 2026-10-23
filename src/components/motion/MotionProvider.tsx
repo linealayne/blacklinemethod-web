@@ -32,7 +32,7 @@ const useIsoLayoutEffect = typeof window === 'undefined' ? useEffect : useLayout
 export function MotionProvider({ children }: { children: ReactNode }) {
   const [state, setState] = useState<MotionState>(DEFAULT)
 
-  // Layout effect so it runs before paint, after every child's useGSAP
+  // Layout effect so it runs before paint, after every child's layout effect
   // (children effects fire first), which lets the CSS pre-hydration
   // hiding hand off to GSAP's inline styles without a flash.
   useIsoLayoutEffect(() => {

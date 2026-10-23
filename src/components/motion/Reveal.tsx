@@ -1,9 +1,7 @@
 'use client'
 
-import { createElement, useRef, type ElementType, type ReactNode } from 'react'
-import { gsap, useGSAP } from '@/lib/gsap'
-import { motionFlags } from '@/lib/flags'
-import { DUR, EASE, REVEAL_START } from '@/lib/motion'
+import { createElement, useEffect, useRef, type ElementType, type ReactNode } from 'react'
+import { REVEAL_START } from '@/lib/motion'
 
 interface RevealProps {
   children: ReactNode
@@ -17,6 +15,7 @@ interface RevealProps {
   stagger?: boolean
   /** viewport line the element must cross, as "top NN%"; default "top 86%" */
   start?: string
+  style?: React.CSSProperties
 }
 
 /** Convert a ScrollTrigger-style "top 86%" into an IntersectionObserver rootMargin. */
@@ -26,9 +25,8 @@ export function revealRootMargin(start: string): string {
 }
 
 /**
- * Observe once; reveal when the element crosses the line, or at once when the
- * page loaded already scrolled past it. IntersectionObserver keeps hydration
- * free of layout reads.
+ * Observe once; fire when the element crosses the line, or at once when the
+ * page loaded already scrolled past it. No layout reads, no library.
  */
 export function observeOnce(el: Element, start: string, onReveal: () => void): () => void {
   const io = new IntersectionObserver(
@@ -45,9 +43,10 @@ export function observeOnce(el: Element, start: string, onReveal: () => void): (
 }
 
 /**
- * Calm fade-and-rise for body text and small groups.
- * Hidden pre-hydration via [data-reveal] (returning motion clients only),
- * then GSAP takes over inline. Reduced motion: nothing moves, nothing is hidden.
+ * Calm fade-and-rise for body text and small groups, driven by CSS
+ * transitions (see globals.css, "Reveal choreography"). Motion clients hide
+ * [data-reveal] until `.bl-in` is added; reduced motion never hides anything.
+ * No GSAP in the critical path.
  */
 export function Reveal({
   children,
@@ -57,30 +56,30 @@ export function Reveal({
   as = 'div',
   stagger = false,
   start = REVEAL_START,
+  style,
 }: RevealProps) {
   const ref = useRef<HTMLElement>(null)
 
-  useGSAP(
-    () => {
-      const el = ref.current
-      if (!el || motionFlags().reduced) return
-      const targets = stagger ? Array.from(el.children) : [el]
-      if (stagger) gsap.set(el, { opacity: 1 })
-      gsap.set(targets, { opacity: 0, y })
-      return observeOnce(el, start, () => {
-        gsap.to(targets, {
-          opacity: 1,
-          y: 0,
-          duration: DUR.rise,
-          ease: EASE.rise,
-          delay,
-          stagger: stagger ? DUR.riseStagger : 0,
-          overwrite: true,
-        })
-      })
-    },
-    { scope: ref }
-  )
+  useEffect(() => {
+    const el = ref.current
+    if (!el) return
+    return observeOnce(el, start, () => el.classList.add('bl-in'))
+  }, [start])
 
-  return createElement(as, { ref, className, 'data-reveal': '' }, children)
+  const vars = {
+    '--bl-delay': `${delay}s`,
+    '--bl-rise': `${y}px`,
+    ...style,
+  } as React.CSSProperties
+
+  return createElement(
+    as,
+    {
+      ref,
+      className,
+      style: vars,
+      'data-reveal': stagger ? 'stagger' : '',
+    },
+    children
+  )
 }

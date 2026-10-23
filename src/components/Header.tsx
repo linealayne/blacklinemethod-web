@@ -4,8 +4,6 @@ import { useState, useEffect, useRef, useCallback } from 'react'
 import Link from 'next/link'
 import { Menu, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { gsap, useGSAP } from '@/lib/gsap'
-import { motionFlags } from '@/lib/flags'
 
 const NAV_LINKS = [
   { label: 'Philosophy', href: '/philosophy' },
@@ -16,55 +14,37 @@ const NAV_LINKS = [
 
 const MOBILE_LINKS = [...NAV_LINKS, { label: 'Contact', href: '/contact' }]
 
-/** Mobile menu choreography */
-const MENU = {
-  open: 0.5,
-  close: 0.22,
-  linkStagger: 0.07,
-}
-
+/**
+ * Mobile menu choreography lives in globals.css ("Mobile menu"): the overlay
+ * fades in over 0.5s and the serif links slide up through masks in sequence.
+ * No animation library on the critical path.
+ */
 export function Header() {
   const [scrolled, setScrolled] = useState(false)
   const [menuOpen, setMenuOpen] = useState(false)
   const overlayRef = useRef<HTMLDivElement>(null)
   const triggerRef = useRef<HTMLButtonElement>(null)
   const closeRef = useRef<HTMLButtonElement>(null)
-  const tl = useRef<gsap.core.Timeline | null>(null)
 
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 100)
+    let ticking = false
+    const onScroll = () => {
+      if (ticking) return
+      ticking = true
+      requestAnimationFrame(() => {
+        setScrolled(window.scrollY > 100)
+        ticking = false
+      })
+    }
     onScroll()
     window.addEventListener('scroll', onScroll, { passive: true })
     return () => window.removeEventListener('scroll', onScroll)
   }, [])
 
-  // Build the overlay timeline once; play/reverse on toggle.
-  useGSAP(
-    () => {
-      const overlay = overlayRef.current
-      if (!overlay) return
-      const links = overlay.querySelectorAll('[data-menu-link]')
-      const foot = overlay.querySelector('[data-menu-foot]')
-      const reduced = motionFlags().reduced
-      const t = gsap.timeline({ paused: true, defaults: { ease: 'power3.out' } })
-      t.fromTo(overlay, { autoAlpha: 0 }, { autoAlpha: 1, duration: reduced ? 0 : MENU.open, ease: 'power2.out' })
-      t.fromTo(
-        links,
-        { yPercent: 110 },
-        { yPercent: 0, duration: reduced ? 0 : 0.9, stagger: reduced ? 0 : MENU.linkStagger, ease: 'expo.out' },
-        reduced ? 0 : 0.12
-      )
-      t.fromTo(foot, { opacity: 0 }, { opacity: 1, duration: reduced ? 0 : 0.6 }, reduced ? 0 : 0.45)
-      tl.current = t
-    },
-    { scope: overlayRef }
-  )
-
   const open = useCallback(() => {
     setMenuOpen(true)
     window.__lenis?.stop()
     document.body.style.overflow = 'hidden'
-    tl.current?.timeScale(1).play()
     requestAnimationFrame(() => closeRef.current?.focus())
   }, [])
 
@@ -72,8 +52,6 @@ export function Header() {
     setMenuOpen(false)
     window.__lenis?.start()
     document.body.style.overflow = ''
-    const t = tl.current
-    if (t) t.timeScale(MENU.open / MENU.close).reverse()
     triggerRef.current?.focus()
   }, [])
 
@@ -103,7 +81,6 @@ export function Header() {
     return () => window.removeEventListener('keydown', onKey)
   }, [menuOpen, close])
 
-  // Close on route change (links inside call close before navigating, but keep this as a guard)
   useEffect(() => {
     return () => {
       document.body.style.overflow = ''
@@ -116,7 +93,7 @@ export function Header() {
       <header
         className={[
           'fixed top-0 left-0 right-0 z-50',
-          'transition-[background-color,border-color,backdrop-filter] duration-700 ease-out',
+          'transition-[background-color,border-color] duration-700 ease-out',
           scrolled ? 'bg-black/90 backdrop-blur-md border-b border-hairline' : 'bg-transparent border-b border-transparent',
         ].join(' ')}
       >
@@ -162,12 +139,11 @@ export function Header() {
         </div>
       </header>
 
-      {/* Mobile full-screen overlay (always mounted; hidden via visibility) */}
+      {/* Mobile full-screen overlay (always mounted; shown via .is-open) */}
       <div
         id="bl-mobile-menu"
         ref={overlayRef}
-        className="fixed inset-0 z-[100] bg-ink flex flex-col lg:hidden"
-        style={{ opacity: 0, visibility: 'hidden' }}
+        className={['fixed inset-0 z-[100] bg-ink flex flex-col lg:hidden', menuOpen ? 'is-open' : ''].join(' ')}
         aria-modal="true"
         role="dialog"
         aria-label="Navigation menu"
@@ -195,7 +171,7 @@ export function Header() {
 
         <nav className="flex flex-col justify-center flex-1 px-6 gap-2" aria-label="Mobile navigation">
           {MOBILE_LINKS.map((link) => (
-            <div key={link.href} className="overflow-hidden py-1">
+            <div key={link.href} className="overflow-hidden py-1" data-menu-item>
               <Link
                 href={link.href}
                 data-menu-link

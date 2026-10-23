@@ -7,10 +7,10 @@ import { useMotion } from '@/components/motion/MotionProvider'
 import { MethodDiagram } from '@/components/MethodDiagram'
 import { Reveal } from '@/components/motion/Reveal'
 import { SplitReveal } from '@/components/motion/SplitReveal'
-import { gsap, useGSAP } from '@/lib/gsap'
 import { motionFlags } from '@/lib/flags'
 import { ORBIT, ORBIT_PULLBACK, type OrbitHandles } from '@/components/three/orbit-config'
 import { useFirstInteraction } from '@/lib/useFirstInteraction'
+import { useGsapEffect } from '@/lib/useGsap'
 import { supportsWebGL } from '@/components/three/webgl'
 
 const OrbitScene = dynamic(() => import('@/components/three/OrbitScene'), { ssr: false })
@@ -76,7 +76,6 @@ export function MethodSection() {
     mq.addEventListener('change', sync)
     const el = canvasWrap.current
     if (!el) return () => mq.removeEventListener('change', sync)
-    // Load the orbit only when the section is near
     const io = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {
@@ -113,23 +112,22 @@ export function MethodSection() {
     }
   }, [show3d])
 
-  useGSAP(
-    () => {
+  useGsapEffect(
+    ({ gsap, ScrollTrigger }) => {
       const section = sectionRef.current
       const stage = stageWrap.current
       if (!section || !stage || !go || gl !== true) return
       const flags = motionFlags()
       if (flags.reduced || !flags.webgl) return
 
-      const pillars = gsap.utils.toArray<HTMLElement>('[data-pillar]', section)
-      const whole = section.querySelector<HTMLElement>('[data-whole]')
-      const cta = section.querySelector<HTMLElement>('[data-cta]')
+      const ctx = gsap.context(() => {
+        const pillars = gsap.utils.toArray<HTMLElement>('[data-pillar]', section)
+        const whole = section.querySelector<HTMLElement>('[data-whole]')
+        const cta = section.querySelector<HTMLElement>('[data-cta]')
 
-      const mm = gsap.matchMedia()
-      mm.add(
-        { desktop: '(min-width: 768px)', phone: '(max-width: 767px)' },
-        (ctx) => {
-          const { desktop } = ctx.conditions as { desktop: boolean }
+        const mm = gsap.matchMedia()
+        mm.add({ desktop: '(min-width: 768px)', phone: '(max-width: 767px)' }, (mctx) => {
+          const { desktop } = mctx.conditions as { desktop: boolean }
           gsap.set(pillars, { opacity: 0, y: 20 })
           gsap.set(whole, { opacity: 0, y: 20 })
           gsap.set(cta, { opacity: 0, y: 12, pointerEvents: 'none' })
@@ -161,11 +159,12 @@ export function MethodSection() {
           tl.to(whole, { opacity: 1, y: 0, duration: 0.07 }, ORBIT_PULLBACK + 0.02)
           tl.to(cta, { opacity: 1, y: 0, pointerEvents: 'auto', duration: 0.05 }, ORBIT_PULLBACK + 0.09)
           tl.to({}, { duration: 0.01 }, 0.99)
-        }
-      )
-      return () => mm.revert()
+        })
+        ScrollTrigger.refresh()
+      }, section)
+      return () => ctx.revert()
     },
-    { scope: sectionRef, dependencies: [isStatic, go, gl], revertOnUpdate: true }
+    [isStatic, go, gl]
   )
 
   const bodyClass = 'font-sans text-sm md:text-[15px] text-body leading-relaxed tracking-wide max-w-md'

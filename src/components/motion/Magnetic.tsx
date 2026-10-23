@@ -1,9 +1,9 @@
 'use client'
 
 import { useRef, type ReactNode } from 'react'
-import { gsap, useGSAP } from '@/lib/gsap'
 import { motionFlags } from '@/lib/flags'
 import { isFinePointer } from '@/lib/motion'
+import { useGsapEffect } from '@/lib/useGsap'
 
 /** Soft magnetic pull on desktop pointers only. Decorative; no effect on touch. */
 export const MAGNET = {
@@ -15,35 +15,31 @@ export const MAGNET = {
 export function Magnetic({ children, className }: { children: ReactNode; className?: string }) {
   const zone = useRef<HTMLDivElement>(null)
 
-  useGSAP(
-    () => {
-      const el = zone.current
-      if (!el || motionFlags().reduced || !isFinePointer()) return
-      const inner = el.firstElementChild as HTMLElement | null
-      if (!inner) return
-      const xTo = gsap.quickTo(inner, 'x', { duration: MAGNET.duration, ease: 'power3' })
-      const yTo = gsap.quickTo(inner, 'y', { duration: MAGNET.duration, ease: 'power3' })
+  useGsapEffect(({ gsap }) => {
+    const el = zone.current
+    if (!el || motionFlags().reduced || !isFinePointer()) return
+    const inner = el.firstElementChild as HTMLElement | null
+    if (!inner) return
+    const xTo = gsap.quickTo(inner, 'x', { duration: MAGNET.duration, ease: 'power3' })
+    const yTo = gsap.quickTo(inner, 'y', { duration: MAGNET.duration, ease: 'power3' })
 
-      const onMove = (e: PointerEvent) => {
-        const r = el.getBoundingClientRect()
-        const dx = e.clientX - (r.left + r.width / 2)
-        const dy = e.clientY - (r.top + r.height / 2)
-        xTo(dx * MAGNET.strength)
-        yTo(dy * MAGNET.strength)
-      }
-      const onLeave = () => {
-        xTo(0)
-        yTo(0)
-      }
-      el.addEventListener('pointermove', onMove)
-      el.addEventListener('pointerleave', onLeave)
-      return () => {
-        el.removeEventListener('pointermove', onMove)
-        el.removeEventListener('pointerleave', onLeave)
-      }
-    },
-    { scope: zone }
-  )
+    const onMove = (e: PointerEvent) => {
+      const r = el.getBoundingClientRect()
+      xTo((e.clientX - (r.left + r.width / 2)) * MAGNET.strength)
+      yTo((e.clientY - (r.top + r.height / 2)) * MAGNET.strength)
+    }
+    const onLeave = () => {
+      xTo(0)
+      yTo(0)
+    }
+    el.addEventListener('pointermove', onMove)
+    el.addEventListener('pointerleave', onLeave)
+    return () => {
+      el.removeEventListener('pointermove', onMove)
+      el.removeEventListener('pointerleave', onLeave)
+      gsap.set(inner, { clearProps: 'x,y' })
+    }
+  }, [])
 
   return (
     <div

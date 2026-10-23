@@ -1,10 +1,10 @@
 'use client'
 
-import { createElement, useRef, type ElementType, type ReactNode } from 'react'
-import { gsap, SplitText, useGSAP } from '@/lib/gsap'
+import { createElement, useEffect, useRef, type ElementType, type ReactNode } from 'react'
 import { motionFlags } from '@/lib/flags'
 import { DUR, EASE, REVEAL_START } from '@/lib/motion'
 import { observeOnce } from './Reveal'
+import { whenInteracted } from '@/lib/useFirstInteraction'
 
 interface SplitRevealProps {
   children: ReactNode
@@ -21,10 +21,11 @@ interface SplitRevealProps {
 const SPLIT_AHEAD = '40% 0px'
 
 /**
- * Line-by-line masked slide-up for headlines. The SplitText split is created
- * lazily, after fonts are ready and only once the headline approaches the
- * viewport, and the reveal is observed rather than scroll-triggered, so page
- * load pays nothing for headlines down the page. Reduced motion: plain text.
+ * Line-by-line masked slide-up for headlines. Nothing loads until the
+ * headline approaches the viewport: then GSAP and SplitText are fetched,
+ * the lines are split (after fonts), hidden inside masks, and revealed once
+ * the headline crosses the line. Headlines carry data-reveal so they stay
+ * hidden until then on motion clients; reduced motion: plain text.
  */
 export function SplitReveal({
   children,
@@ -37,18 +38,28 @@ export function SplitReveal({
 }: SplitRevealProps) {
   const ref = useRef<HTMLElement>(null)
 
-  useGSAP(
-    () => {
-      const el = ref.current
-      if (!el || motionFlags().reduced) return
+  useEffect(() => {
+    const el = ref.current
+    if (!el) return
+    if (motionFlags().reduced) return
 
-      let split: SplitText | null = null
-      let cancelled = false
+    let cancelled = false
+    let revert: (() => void) | null = null
+    let stopReveal: (() => void) | null = null
+
+    const create = async () => {
+      await whenInteracted()
+      if (cancelled) return
+      const [{ gsap, loadSplitText }, SplitText] = await Promise.all([
+        import('@/lib/gsap'),
+        import('@/lib/gsap').then((m) => m.loadSplitText()),
+      ])
+      if (cancelled) return
+      if (document.fonts?.ready) await document.fonts.ready
+      if (cancelled) return
+
       let revealed = false
       let lines: Element[] = []
-      let stopReveal: (() => void) | null = null
-      gsap.set(el, { opacity: 0 })
-
       const reveal = () => {
         if (revealed) return
         revealed = true
@@ -62,44 +73,42 @@ export function SplitReveal({
         })
       }
 
-      const create = () => {
-        if (cancelled || split) return
-        split = SplitText.create(el, {
-          type: 'lines',
-          mask: 'lines',
-          linesClass: 'bl-line',
-          autoSplit: true,
-          onSplit(self) {
-            lines = self.lines
-            gsap.set(lines, { yPercent: revealed ? 0 : 110 })
-          },
-        })
-        // Lines are now hidden by transform; the wrapper can show.
-        gsap.set(el, { opacity: 1 })
-        if (mode === 'immediate') reveal()
-        else stopReveal = observeOnce(el, start, reveal)
-      }
-
-      const fontsReady: Promise<unknown> = document.fonts?.ready ?? Promise.resolve()
-      const io = new IntersectionObserver(
-        ([entry]) => {
-          if (!entry.isIntersecting && entry.boundingClientRect.bottom >= 0) return
-          io.disconnect()
-          fontsReady.then(create)
+      // The CSS reveal must not fight the masks: take the element out of the
+      // CSS choreography and let the lines carry the motion.
+      el.style.transition = 'none'
+      const split = SplitText.create(el, {
+        type: 'lines',
+        mask: 'lines',
+        linesClass: 'bl-line',
+        autoSplit: true,
+        onSplit(self) {
+          lines = self.lines
+          gsap.set(lines, { yPercent: revealed ? 0 : 110 })
         },
-        { rootMargin: SPLIT_AHEAD }
-      )
-      io.observe(el)
+      })
+      el.classList.add('bl-in')
+      revert = () => split.revert()
+      if (mode === 'immediate') reveal()
+      else stopReveal = observeOnce(el, start, reveal)
+    }
 
-      return () => {
-        cancelled = true
+    const io = new IntersectionObserver(
+      ([entry]) => {
+        if (!entry.isIntersecting && entry.boundingClientRect.bottom >= 0) return
         io.disconnect()
-        stopReveal?.()
-        split?.revert()
-      }
-    },
-    { scope: ref }
-  )
+        create()
+      },
+      { rootMargin: SPLIT_AHEAD }
+    )
+    io.observe(el)
+
+    return () => {
+      cancelled = true
+      io.disconnect()
+      stopReveal?.()
+      revert?.()
+    }
+  }, [delay, mode, start])
 
   return createElement(as, { ref, className, style, 'data-reveal': '' }, children)
 }

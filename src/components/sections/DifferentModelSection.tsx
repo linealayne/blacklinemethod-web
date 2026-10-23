@@ -2,14 +2,14 @@
 
 import { useRef } from 'react'
 import { SplitReveal } from '@/components/motion/SplitReveal'
-import { Reveal } from '@/components/motion/Reveal'
-import { gsap, useGSAP } from '@/lib/gsap'
+import { Reveal, observeOnce } from '@/components/motion/Reveal'
 import { motionFlags } from '@/lib/flags'
+import { useGsapEffect } from '@/lib/useGsap'
 
 const PAIRS = [
   { system: 'built around the clock.', blackline: 'built around you.' },
   { system: 'the population average.', blackline: 'your biology.' },
-  { system: 'the default prescription.', blackline: 'the right intervention, when it is right.' },
+  { system: 'one protocol for everyone.', blackline: 'a protocol built for you.' },
 ]
 
 /** Reveal choreography for the contrast rows */
@@ -23,15 +23,12 @@ const MODEL = {
 export function DifferentModelSection() {
   const rootRef = useRef<HTMLDivElement>(null)
 
-  useGSAP(
-    () => {
-      const root = rootRef.current
-      if (!root || motionFlags().reduced) return
-      const rows = Array.from(root.querySelectorAll<HTMLElement>('[data-row]'))
-      const tl = gsap.timeline({
-        scrollTrigger: { trigger: root, start: 'top 78%', once: true },
-        defaults: { ease: 'power3.out' },
-      })
+  useGsapEffect(({ gsap }) => {
+    const root = rootRef.current
+    if (!root || motionFlags().reduced) return
+    const rows = Array.from(root.querySelectorAll<HTMLElement>('[data-row]'))
+    const ctx = gsap.context(() => {
+      const tl = gsap.timeline({ paused: true, defaults: { ease: 'power3.out' } })
       rows.forEach((row, i) => {
         const sys = row.querySelector('[data-system]')
         const bl = row.querySelector('[data-blackline]')
@@ -39,17 +36,13 @@ export function DifferentModelSection() {
         const at = i * MODEL.rowStagger
         tl.fromTo(sys, { opacity: 0, y: 14 }, { opacity: 0.85, y: 0, duration: MODEL.systemIn }, at)
         tl.fromTo(rule, { scaleX: 0 }, { scaleX: 1, duration: 0.8, ease: 'power3.inOut' }, at + 0.15)
-        tl.fromTo(
-          bl,
-          { opacity: 0, y: 14 },
-          { opacity: 1, y: 0, duration: MODEL.systemIn },
-          at + MODEL.blacklineDelay
-        )
+        tl.fromTo(bl, { opacity: 0, y: 14 }, { opacity: 1, y: 0, duration: MODEL.systemIn }, at + MODEL.blacklineDelay)
         tl.to(sys, { opacity: MODEL.systemDim, duration: 1.1 }, at + MODEL.blacklineDelay + 0.2)
       })
-    },
-    { scope: rootRef }
-  )
+      observeOnce(root, 'top 78%', () => tl.play())
+    }, root)
+    return () => ctx.revert()
+  }, [])
 
   return (
     <section className="bg-black border-t border-hairline" aria-label="A different model of care">
@@ -83,20 +76,20 @@ export function DifferentModelSection() {
                 data-row
                 className="grid gap-y-3 py-7 md:py-9 md:grid-cols-[1fr_5rem_1fr] md:items-center"
               >
+                <span className="md:hidden bl-label text-[10px]">the system</span>
                 <p
                   data-system
-                  className="font-serif font-light text-offwhite text-[1.6rem] md:text-[2.1rem] leading-[1.15] tracking-wide lowercase"
+                  className="font-serif font-light text-offwhite text-[1.6rem] md:text-[2.1rem] leading-[1.15] tracking-wide lowercase -mt-1 md:mt-0"
                   style={{ opacity: 0.85 }}
                 >
-                  <span className="md:hidden bl-label block mb-2 text-[10px]">the system</span>
                   {pair.system}
                 </p>
                 <span className="hidden md:block h-px bg-amber/40 origin-left mx-4" data-rule aria-hidden="true" />
+                <span className="md:hidden bl-label bl-label-amber text-[10px] mt-3">blackline</span>
                 <p
                   data-blackline
-                  className="font-serif font-light text-offwhite text-[1.6rem] md:text-[2.1rem] leading-[1.15] tracking-wide lowercase"
+                  className="font-serif font-light text-offwhite text-[1.6rem] md:text-[2.1rem] leading-[1.15] tracking-wide lowercase -mt-1 md:mt-0"
                 >
-                  <span className="md:hidden bl-label bl-label-amber block mb-2 text-[10px]">blackline</span>
                   {pair.blackline}
                 </p>
               </div>

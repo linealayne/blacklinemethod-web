@@ -15,7 +15,7 @@ const fraunces = Fraunces({
   weight: ['300', '400'],
   style: ['normal', 'italic'],
   variable: '--font-fraunces',
-  display: 'block',
+  display: 'swap',
 })
 
 const inter = Inter({

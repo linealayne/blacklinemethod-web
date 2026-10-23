@@ -3,13 +3,15 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { SplitReveal } from '@/components/motion/SplitReveal'
 import { Reveal } from '@/components/motion/Reveal'
-import { gsap, Draggable, useGSAP } from '@/lib/gsap'
 import { motionFlags } from '@/lib/flags'
+import { useGsapEffect } from '@/lib/useGsap'
+import type { GsapModule } from '@/lib/gsap'
 
 /**
  * "Optimal is not a range", illustrated. A wide reference band, a much
  * narrower band inside it, and a marker you can drag or move with the
  * keyboard. No numbers, no units, no markers: purely illustrative.
+ * GSAP and Draggable load on demand; keyboard and click work before they do.
  */
 export const RANGE = {
   reference: [0.1, 0.9] as const, // fraction of the track
@@ -43,7 +45,8 @@ export function RangeExplainer() {
   const markerRef = useRef<HTMLDivElement>(null)
   const statusRef = useRef<HTMLParagraphElement>(null)
   const fraction = useRef(RANGE.initial)
-  const draggable = useRef<Draggable | null>(null)
+  const gsapRef = useRef<GsapModule['gsap'] | null>(null)
+  const draggable = useRef<{ update: () => void; kill: () => void } | null>(null)
   const [status, setStatus] = useState<Status>(statusFor(RANGE.initial))
   const [valueNow, setValueNow] = useState(Math.round(RANGE.initial * 100))
 
@@ -51,22 +54,40 @@ export function RangeExplainer() {
     const track = trackRef.current
     const marker = markerRef.current
     if (!track || !marker) return
-    const clamped = gsap.utils.clamp(0, 1, f)
+    const clamped = Math.max(0, Math.min(1, f))
     fraction.current = clamped
     const x = clamped * track.clientWidth
-    if (animate && !motionFlags().reduced) gsap.to(marker, { x, duration: 0.35, ease: 'power3.out' })
-    else gsap.set(marker, { x })
-    draggable.current?.update()
+    const gsap = gsapRef.current
+    if (gsap) {
+      if (animate && !motionFlags().reduced) gsap.to(marker, { x, duration: 0.35, ease: 'power3.out' })
+      else gsap.set(marker, { x })
+      draggable.current?.update()
+    } else {
+      marker.style.transform = `translate(${x}px, 0px)`
+    }
     setStatus(statusFor(clamped))
     setValueNow(Math.round(clamped * 100))
   }, [])
 
-  useGSAP(
-    () => {
+  // Initial placement without any library
+  useEffect(() => {
+    place(RANGE.initial)
+    const track = trackRef.current
+    if (!track) return
+    const ro = new ResizeObserver(() => place(fraction.current))
+    ro.observe(track)
+    return () => ro.disconnect()
+  }, [place])
+
+  // Drag support when GSAP arrives
+  useGsapEffect(
+    async ({ gsap, loadDraggable }) => {
       const track = trackRef.current
       const marker = markerRef.current
       if (!track || !marker) return
-      place(RANGE.initial)
+      const Draggable = await loadDraggable()
+      gsapRef.current = gsap
+      place(fraction.current)
       const [d] = Draggable.create(marker, {
         type: 'x',
         bounds: track,
@@ -79,21 +100,22 @@ export function RangeExplainer() {
         },
       })
       draggable.current = d
-      const ro = new ResizeObserver(() => place(fraction.current))
-      ro.observe(track)
       return () => {
-        ro.disconnect()
         d.kill()
+        draggable.current = null
+        gsapRef.current = null
       }
     },
-    { scope: trackRef }
+    [place]
   )
 
-  // Crossfade the status line when it changes (reduced motion: instant)
+  // Crossfade the status line when it changes (CSS keyframe; reduced motion: instant)
   useEffect(() => {
     const el = statusRef.current
     if (!el || motionFlags().reduced) return
-    gsap.fromTo(el, { opacity: 0.2, y: 4 }, { opacity: 1, y: 0, duration: 0.3, ease: 'power2.out', overwrite: true })
+    el.classList.remove('bl-status-in')
+    void el.offsetWidth
+    el.classList.add('bl-status-in')
   }, [status])
 
   const onKeyDown = (e: React.KeyboardEvent) => {
@@ -141,19 +163,13 @@ export function RangeExplainer() {
 
           <Reveal delay={0.1}>
             <div className="pt-10 pb-2">
-              {/* labels above */}
               <div className="relative h-5 mb-3 font-sans text-[10px] tracking-[0.25em] uppercase text-label">
                 <span className="absolute" style={{ left: pct(RANGE.reference[0]) }}>
                   Reference range
                 </span>
               </div>
 
-              {/* track */}
-              <div
-                ref={trackRef}
-                className="relative h-14 cursor-pointer"
-                onPointerDown={onTrackPointerDown}
-              >
+              <div ref={trackRef} className="relative h-14 cursor-pointer" onPointerDown={onTrackPointerDown}>
                 <div className="absolute inset-y-0 left-0 right-0 border-y border-hairline/60" aria-hidden="true" />
                 <div
                   className="absolute inset-y-2 border border-hairline bg-offwhite/[0.035]"
@@ -165,7 +181,6 @@ export function RangeExplainer() {
                   style={{ left: pct(RANGE.optimal[0]), width: pct(RANGE.optimal[1] - RANGE.optimal[0]) }}
                   aria-hidden="true"
                 />
-                {/* marker */}
                 <div
                   ref={markerRef}
                   role="slider"
@@ -183,7 +198,6 @@ export function RangeExplainer() {
                 </div>
               </div>
 
-              {/* labels below */}
               <div className="relative h-5 mt-3 font-sans text-[10px] tracking-[0.25em] uppercase text-amber-muted">
                 <span
                   className="absolute whitespace-nowrap"
@@ -193,12 +207,8 @@ export function RangeExplainer() {
                 </span>
               </div>
 
-              {/* status */}
               <div className="mt-10 min-h-[4.5rem]">
-                <p
-                  ref={statusRef}
-                  className="font-serif font-light text-offwhite text-2xl md:text-[1.75rem] tracking-wide"
-                >
+                <p ref={statusRef} className="font-serif font-light text-offwhite text-2xl md:text-[1.75rem] tracking-wide">
                   {STATUS_TEXT[status]}
                 </p>
                 <p className="mt-2 font-sans text-sm text-body-dim tracking-wide">{STATUS_NOTE[status]}</p>

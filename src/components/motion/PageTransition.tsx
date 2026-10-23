@@ -2,15 +2,14 @@
 
 import { useEffect, useRef } from 'react'
 import { usePathname, useRouter } from 'next/navigation'
-import { gsap, ScrollTrigger } from '@/lib/gsap'
 import { motionFlags } from '@/lib/flags'
-import { DUR, EASE } from '@/lib/motion'
+import { DUR } from '@/lib/motion'
 
 /**
- * Fade-through-black between routes, under 500ms total.
- * A capture-phase click listener intercepts same-origin navigations,
- * fades the veil in, then pushes the route; when the new pathname
- * renders, scroll resets, ScrollTrigger refreshes, and the veil lifts.
+ * Fade-through-black between routes, under 500ms total, with CSS transitions.
+ * A capture-phase click listener intercepts same-origin navigations, raises
+ * the veil, then pushes the route; when the new pathname renders, scroll
+ * resets, ScrollTrigger refreshes (if it has loaded), and the veil lifts.
  * Next's Link honours defaultPrevented so prefetching is unaffected.
  */
 export function PageTransition() {
@@ -47,20 +46,13 @@ export function PageTransition() {
 
       e.preventDefault()
       const href = url.pathname + url.search + url.hash
-      gsap.killTweensOf(veil)
-      gsap.to(veil, {
-        autoAlpha: 1,
-        duration: DUR.veilIn,
-        ease: 'power2.in',
-        onComplete: () => {
-          router.push(href)
-          // If the route never changes (error, same route), lift the veil anyway
-          if (safety.current) window.clearTimeout(safety.current)
-          safety.current = window.setTimeout(() => {
-            gsap.to(veil, { autoAlpha: 0, duration: DUR.veilOut, ease: EASE.ui })
-          }, 2000)
-        },
-      })
+      veil.classList.add('is-on')
+      window.setTimeout(() => {
+        router.push(href)
+        // If the route never changes (error, same route), lift the veil anyway
+        if (safety.current) window.clearTimeout(safety.current)
+        safety.current = window.setTimeout(() => veil.classList.remove('is-on'), 2000)
+      }, DUR.veilIn * 1000)
     }
 
     document.addEventListener('click', onClick, true)
@@ -83,8 +75,8 @@ export function PageTransition() {
     else window.scrollTo(0, 0)
 
     requestAnimationFrame(() => {
-      ScrollTrigger.refresh()
-      gsap.to(veil, { autoAlpha: 0, duration: DUR.veilOut, ease: EASE.ui, delay: 0.05 })
+      ;(window as Window & { __ScrollTrigger?: { refresh: () => void } }).__ScrollTrigger?.refresh()
+      window.setTimeout(() => veil.classList.remove('is-on'), 50)
     })
   }, [pathname])
 

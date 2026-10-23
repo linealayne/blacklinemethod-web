@@ -1,9 +1,9 @@
 'use client'
 
 import { useEffect } from 'react'
-import Lenis from 'lenis'
-import { gsap, ScrollTrigger } from '@/lib/gsap'
+import type Lenis from 'lenis'
 import { motionFlags } from '@/lib/flags'
+import { isFinePointer } from '@/lib/motion'
 
 declare global {
   interface Window {
@@ -11,42 +11,49 @@ declare global {
   }
 }
 
-/** Lenis smooth scrolling synced to ScrollTrigger. Off for reduced motion. */
+/**
+ * Lenis smooth scrolling synced to ScrollTrigger. Desktop pointers only:
+ * touch devices keep native scrolling (lighter, and what the hand expects).
+ * Both libraries load on demand after hydration. Off for reduced motion.
+ */
 export const SMOOTH_SCROLL = {
   lerp: 0.12, // lower = floatier, higher = tighter
   wheelMultiplier: 1,
-  touchMultiplier: 1.4,
 }
 
 export function SmoothScroll() {
   useEffect(() => {
-    if (motionFlags().reduced) return
+    if (motionFlags().reduced || !isFinePointer()) return
+    let cancelled = false
+    let cleanup: (() => void) | null = null
 
-    const lenis = new Lenis({
-      lerp: SMOOTH_SCROLL.lerp,
-      wheelMultiplier: SMOOTH_SCROLL.wheelMultiplier,
-      touchMultiplier: SMOOTH_SCROLL.touchMultiplier,
-      smoothWheel: true,
-      syncTouch: false,
+    Promise.all([import('lenis'), import('@/lib/gsap')]).then(([{ default: LenisCtor }, { gsap, ScrollTrigger }]) => {
+      if (cancelled) return
+      const lenis = new LenisCtor({
+        lerp: SMOOTH_SCROLL.lerp,
+        wheelMultiplier: SMOOTH_SCROLL.wheelMultiplier,
+        smoothWheel: true,
+        syncTouch: false,
+      })
+      window.__lenis = lenis
+      document.documentElement.classList.add('bl-lenis')
+
+      lenis.on('scroll', ScrollTrigger.update)
+      const tick = (time: number) => lenis.raf(time * 1000)
+      gsap.ticker.add(tick)
+      gsap.ticker.lagSmoothing(0)
+
+      cleanup = () => {
+        gsap.ticker.remove(tick)
+        lenis.destroy()
+        delete window.__lenis
+        document.documentElement.classList.remove('bl-lenis')
+      }
     })
-    window.__lenis = lenis
-    document.documentElement.classList.add('bl-lenis')
-
-    lenis.on('scroll', ScrollTrigger.update)
-    const tick = (time: number) => lenis.raf(time * 1000)
-    gsap.ticker.add(tick)
-    gsap.ticker.lagSmoothing(0)
-
-    // Fonts change line counts, which changes trigger positions
-    if (document.fonts?.ready) {
-      document.fonts.ready.then(() => ScrollTrigger.refresh())
-    }
 
     return () => {
-      gsap.ticker.remove(tick)
-      lenis.destroy()
-      delete window.__lenis
-      document.documentElement.classList.remove('bl-lenis')
+      cancelled = true
+      cleanup?.()
     }
   }, [])
 

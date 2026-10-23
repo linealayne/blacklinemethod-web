@@ -102,13 +102,35 @@
    before hydration; GSAP takes over inline from there. If JS never
    arrives, the safety animation shows everything after 4s.
    ------------------------------------------------------------------ */
-html.bl-motion.bl-no-loader:not(.bl-hydrated) [data-reveal] {
+/* CSS-driven: hidden until .bl-in, then a 0.9s rise. Stagger containers keep
+   themselves visible and animate their children with nth-child delays.
+   The hero headline never carries data-reveal, so it paints at first paint. */
+html.bl-motion [data-reveal]:not(.bl-in),
+html.bl-motion [data-reveal="stagger"]:not(.bl-in) > * {
   opacity: 0;
+  transform: translateY(var(--bl-rise, 24px));
+}
+html.bl-motion [data-reveal],
+html.bl-motion [data-reveal="stagger"] > * {
+  transition: opacity 0.9s var(--bl-ease-lux), transform 0.9s var(--bl-ease-lux);
+  transition-delay: var(--bl-delay, 0s);
+}
+html.bl-motion [data-reveal="stagger"]:not(.bl-in) {
+  opacity: 1;
+  transform: none;
+}
+html.bl-motion [data-reveal="stagger"] > *:nth-child(2) { transition-delay: calc(var(--bl-delay, 0s) + 0.08s); }
+html.bl-motion [data-reveal="stagger"] > *:nth-child(3) { transition-delay: calc(var(--bl-delay, 0s) + 0.16s); }
+html.bl-motion [data-reveal="stagger"] > *:nth-child(4) { transition-delay: calc(var(--bl-delay, 0s) + 0.24s); }
+html.bl-motion [data-reveal="stagger"] > *:nth-child(5) { transition-delay: calc(var(--bl-delay, 0s) + 0.32s); }
+html.bl-motion [data-reveal="stagger"] > *:nth-child(6) { transition-delay: calc(var(--bl-delay, 0s) + 0.4s); }
+html.bl-motion [data-reveal="stagger"] > *:nth-child(n + 7) { transition-delay: calc(var(--bl-delay, 0s) + 0.48s); }
+/* If JS never arrives, everything shows after 4s */
+html.bl-motion:not(.bl-hydrated) [data-reveal]:not(.bl-in),
+html.bl-motion:not(.bl-hydrated) [data-reveal="stagger"]:not(.bl-in) > * {
   animation: bl-reveal-safety 0s 4s forwards;
 }
-/* With the loader up, nothing needs pre-hiding: the overlay covers the page
-   and the headline stays painted for LCP. */
-@keyframes bl-reveal-safety { to { opacity: 1; } }
+@keyframes bl-reveal-safety { to { opacity: 1; transform: none; } }
 
 /* Pinned sections on short desktop viewports: align to the top under the header */
 @media (min-width: 768px) and (max-height: 820px) {
@@ -175,8 +197,15 @@ html.bl-loader-done #bl-loader { display: none; }
   transform: scaleX(0);
   transform-origin: left center;
 }
+/* Playing: wordmark 0.6s, rule 0.5s from 0.2s, fade 0.4s from 0.75s */
+#bl-loader.is-playing { animation: bl-loader-out 0.4s ease-in-out 0.75s forwards; }
+#bl-loader.is-playing .wordmark { animation: bl-loader-word 0.6s var(--bl-ease-out) forwards; }
+#bl-loader.is-playing .rule { animation: bl-loader-rule 0.5s cubic-bezier(0.77, 0, 0.175, 1) 0.2s forwards; }
+@keyframes bl-loader-word { from { opacity: 0; letter-spacing: 0.1em; } to { opacity: 1; letter-spacing: 0.35em; } }
+@keyframes bl-loader-rule { to { transform: scaleX(1); } }
+@keyframes bl-loader-out { to { opacity: 0; visibility: hidden; } }
 
-/* Route veil: fade through black between routes */
+/* Route veil: fade through black between routes (CSS transitions, no library) */
 #bl-veil {
   position: fixed;
   inset: 0;
@@ -185,6 +214,45 @@ html.bl-loader-done #bl-loader { display: none; }
   opacity: 0;
   visibility: hidden;
   pointer-events: none;
+  transition: opacity 0.3s var(--bl-ease-out), visibility 0s linear 0.3s;
+}
+#bl-veil.is-on {
+  opacity: 1;
+  visibility: visible;
+  transition: opacity 0.22s cubic-bezier(0.4, 0, 1, 1), visibility 0s;
+}
+
+/* Mobile menu: overlay fades, serif links slide up through masks in sequence */
+#bl-mobile-menu {
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.5s var(--bl-ease-lux), visibility 0s linear 0.5s;
+}
+#bl-mobile-menu.is-open {
+  opacity: 1;
+  visibility: visible;
+  transition: opacity 0.5s var(--bl-ease-lux), visibility 0s;
+}
+#bl-mobile-menu [data-menu-link] {
+  transform: translateY(110%);
+  transition: transform 0.25s var(--bl-ease-out);
+}
+#bl-mobile-menu.is-open [data-menu-link] {
+  transform: none;
+  transition: transform 0.9s cubic-bezier(0.16, 1, 0.3, 1);
+}
+#bl-mobile-menu.is-open [data-menu-item]:nth-child(1) [data-menu-link] { transition-delay: 0.12s; }
+#bl-mobile-menu.is-open [data-menu-item]:nth-child(2) [data-menu-link] { transition-delay: 0.19s; }
+#bl-mobile-menu.is-open [data-menu-item]:nth-child(3) [data-menu-link] { transition-delay: 0.26s; }
+#bl-mobile-menu.is-open [data-menu-item]:nth-child(4) [data-menu-link] { transition-delay: 0.33s; }
+#bl-mobile-menu.is-open [data-menu-item]:nth-child(5) [data-menu-link] { transition-delay: 0.4s; }
+#bl-mobile-menu [data-menu-foot] {
+  opacity: 0;
+  transition: opacity 0.2s var(--bl-ease-out);
+}
+#bl-mobile-menu.is-open [data-menu-foot] {
+  opacity: 1;
+  transition: opacity 0.6s var(--bl-ease-lux) 0.45s;
 }
 
 /* Film grain: a very light static texture, drifted in steps */
@@ -217,6 +285,10 @@ html.bl-reduced #bl-grain { animation: none; }
 @media (hover: hover) and (pointer: fine) {
   .group:hover .bl-underline, .bl-underline:hover { background-size: 100% 1px; }
 }
+
+/* Range explainer status line: short crossfade on change */
+.bl-status-in { animation: bl-status 0.3s var(--bl-ease-out); }
+@keyframes bl-status { from { opacity: 0.2; transform: translateY(4px); } to { opacity: 1; transform: none; } }
 
 /* Pressable feedback on every real button */
 .bl-press { transition: transform var(--bl-dur-fast) var(--bl-ease-out); }
