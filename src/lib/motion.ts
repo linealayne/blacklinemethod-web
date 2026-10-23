@@ -33,6 +33,12 @@ export function isFinePointer(): boolean {
   return window.matchMedia('(hover: hover) and (pointer: fine)').matches
 }
 
+/** Fine pointer and 1024px or wider: the loader and the masked hero reveal run here. */
+export function isDesktop(): boolean {
+  if (typeof window === 'undefined') return false
+  return document.documentElement.classList.contains('bl-desktop')
+}
+
 export function isPhone(): boolean {
   if (typeof window === 'undefined') return false
   return window.matchMedia('(max-width: 767px)').matches

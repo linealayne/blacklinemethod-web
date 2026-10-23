@@ -1,12 +1,12 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import dynamic from 'next/dynamic'
 import { Button } from '@/components/ui/button'
 import { useMotion } from '@/components/motion/MotionProvider'
 import { motionFlags } from '@/lib/flags'
-import { isFinePointer, isPhone } from '@/lib/motion'
+import { isDesktop, isFinePointer, isPhone } from '@/lib/motion'
 import { useFirstInteraction } from '@/lib/useFirstInteraction'
 import { useGsapEffect } from '@/lib/useGsap'
 import type { HeroHandles } from '@/components/three/HeroField'
@@ -23,11 +23,12 @@ const HERO = {
 }
 
 /**
- * The headline is never hidden before paint: it is the page's largest text
- * and paints in the metric-matched fallback at first paint, then swaps to
- * Fraunces. The masked line reveal only runs when the loader runs (desktop
- * first visit, under the overlay). Everywhere else the subhead and button
- * simply rise in sequence through the CSS reveal.
+ * On phones and tablets the headline is never hidden: it paints in the
+ * metric-matched fallback at first paint, then swaps to Fraunces, and the
+ * subhead and button rise through the CSS reveal. On desktop the masked
+ * line reveal runs on every visit: under the loader on the first visit,
+ * straight after hydration on later ones (the CSS keeps the headline
+ * hidden until then so nothing flashes).
  */
 export function HeroSection() {
   const { mounted, reduced, webgl, loaderDone } = useMotion()
@@ -110,16 +111,24 @@ export function HeroSection() {
     return () => window.removeEventListener('deviceorientation', onTilt)
   }, [show3d, handles])
 
-  // Sub elements: the CSS reveal handles the rise; we only decide when.
-  // No loader (phones, tablets, returning visitors): right away.
-  // Loader running: once the headline lines have mostly arrived (see below).
+  // Phones, tablets, reduced motion: subs rise right away through the CSS reveal.
+  // Desktop: the headline timeline reveals them after the lines (see below).
   useEffect(() => {
     if (!mounted) return
     const flags = motionFlags()
-    if (flags.reduced || flags.loaderDone) revealSubs(contentRef.current)
+    if (flags.reduced || !isDesktop()) revealSubs(contentRef.current)
   }, [mounted])
 
-  // Desktop first visit: masked line reveal under the loader, then the subs.
+  // Returning desktop visitors: keep the headline hidden synchronously until
+  // the split takes over (the pre-hydration CSS rule stops applying at hydration).
+  useLayoutEffect(() => {
+    const h1 = h1Ref.current
+    if (!h1) return
+    const flags = motionFlags()
+    if (!flags.reduced && isDesktop() && flags.loaderDone) h1.style.opacity = '0'
+  }, [])
+
+  // Desktop: masked line reveal (under the loader on first visit), then the subs.
   useGsapEffect(
     async ({ gsap, ScrollTrigger, loadSplitText }) => {
       const h1 = h1Ref.current
@@ -144,9 +153,9 @@ export function HeroSection() {
         })
       }, section)
 
-      if (flags.loaderDone) return () => ctx.revert()
+      if (!isDesktop()) return () => ctx.revert()
 
-      // Loader is up: split now, reveal when it hands off.
+      // Split now; reveal when the loader hands off, or at once if there is none.
       const SplitText = await loadSplitText()
       if (document.fonts?.ready) await document.fonts.ready
       const split = SplitText.create(h1, {
@@ -169,13 +178,14 @@ export function HeroSection() {
           return tl
         },
       })
+      gsap.set(h1, { opacity: 1 })
       return () => {
         split.revert()
         ctx.revert()
       }
     },
     [mounted],
-    { immediate: typeof window !== 'undefined' && !motionFlags().loaderDone }
+    { immediate: typeof window !== 'undefined' && isDesktop() }
   )
 
   useEffect(() => {
@@ -206,6 +216,7 @@ export function HeroSection() {
       <div ref={contentRef} className="relative z-10 text-center px-6 max-w-5xl mx-auto pt-16 pb-10">
         <h1
           ref={h1Ref}
+          data-hero-h1=""
           className="font-serif font-light text-offwhite lowercase leading-[1.05] tracking-wider text-[clamp(2.75rem,7vw,7rem)]"
         >
           run your own biology.
