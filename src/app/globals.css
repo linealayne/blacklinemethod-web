@@ -2,40 +2,307 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ------------------------------------------------------------------
+   Design tokens (mirrors tailwind.config.ts; see DESIGN.md)
+   ------------------------------------------------------------------ */
+:root {
+  --bl-black: #0A0A0A;
+  --bl-ink: #060606;
+  --bl-offwhite: #F5F5F0;
+  --bl-amber: #C8965A;
+  --bl-amber-muted: #A27A4A;
+  --bl-gold: #E2C48F;
+  --bl-hairline: #2A2A2A;
+  --bl-label: #8C8A84;
+  --bl-body: #9C9B96;
+  --bl-body-dim: #85847F;
+
+  /* motion */
+  --bl-ease-lux: cubic-bezier(0.22, 1, 0.36, 1);
+  --bl-ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --bl-dur-fast: 160ms;
+  --bl-dur-ui: 240ms;
+  --bl-dur-slow: 600ms;
+}
+
 @layer base {
   *, *::before, *::after {
     box-sizing: border-box;
   }
 
   html {
+    background-color: var(--bl-black);
+    color-scheme: dark;
+  }
+
+  /* Native smooth scroll only when Lenis is not driving the page */
+  html:not(.bl-lenis):not(.bl-reduced) {
     scroll-behavior: smooth;
-    background-color: #0A0A0A;
   }
 
   body {
-    background-color: #0A0A0A;
-    color: #F5F5F0;
+    background-color: var(--bl-black);
+    color: var(--bl-offwhite);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    overflow-x: clip;
   }
+
+  /* Browser surfaces carry the palette too */
+  ::selection {
+    background: rgba(200, 150, 90, 0.35);
+    color: var(--bl-offwhite);
+  }
+  html {
+    scrollbar-width: thin;
+    scrollbar-color: #3a3a38 var(--bl-ink);
+  }
+  ::-webkit-scrollbar { width: 10px; }
+  ::-webkit-scrollbar-track { background: var(--bl-ink); }
+  ::-webkit-scrollbar-thumb { background: #3a3a38; border: 2px solid var(--bl-ink); border-radius: 8px; }
+  ::-webkit-scrollbar-thumb:hover { background: #4a4a47; }
+  input, textarea { caret-color: var(--bl-amber); scroll-margin-top: 7rem; }
+  [id] { scroll-margin-top: 6rem; }
 
   /* Focus ring: amber hairline, no browser default */
   *:focus-visible {
-    outline: 1px solid #C8965A;
-    outline-offset: 2px;
+    outline: 1px solid var(--bl-amber);
+    outline-offset: 3px;
   }
 
-  /* Remove default button styles */
   button {
-    border: none;
     background: none;
+  }
+
+  a, button, [role="button"], [role="slider"], label[for], summary {
     cursor: pointer;
   }
+  a[aria-disabled="true"], button:disabled { cursor: default; }
 }
 
 @layer utilities {
-  /* Thin hairline utility — 1px border in warm grey */
-  .hairline-top    { border-top: 1px solid #2A2A2A; }
-  .hairline-bottom { border-bottom: 1px solid #2A2A2A; }
+  .hairline-top    { border-top: 1px solid var(--bl-hairline); }
+  .hairline-bottom { border-bottom: 1px solid var(--bl-hairline); }
   .hairline-amber  { border-top: 1px solid rgba(200, 150, 90, 0.35); }
+
+  /* Quiet uppercase label: readable (AA) but secondary */
+  .bl-label {
+    font-family: var(--font-inter), system-ui, sans-serif;
+    font-size: 11px;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--bl-label);
+  }
+  .bl-label-amber { color: var(--bl-amber-muted); }
+}
+
+/* ------------------------------------------------------------------
+   Reveal choreography
+   Elements marked data-reveal are hidden only on motion-capable clients
+   before hydration; GSAP takes over inline from there. If JS never
+   arrives, the safety animation shows everything after 4s.
+   ------------------------------------------------------------------ */
+/* CSS-driven: hidden until .bl-in, then a 0.9s rise. Stagger containers keep
+   themselves visible and animate their children with nth-child delays.
+   The hero headline never carries data-reveal, so it paints at first paint. */
+html.bl-motion [data-reveal]:not(.bl-in),
+html.bl-motion [data-reveal="stagger"]:not(.bl-in) > * {
+  opacity: 0;
+  transform: translateY(var(--bl-rise, 24px));
+}
+html.bl-motion [data-reveal],
+html.bl-motion [data-reveal="stagger"] > * {
+  transition: opacity 0.9s var(--bl-ease-lux), transform 0.9s var(--bl-ease-lux);
+  transition-delay: var(--bl-delay, 0s);
+}
+html.bl-motion [data-reveal="stagger"]:not(.bl-in) {
+  opacity: 1;
+  transform: none;
+}
+html.bl-motion [data-reveal="stagger"] > *:nth-child(2) { transition-delay: calc(var(--bl-delay, 0s) + 0.08s); }
+html.bl-motion [data-reveal="stagger"] > *:nth-child(3) { transition-delay: calc(var(--bl-delay, 0s) + 0.16s); }
+html.bl-motion [data-reveal="stagger"] > *:nth-child(4) { transition-delay: calc(var(--bl-delay, 0s) + 0.24s); }
+html.bl-motion [data-reveal="stagger"] > *:nth-child(5) { transition-delay: calc(var(--bl-delay, 0s) + 0.32s); }
+html.bl-motion [data-reveal="stagger"] > *:nth-child(6) { transition-delay: calc(var(--bl-delay, 0s) + 0.4s); }
+html.bl-motion [data-reveal="stagger"] > *:nth-child(n + 7) { transition-delay: calc(var(--bl-delay, 0s) + 0.48s); }
+/* Returning desktop visitors: the headline waits for its masked reveal */
+html.bl-motion.bl-desktop.bl-no-loader:not(.bl-hydrated) [data-hero-h1] { opacity: 0; animation: bl-reveal-safety 0s 4s forwards; }
+
+/* If JS never arrives, everything shows after 4s */
+html.bl-motion:not(.bl-hydrated) [data-reveal]:not(.bl-in),
+html.bl-motion:not(.bl-hydrated) [data-reveal="stagger"]:not(.bl-in) > * {
+  animation: bl-reveal-safety 0s 4s forwards;
+}
+@keyframes bl-reveal-safety { to { opacity: 1; transform: none; } }
+
+/* Pinned sections on short desktop viewports: align to the top under the header */
+@media (min-width: 768px) and (max-height: 820px) {
+  .bl-pinned { align-items: flex-start; }
+  .bl-pinned > div { padding-top: 6.5rem; padding-bottom: 2rem; }
+}
+
+/* Skip link: visible only when focused */
+.bl-skip {
+  position: fixed;
+  top: 12px;
+  left: 12px;
+  z-index: 300;
+  padding: 10px 16px;
+  background: var(--bl-ink);
+  color: var(--bl-amber);
+  border: 1px solid var(--bl-amber);
+  font-family: var(--font-inter), system-ui, sans-serif;
+  font-size: 11px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  transform: translateY(-200%);
+}
+.bl-skip:focus-visible { transform: translateY(0); }
+
+/* SplitText line masks: give descenders room so the clip never bites */
+.bl-line-mask {
+  padding-bottom: 0.14em;
+  margin-bottom: -0.14em;
+}
+
+/* ------------------------------------------------------------------
+   Loader (first visit per session). Hidden immediately for returning
+   visitors, reduced motion, and when JS is unavailable after 2.2s.
+   ------------------------------------------------------------------ */
+#bl-loader {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bl-ink);
+  animation: bl-loader-safety 0s 2.2s forwards;
+}
+@keyframes bl-loader-safety { to { visibility: hidden; pointer-events: none; } }
+html.bl-no-loader #bl-loader,
+html.bl-reduced #bl-loader,
+html.bl-loader-done #bl-loader { display: none; }
+#bl-loader .wordmark {
+  font-family: var(--font-fraunces), Georgia, serif;
+  font-size: 15px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--bl-offwhite);
+  opacity: 0;
+}
+#bl-loader .rule {
+  display: block;
+  height: 1px;
+  width: 100%;
+  margin-top: 18px;
+  background: var(--bl-amber);
+  transform: scaleX(0);
+  transform-origin: left center;
+}
+/* Playing: wordmark 0.6s, rule 0.5s from 0.2s, fade 0.4s from 0.75s */
+#bl-loader.is-playing { animation: bl-loader-out 0.4s ease-in-out 0.75s forwards; }
+#bl-loader.is-playing .wordmark { animation: bl-loader-word 0.6s var(--bl-ease-out) forwards; }
+#bl-loader.is-playing .rule { animation: bl-loader-rule 0.5s cubic-bezier(0.77, 0, 0.175, 1) 0.2s forwards; }
+@keyframes bl-loader-word { from { opacity: 0; letter-spacing: 0.1em; } to { opacity: 1; letter-spacing: 0.35em; } }
+@keyframes bl-loader-rule { to { transform: scaleX(1); } }
+@keyframes bl-loader-out { to { opacity: 0; visibility: hidden; } }
+
+/* Route veil: fade through black between routes (CSS transitions, no library) */
+#bl-veil {
+  position: fixed;
+  inset: 0;
+  z-index: 150;
+  background: var(--bl-ink);
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity 0.3s var(--bl-ease-out), visibility 0s linear 0.3s;
+}
+#bl-veil.is-on {
+  opacity: 1;
+  visibility: visible;
+  transition: opacity 0.22s cubic-bezier(0.4, 0, 1, 1), visibility 0s;
+}
+
+/* Mobile menu: overlay fades, serif links slide up through masks in sequence */
+#bl-mobile-menu {
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.5s var(--bl-ease-lux), visibility 0s linear 0.5s;
+}
+#bl-mobile-menu.is-open {
+  opacity: 1;
+  visibility: visible;
+  transition: opacity 0.5s var(--bl-ease-lux), visibility 0s;
+}
+#bl-mobile-menu [data-menu-link] {
+  transform: translateY(110%);
+  transition: transform 0.25s var(--bl-ease-out);
+}
+#bl-mobile-menu.is-open [data-menu-link] {
+  transform: none;
+  transition: transform 0.9s cubic-bezier(0.16, 1, 0.3, 1);
+}
+#bl-mobile-menu.is-open [data-menu-item]:nth-child(1) [data-menu-link] { transition-delay: 0.12s; }
+#bl-mobile-menu.is-open [data-menu-item]:nth-child(2) [data-menu-link] { transition-delay: 0.19s; }
+#bl-mobile-menu.is-open [data-menu-item]:nth-child(3) [data-menu-link] { transition-delay: 0.26s; }
+#bl-mobile-menu.is-open [data-menu-item]:nth-child(4) [data-menu-link] { transition-delay: 0.33s; }
+#bl-mobile-menu.is-open [data-menu-item]:nth-child(5) [data-menu-link] { transition-delay: 0.4s; }
+#bl-mobile-menu [data-menu-foot] {
+  opacity: 0;
+  transition: opacity 0.2s var(--bl-ease-out);
+}
+#bl-mobile-menu.is-open [data-menu-foot] {
+  opacity: 1;
+  transition: opacity 0.6s var(--bl-ease-lux) 0.45s;
+}
+
+/* Film grain: a very light static texture, drifted in steps */
+#bl-grain {
+  position: fixed;
+  inset: -50%;
+  width: 200%;
+  height: 200%;
+  z-index: 140;
+  pointer-events: none;
+  opacity: 0.035;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 1 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: 240px 240px;
+  animation: bl-grain 1.6s steps(6) infinite;
+}
+@keyframes bl-grain {
+  0% { transform: translate3d(0, 0, 0); }
+  100% { transform: translate3d(-6%, -4%, 0); }
+}
+html.bl-reduced #bl-grain { animation: none; }
+
+/* Link underline drawn with an amber rule (insights cards, inline links) */
+.bl-underline {
+  background-image: linear-gradient(currentColor, currentColor);
+  background-repeat: no-repeat;
+  background-size: 0% 1px;
+  background-position: left 100%;
+  transition: background-size var(--bl-dur-slow) var(--bl-ease-lux);
+}
+@media (hover: hover) and (pointer: fine) {
+  .group:hover .bl-underline, .bl-underline:hover { background-size: 100% 1px; }
+}
+
+/* Range explainer status line: short crossfade on change */
+.bl-status-in { animation: bl-status 0.3s var(--bl-ease-out); }
+@keyframes bl-status { from { opacity: 0.2; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+
+/* Pressable feedback on every real button */
+.bl-press { transition: transform var(--bl-dur-fast) var(--bl-ease-out); }
+.bl-press:active { transform: scale(0.98); }
+
+/* Reduced motion: no autonomous motion anywhere */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }

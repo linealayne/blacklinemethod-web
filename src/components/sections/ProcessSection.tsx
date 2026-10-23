@@ -1,5 +1,7 @@
 import Link from 'next/link'
-import { FadeInSection } from '@/components/FadeInSection'
+import { Reveal } from '@/components/motion/Reveal'
+import { SplitReveal } from '@/components/motion/SplitReveal'
+import { ProcessTimeline } from '@/components/ProcessTimeline'
 
 const STEPS = [
   {
@@ -25,50 +27,36 @@ const STEPS = [
 export function ProcessSection() {
   return (
     <section className="bg-black border-t border-hairline" aria-label="The process">
-      <div className="max-w-7xl mx-auto px-6 md:px-12 py-32 md:py-44">
-        <FadeInSection>
-          <span className="block font-sans text-[10px] tracking-[0.3em] uppercase text-offwhite/20 mb-10">
+      <div className="max-w-7xl mx-auto px-6 md:px-12 py-24 md:py-32">
+        <div className="max-w-3xl">
+          <Reveal as="p" className="bl-label mb-8">
             the process
-          </span>
-          <h2 className="font-serif font-light text-offwhite lowercase tracking-wider leading-[1.05] text-[clamp(2.75rem,5vw,5.5rem)] mb-6">
+          </Reveal>
+          <SplitReveal
+            as="h2"
+            className="font-serif font-light text-offwhite lowercase tracking-wider leading-[1.05] text-[clamp(2.5rem,4.8vw,5rem)]"
+          >
             what working with us looks like.
-          </h2>
-          <p className="font-sans text-sm text-offwhite/40 leading-relaxed tracking-wide max-w-md mb-20">
+          </SplitReveal>
+          <Reveal as="p" delay={0.2} className="mt-8 font-sans text-sm md:text-[15px] text-body leading-relaxed tracking-wide max-w-md">
             Engagements are structured, not open-ended. The first ninety days establish the baseline.
             Everything after is calibration.
-          </p>
-        </FadeInSection>
-
-        <div className="grid md:grid-cols-3 gap-12 md:gap-8">
-          {STEPS.map((step, i) => (
-            <FadeInSection key={step.index} delay={0.1 * i}>
-              <div>
-                <span className="block font-sans text-[10px] tracking-[0.3em] uppercase text-offwhite/15 mb-6">
-                  {step.index}
-                </span>
-                <div className="w-8 h-px bg-amber/30 mb-6" aria-hidden="true" />
-                <p className="font-sans text-[11px] tracking-[0.2em] uppercase text-amber/50 mb-4">
-                  {step.label}
-                </p>
-                <p className="font-sans text-sm text-offwhite/40 leading-relaxed tracking-wide">
-                  {step.description}
-                </p>
-              </div>
-            </FadeInSection>
-          ))}
+          </Reveal>
         </div>
 
-        <FadeInSection delay={0.32}>
-          <div className="mt-16">
-            <Link
-              href="/process"
-              className="font-sans text-[11px] tracking-[0.2em] uppercase text-amber/60 transition-colors duration-600 hover:text-amber inline-flex items-center gap-3"
-            >
-              See the full process and engagement tiers
-              <span aria-hidden="true">→</span>
-            </Link>
-          </div>
-        </FadeInSection>
+        <div className="mt-16 md:mt-20">
+          <ProcessTimeline steps={STEPS} />
+        </div>
+
+        <Reveal className="mt-16">
+          <Link
+            href="/process"
+            className="group inline-flex items-center gap-3 min-h-[44px] font-sans text-[11px] tracking-[0.2em] uppercase text-amber-muted transition-colors duration-600 hover:text-amber"
+          >
+            <span className="bl-underline">See the full process and engagement tiers</span>
+            <span aria-hidden="true" className="transition-transform duration-600 ease-lux group-hover:translate-x-1">→</span>
+          </Link>
+        </Reveal>
       </div>
     </section>
   )

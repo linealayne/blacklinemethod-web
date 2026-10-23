@@ -1,8 +1,7 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import Link from 'next/link'
-import { motion, AnimatePresence } from 'framer-motion'
 import { Menu, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 
@@ -13,57 +12,114 @@ const NAV_LINKS = [
   { label: 'Insights', href: '/insights' },
 ]
 
+const MOBILE_LINKS = [...NAV_LINKS, { label: 'Contact', href: '/contact' }]
+
+/**
+ * Mobile menu choreography lives in globals.css ("Mobile menu"): the overlay
+ * fades in over 0.5s and the serif links slide up through masks in sequence.
+ * No animation library on the critical path.
+ */
 export function Header() {
   const [scrolled, setScrolled] = useState(false)
   const [menuOpen, setMenuOpen] = useState(false)
+  const overlayRef = useRef<HTMLDivElement>(null)
+  const triggerRef = useRef<HTMLButtonElement>(null)
+  const closeRef = useRef<HTMLButtonElement>(null)
 
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 100)
+    let ticking = false
+    const onScroll = () => {
+      if (ticking) return
+      ticking = true
+      requestAnimationFrame(() => {
+        setScrolled(window.scrollY > 100)
+        ticking = false
+      })
+    }
+    onScroll()
     window.addEventListener('scroll', onScroll, { passive: true })
     return () => window.removeEventListener('scroll', onScroll)
   }, [])
 
+  const open = useCallback(() => {
+    setMenuOpen(true)
+    window.__lenis?.stop()
+    document.body.style.overflow = 'hidden'
+    requestAnimationFrame(() => closeRef.current?.focus())
+  }, [])
+
+  const close = useCallback(() => {
+    setMenuOpen(false)
+    window.__lenis?.start()
+    document.body.style.overflow = ''
+    triggerRef.current?.focus()
+  }, [])
+
   useEffect(() => {
-    document.body.style.overflow = menuOpen ? 'hidden' : ''
+    if (!menuOpen) return
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        close()
+        return
+      }
+      if (e.key !== 'Tab' || !overlayRef.current) return
+      const focusables = Array.from(
+        overlayRef.current.querySelectorAll<HTMLElement>('a[href], button:not([disabled])')
+      ).filter((el) => el.tabIndex !== -1)
+      if (focusables.length === 0) return
+      const first = focusables[0]
+      const last = focusables[focusables.length - 1]
+      if (e.shiftKey && document.activeElement === first) {
+        e.preventDefault()
+        last.focus()
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault()
+        first.focus()
+      }
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [menuOpen, close])
+
+  useEffect(() => {
     return () => {
       document.body.style.overflow = ''
+      window.__lenis?.start()
     }
-  }, [menuOpen])
+  }, [])
 
   return (
     <>
       <header
         className={[
           'fixed top-0 left-0 right-0 z-50',
-          'transition-all duration-700 ease-out',
-          scrolled
-            ? 'bg-black/95 backdrop-blur-md border-b border-hairline'
-            : 'bg-transparent',
+          'transition-[background-color,border-color] duration-700 ease-out',
+          scrolled ? 'bg-black/90 backdrop-blur-md border-b border-hairline' : 'bg-transparent border-b border-transparent',
         ].join(' ')}
       >
         <div className="max-w-7xl mx-auto px-6 md:px-12 h-20 flex items-center justify-between">
           <Link
             href="/"
-            className="font-serif text-sm tracking-[0.35em] text-offwhite uppercase transition-opacity duration-600 hover:opacity-60"
-            aria-label="Blackline Method — home"
+            className="font-serif text-sm tracking-[0.35em] text-offwhite uppercase transition-opacity duration-600 hover:opacity-60 py-3"
+            aria-label="Blackline Method, home"
           >
             BLACKLINE
           </Link>
 
           {/* Desktop navigation */}
-          <nav className="hidden md:flex items-center gap-10" aria-label="Main navigation">
+          <nav className="hidden lg:flex items-center gap-10" aria-label="Main navigation">
             {NAV_LINKS.map((link) => (
               <Link
                 key={link.href}
                 href={link.href}
-                className="font-sans text-[11px] tracking-[0.2em] uppercase text-offwhite/50 transition-colors duration-600 hover:text-amber"
+                className="font-sans text-[11px] tracking-[0.2em] uppercase text-label transition-colors duration-600 hover:text-amber py-3 whitespace-nowrap"
               >
                 {link.label}
               </Link>
             ))}
           </nav>
 
-          <div className="hidden md:block">
+          <div className="hidden lg:block">
             <Button asChild size="sm">
               <Link href="/contact">request a consult</Link>
             </Button>
@@ -71,81 +127,73 @@ export function Header() {
 
           {/* Mobile trigger */}
           <button
-            className="md:hidden text-offwhite/70 transition-colors duration-600 hover:text-amber p-1"
-            onClick={() => setMenuOpen(true)}
+            ref={triggerRef}
+            className="lg:hidden text-offwhite/80 transition-colors duration-600 hover:text-amber -mr-3 p-3"
+            onClick={open}
             aria-label="Open menu"
             aria-expanded={menuOpen}
+            aria-controls="bl-mobile-menu"
           >
-            <Menu size={18} strokeWidth={1.25} />
+            <Menu size={20} strokeWidth={1.25} />
           </button>
         </div>
       </header>
 
-      {/* Mobile full-screen overlay */}
-      <AnimatePresence>
-        {menuOpen && (
-          <motion.div
-            key="mobile-menu"
-            initial={{ x: '100%' }}
-            animate={{ x: 0 }}
-            exit={{ x: '100%' }}
-            transition={{ duration: 0.65, ease: [0.22, 1, 0.36, 1] }}
-            className="fixed inset-0 z-[100] bg-black flex flex-col"
-            aria-modal="true"
-            role="dialog"
-            aria-label="Navigation menu"
+      {/* Mobile full-screen overlay (always mounted; shown via .is-open) */}
+      <div
+        id="bl-mobile-menu"
+        ref={overlayRef}
+        className={['fixed inset-0 z-[100] bg-ink flex flex-col lg:hidden', menuOpen ? 'is-open' : ''].join(' ')}
+        aria-modal="true"
+        role="dialog"
+        aria-label="Navigation menu"
+        aria-hidden={!menuOpen}
+      >
+        <div className="flex items-center justify-between px-6 h-20 border-b border-hairline">
+          <Link
+            href="/"
+            className="font-serif text-sm tracking-[0.35em] text-offwhite uppercase py-3"
+            onClick={close}
+            tabIndex={menuOpen ? 0 : -1}
           >
-            {/* Menu header */}
-            <div className="flex items-center justify-between px-6 h-20 border-b border-hairline">
+            BLACKLINE
+          </Link>
+          <button
+            ref={closeRef}
+            className="text-offwhite/80 transition-colors duration-600 hover:text-amber -mr-3 p-3"
+            onClick={close}
+            aria-label="Close menu"
+            tabIndex={menuOpen ? 0 : -1}
+          >
+            <X size={20} strokeWidth={1.25} />
+          </button>
+        </div>
+
+        <nav className="flex flex-col justify-center flex-1 px-6 gap-2" aria-label="Mobile navigation">
+          {MOBILE_LINKS.map((link) => (
+            <div key={link.href} className="overflow-hidden py-1" data-menu-item>
               <Link
-                href="/"
-                className="font-serif text-sm tracking-[0.35em] text-offwhite uppercase"
-                onClick={() => setMenuOpen(false)}
+                href={link.href}
+                data-menu-link
+                className="block font-serif text-[2.6rem] leading-[1.15] font-light text-offwhite/85 tracking-wider lowercase transition-colors duration-600 hover:text-amber"
+                onClick={close}
+                tabIndex={menuOpen ? 0 : -1}
               >
-                BLACKLINE
+                {link.label.toLowerCase()}
               </Link>
-              <button
-                className="text-offwhite/60 transition-colors duration-600 hover:text-amber p-1"
-                onClick={() => setMenuOpen(false)}
-                aria-label="Close menu"
-              >
-                <X size={18} strokeWidth={1.25} />
-              </button>
             </div>
+          ))}
+        </nav>
 
-            {/* Nav links */}
-            <nav className="flex flex-col justify-center flex-1 px-6 gap-10">
-              {[...NAV_LINKS, { label: 'Contact', href: '/contact' }].map((link, i) => (
-                <motion.div
-                  key={link.href}
-                  initial={{ opacity: 0, x: 24 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{
-                    delay: 0.12 + i * 0.07,
-                    duration: 0.65,
-                    ease: [0.22, 1, 0.36, 1],
-                  }}
-                >
-                  <Link
-                    href={link.href}
-                    className="block font-serif text-4xl font-light text-offwhite/70 tracking-wider lowercase transition-colors duration-600 hover:text-amber"
-                    onClick={() => setMenuOpen(false)}
-                  >
-                    {link.label.toLowerCase()}
-                  </Link>
-                </motion.div>
-              ))}
-            </nav>
-
-            {/* Menu footer */}
-            <div className="px-6 pb-10 border-t border-hairline pt-8">
-              <p className="font-sans text-[10px] tracking-[0.2em] uppercase text-offwhite/20">
-                Dallas, Texas · By appointment · Remote and in-person
-              </p>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+        <div className="px-6 pb-10 border-t border-hairline pt-8 space-y-6" data-menu-foot>
+          <Button asChild size="lg" className="w-full" glow>
+            <Link href="/contact" onClick={close} tabIndex={menuOpen ? 0 : -1}>
+              request a consult
+            </Link>
+          </Button>
+          <p className="bl-label text-[10px]">Dallas, Texas · By appointment · Remote and in-person</p>
+        </div>
+      </div>
     </>
   )
 }

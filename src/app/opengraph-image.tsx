@@ -1,7 +1,7 @@
 import { ImageResponse } from 'next/og'
 
 export const runtime = 'edge'
-export const alt = 'Blackline Method — Private Training, Dallas Design District'
+export const alt = 'Blackline Method | Private Optimization Practice, Dallas'
 export const size = { width: 1200, height: 630 }
 export const contentType = 'image/png'
 
@@ -52,7 +52,7 @@ export default async function Image() {
             textTransform: 'uppercase',
           }}
         >
-          Private Training · Dallas Design District
+          Private Optimization Practice · Dallas, Texas
         </div>
       </div>
     ),
