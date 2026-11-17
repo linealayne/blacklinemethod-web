@@ -29,15 +29,15 @@ export function ArticleLayout({
   })
 
   return (
-    <article className="bg-black min-h-screen pt-36 md:pt-40 pb-24 px-6">
-      <div className="max-w-[640px] mx-auto">
+    <article className="bg-black min-h-screen pt-36 md:pt-48 pb-24 px-6">
+      <div className="max-w-[680px] mx-auto">
         {/* Eyebrow */}
         <Reveal className="flex flex-wrap items-center gap-x-4 gap-y-2 mb-10">
-          <span className="font-sans text-[10px] tracking-[0.3em] uppercase text-amber-muted">
+          <span className="bl-label bl-label-strong bl-tick">
             {category}
           </span>
           <span className="text-hairline hidden sm:inline" aria-hidden="true">·</span>
-          <span className="font-sans text-[10px] tracking-[0.2em] uppercase text-label whitespace-nowrap">
+          <span className="bl-label whitespace-nowrap">
             {formattedDate}
           </span>
         </Reveal>
@@ -45,18 +45,18 @@ export function ArticleLayout({
         {/* Title */}
         <SplitReveal
           as="h1"
-          className="font-serif font-light text-offwhite lowercase leading-[1.1] tracking-wider text-[clamp(2.25rem,5vw,3.5rem)] mb-8"
+          className="bl-h2 mb-10"
         >
           {title}
         </SplitReveal>
 
         {/* Dek */}
-        <Reveal as="p" delay={0.3} className="font-serif italic text-body text-lg leading-relaxed mb-14 tracking-wide">
+        <Reveal as="p" delay={0.3} className="bl-lead mb-14">
           {dek}
         </Reveal>
 
         {/* Hairline */}
-        <div className="w-full h-px bg-hairline mb-14" aria-hidden="true" />
+        <Reveal as="span" className="bl-rule mb-14" y={0}>{null}</Reveal>
 
         {/* Body */}
         <Reveal delay={0.15} className="article-body space-y-6 font-sans text-[16px] md:text-[17px] text-body leading-[1.85] tracking-[0.01em]">
@@ -65,16 +65,16 @@ export function ArticleLayout({
 
         {/* Byline + CTA */}
         <Reveal className="mt-20 pt-10 border-t border-hairline space-y-10">
-          <p className="font-sans text-[11px] tracking-[0.2em] uppercase text-label">
+          <p className="bl-label">
             Written by {author}
           </p>
 
           <div className="space-y-5">
-            <div className="w-8 h-px bg-amber" aria-hidden="true" />
-            <p className="font-serif text-xl text-offwhite/80 font-light tracking-wide">
+            <div className="w-8 h-px bg-offwhite/50" aria-hidden="true" />
+            <p className="bl-lead text-offwhite/85">
               Engagements are limited. That is by design.
             </p>
-            <Button asChild glow>
+            <Button asChild>
               <Link href="/contact">request a consult</Link>
             </Button>
           </div>

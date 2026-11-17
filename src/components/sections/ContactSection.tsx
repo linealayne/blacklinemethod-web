@@ -73,20 +73,20 @@ export function ContactSection() {
 
   return (
     <section aria-label="Contact">
-      <div className="max-w-7xl mx-auto px-6 md:px-12 pt-36 md:pt-40 pb-24 md:pb-32">
+      <div className="bl-wrap pt-36 md:pt-48 pb-24 md:pb-36">
         <div className="grid md:grid-cols-2 gap-14 md:gap-24">
           {/* Left: contact info */}
           <div>
-            <Reveal as="p" className="bl-label mb-8">
+            <Reveal as="p" className="bl-label bl-tick mb-10">
               request a consult
             </Reveal>
             <SplitReveal
               as="h1"
-              className="font-serif font-light text-offwhite lowercase tracking-wider leading-[1.05] text-[clamp(2.5rem,4.5vw,4.5rem)] mb-12"
+              className="bl-h2 mb-12"
             >
               the first conversation.
             </SplitReveal>
-            <Reveal stagger delay={0.25} className="space-y-6 font-sans text-sm md:text-[15px] text-body tracking-wide leading-relaxed max-w-sm">
+            <Reveal stagger delay={0.25} className="space-y-6 bl-body max-w-sm">
               <p>
                 The initial consult is ninety minutes. We cover your history, your current state,
                 your goals, and what has and hasn&apos;t worked. Nothing is prescribed in that session.
@@ -99,13 +99,13 @@ export function ContactSection() {
               <div className="pt-2 flex flex-col items-start">
                 <a
                   href="mailto:layne@blacklinemethod.com"
-                  className="inline-flex items-center min-h-[40px] transition-colors duration-600 hover:text-amber"
+                  className="inline-flex items-center min-h-[44px] font-serif font-light text-[1.3rem] tracking-[-0.01em] text-offwhite/90 transition-opacity duration-600 hover:opacity-60"
                 >
                   layne@blacklinemethod.com
                 </a>
                 <a
                   href="mailto:spencer@blacklinemethod.com"
-                  className="inline-flex items-center min-h-[40px] transition-colors duration-600 hover:text-amber"
+                  className="inline-flex items-center min-h-[44px] font-serif font-light text-[1.3rem] tracking-[-0.01em] text-offwhite/90 transition-opacity duration-600 hover:opacity-60"
                 >
                   spencer@blacklinemethod.com
                 </a>
@@ -117,11 +117,11 @@ export function ContactSection() {
           </div>
 
           {/* Right: form or success state */}
-          <Reveal delay={0.18}>
+          <Reveal delay={0.18} className="md:pt-4">
             {status === 'success' ? (
               <div className="flex flex-col justify-center h-full min-h-[320px]" role="status">
-                <div className="w-8 h-px bg-amber mb-8" aria-hidden="true" />
-                <p className="font-serif text-2xl text-offwhite/90 font-light tracking-wide mb-4">
+                <div className="relative w-24 h-px bg-offwhite/40 mb-8" aria-hidden="true"><span className="absolute right-0 -top-[2px] h-[5px] w-[5px] rounded-full bg-amber" /></div>
+                <p className="font-serif text-[2rem] text-offwhite font-light tracking-[-0.015em] mb-4">
                   Request received.
                 </p>
                 <p className="font-sans text-sm text-body tracking-wide leading-relaxed">
@@ -209,7 +209,6 @@ export function ContactSection() {
                   type="submit"
                   disabled={status === 'loading'}
                   className="w-full sm:w-auto"
-                  glow
                 >
                   {status === 'loading' ? 'Sending...' : 'Send request'}
                 </Button>

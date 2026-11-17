@@ -6,62 +6,58 @@ import dynamic from 'next/dynamic'
 import { Button } from '@/components/ui/button'
 import { useMotion } from '@/components/motion/MotionProvider'
 import { motionFlags } from '@/lib/flags'
-import { isDesktop, isFinePointer, isPhone } from '@/lib/motion'
-import { useFirstInteraction } from '@/lib/useFirstInteraction'
+import { isDesktop } from '@/lib/motion'
 import { useGsapEffect } from '@/lib/useGsap'
-import type { HeroHandles } from '@/components/three/HeroField'
-import { supportsWebGL } from '@/components/three/webgl'
 
-const HeroField = dynamic(() => import('@/components/three/HeroField'), { ssr: false })
+const HeroLine = dynamic(() => import('@/components/hero/HeroLine'), { ssr: false })
 
 /** Hero reveal choreography (seconds) */
 const HERO = {
   lineDuration: 1.3,
   lineStagger: 0.1,
-  subOverlap: 0.75, // how early the sub elements start before the lines finish
-  fadeStart: 0.3, // scroll progress where the copy starts to fade
+  subOverlap: 0.6, // how early the sub elements start before the headline lines finish
+  fadeStart: 0.25, // scroll progress where the copy starts to fade
+  drift: -14, // yPercent the copy drifts while the hero scrolls away (parallax against the line)
 }
 
+/** The static trace for reduced motion and no-JS: calm, level, with the band. */
+const STATIC_TRACE = (() => {
+  const pts: string[] = []
+  for (let x = 0; x <= 1000; x += 10) {
+    const y = 60 + Math.sin(x * 0.02) * 0.9 + Math.sin(x * 0.051) * 0.5
+    pts.push(`${x === 0 ? 'M' : 'L'}${x} ${y.toFixed(2)}`)
+  }
+  return pts.join(' ')
+})()
+
 /**
- * On phones and tablets the headline is never hidden: it paints in the
- * metric-matched fallback at first paint, then swaps to Fraunces, and the
- * subhead and button rise through the CSS reveal. On desktop the masked
- * line reveal runs on every visit: under the loader on the first visit,
- * straight after hydration on later ones (the CSS keeps the headline
- * hidden until then so nothing flashes).
+ * The headline sits on the line. On desktop the masked line reveal runs on
+ * every visit, in step with the line drawing in (under the loader on the
+ * first visit, straight after hydration on later ones). On phones the
+ * headline paints at first paint (it is the LCP element) and the line draws
+ * beneath it once the loader hands off.
  */
 export function HeroSection() {
-  const { mounted, reduced, webgl, loaderDone } = useMotion()
+  const { mounted, reduced, loaderDone } = useMotion()
   const sectionRef = useRef<HTMLElement>(null)
   const contentRef = useRef<HTMLDivElement>(null)
   const h1Ref = useRef<HTMLHeadingElement>(null)
+  const anchorRef = useRef<HTMLDivElement>(null)
   const playRef = useRef<(() => void) | null>(null)
   const loaderDoneRef = useRef(false)
-  const handles = useRef<HeroHandles>({
-    pointer: { x: 0, y: 0, active: 0 },
-    scroll: { value: 0 },
-  }).current
 
-  const [show3d, setShow3d] = useState(false)
+  const [showLine, setShowLine] = useState(false)
   const [active, setActive] = useState(true)
-  const [phone, setPhone] = useState(false)
 
-  // Lazy-load WebGL once the loader is done and the visitor has moved, scrolled,
-  // or touched (or after a quiet while). Text renders first, always.
-  const go = useFirstInteraction(mounted && !reduced && webgl && loaderDone)
+  // The line is the hero: load it straight after hydration (it is a few kB of 2D canvas).
   useEffect(() => {
-    if (!go) return
-    if (!supportsWebGL()) return
-    setPhone(isPhone())
-    setShow3d(true)
-    // warm the orbit chunk too: three is shared, the rest is small
-    import('@/components/three/OrbitScene').catch(() => {})
-  }, [go])
+    if (mounted && !reduced) setShowLine(true)
+  }, [mounted, reduced])
 
   // Pause rendering when the hero is off screen or the tab is hidden.
   useEffect(() => {
     const el = sectionRef.current
-    if (!el || !show3d) return
+    if (!el || !showLine) return
     let inView = true
     const update = () => setActive(inView && !document.hidden)
     const io = new IntersectionObserver(
@@ -77,47 +73,14 @@ export function HeroSection() {
       io.disconnect()
       document.removeEventListener('visibilitychange', update)
     }
-  }, [show3d])
+  }, [showLine])
 
-  // Pointer (desktop) or device tilt (phones) feeds the particle push.
-  useEffect(() => {
-    const el = sectionRef.current
-    if (!el || !show3d) return
-    const p = handles.pointer
-    if (isFinePointer()) {
-      const onMove = (e: PointerEvent) => {
-        const r = el.getBoundingClientRect()
-        p.x = ((e.clientX - r.left) / r.width) * 2 - 1
-        p.y = -(((e.clientY - r.top) / r.height) * 2 - 1)
-        p.active = 1
-      }
-      const onLeave = () => {
-        p.active = 0
-      }
-      el.addEventListener('pointermove', onMove, { passive: true })
-      el.addEventListener('pointerleave', onLeave)
-      return () => {
-        el.removeEventListener('pointermove', onMove)
-        el.removeEventListener('pointerleave', onLeave)
-      }
-    }
-    const onTilt = (e: DeviceOrientationEvent) => {
-      if (e.gamma == null || e.beta == null) return
-      p.x = Math.max(-1, Math.min(1, e.gamma / 25)) * 0.6
-      p.y = Math.max(-1, Math.min(1, (e.beta - 40) / 25)) * 0.6
-      p.active = 0.7
-    }
-    window.addEventListener('deviceorientation', onTilt)
-    return () => window.removeEventListener('deviceorientation', onTilt)
-  }, [show3d, handles])
-
-  // Phones, tablets, reduced motion: subs rise right away through the CSS reveal.
-  // Desktop: the headline timeline reveals them after the lines (see below).
+  // Phones, tablets, reduced motion: subs rise through the CSS reveal once the loader hands off.
   useEffect(() => {
     if (!mounted) return
     const flags = motionFlags()
-    if (flags.reduced || !isDesktop()) revealSubs(contentRef.current)
-  }, [mounted])
+    if (flags.reduced || (!isDesktop() && loaderDone)) revealSubs(contentRef.current)
+  }, [mounted, loaderDone])
 
   // Returning desktop visitors: keep the headline hidden synchronously until
   // the split takes over (the pre-hydration CSS rule stops applying at hydration).
@@ -128,7 +91,7 @@ export function HeroSection() {
     if (!flags.reduced && isDesktop() && flags.loaderDone) h1.style.opacity = '0'
   }, [])
 
-  // Desktop: masked line reveal (under the loader on first visit), then the subs.
+  // Desktop: masked line reveal, then the subs. All clients: scroll parallax.
   useGsapEffect(
     async ({ gsap, ScrollTrigger, loadSplitText }) => {
       const h1 = h1Ref.current
@@ -139,23 +102,20 @@ export function HeroSection() {
       if (flags.reduced) return
 
       const ctx = gsap.context(() => {
-        // Scrolling past the hero: copy drifts up and fades; the field loosens.
         ScrollTrigger.create({
           trigger: section,
           start: 'top top',
           end: 'bottom top',
           scrub: true,
           onUpdate: (self) => {
-            handles.scroll.value = self.progress
-            const f = gsap.utils.clamp(0, 1, (self.progress - HERO.fadeStart) / (0.95 - HERO.fadeStart))
-            gsap.set(content, { yPercent: -10 * self.progress, opacity: 1 - f })
+            const f = gsap.utils.clamp(0, 1, (self.progress - HERO.fadeStart) / (0.9 - HERO.fadeStart))
+            gsap.set(content, { yPercent: HERO.drift * self.progress, opacity: 1 - f })
           },
         })
       }, section)
 
       if (!isDesktop()) return () => ctx.revert()
 
-      // Split now; reveal when the loader hands off, or at once if there is none.
       const SplitText = await loadSplitText()
       if (document.fonts?.ready) await document.fonts.ready
       const split = SplitText.create(h1, {
@@ -196,62 +156,61 @@ export function HeroSection() {
   return (
     <section
       ref={sectionRef}
-      className="relative min-h-[100svh] bg-black flex items-center justify-center overflow-hidden"
+      className="relative min-h-[100svh] bg-black flex flex-col overflow-hidden"
       aria-label="Introduction"
     >
-      {/* Particle field (decorative, lazy) */}
+      {/* The line (decorative, canvas) */}
       <div className="absolute inset-0 pointer-events-none" aria-hidden="true">
-        {show3d && <HeroField handles={handles} start={loaderDone} active={active} phone={phone} />}
+        {showLine && <HeroLine anchor={anchorRef} start={loaderDone} active={active} />}
       </div>
-      {/* Soft darkening behind the words so the headline always reads */}
-      <div
-        className="absolute inset-0 pointer-events-none"
-        aria-hidden="true"
-        style={{
-          background:
-            'radial-gradient(ellipse 60% 54% at 50% 56%, rgba(10,10,10,0.62) 0%, rgba(10,10,10,0.3) 50%, rgba(10,10,10,0) 74%)',
-        }}
-      />
 
-      <div ref={contentRef} className="relative z-10 text-center px-6 max-w-5xl mx-auto pt-16 pb-10">
-        <h1
-          ref={h1Ref}
-          data-hero-h1=""
-          className="font-serif font-light text-offwhite lowercase leading-[1.05] tracking-wider text-[clamp(2.75rem,7vw,7rem)]"
-        >
+      <div
+        ref={contentRef}
+        className="relative z-10 bl-wrap flex-1 flex flex-col justify-center md:justify-end pt-[calc(var(--bl-header)+4rem)] pb-10 md:pb-14"
+      >
+        <h1 ref={h1Ref} data-hero-h1="" className="bl-display max-w-[11ch] -ml-[0.04em]">
           run your own biology.
         </h1>
 
-        <p data-hero-sub data-reveal="" className="mt-8 bl-label" style={{ '--bl-rise': '18px' } as React.CSSProperties}>
-          Dallas, Texas&nbsp;&nbsp;·&nbsp;&nbsp;By appointment
-        </p>
-
-        <p
-          data-hero-sub
-          data-reveal=""
-          className="mt-6 font-serif italic text-body-dim text-base md:text-lg tracking-wide max-w-md mx-auto"
-          style={{ '--bl-rise': '18px', '--bl-delay': '0.1s' } as React.CSSProperties}
-        >
-          a private optimization practice built around one person at a time. hormones, training,
-          nutrition, and the way you live.
-        </p>
-
-        <div data-hero-sub data-reveal="" className="mt-12" style={{ '--bl-rise': '18px', '--bl-delay': '0.2s' } as React.CSSProperties}>
-          <Button asChild size="lg" glow>
-            <Link href="/contact">request a consult</Link>
-          </Button>
+        {/* The baseline the line rides on. Holds the static trace for reduced motion and no-JS. */}
+        <div ref={anchorRef} className="relative h-[112px] md:h-[150px]" aria-hidden="true">
+          <div className="bl-line-static absolute inset-y-0 left-1/2 w-screen -translate-x-1/2">
+            <svg className="absolute inset-0 h-full w-full" viewBox="0 0 1000 120" preserveAspectRatio="none">
+              <path d="M0 16 L1000 16 M0 104 L1000 104" stroke="#F2F1EC" strokeOpacity="0.09" strokeDasharray="2 6" vectorEffect="non-scaling-stroke" fill="none" />
+              <path d={STATIC_TRACE} stroke="#F2F1EC" strokeOpacity="0.9" strokeWidth="1.15" vectorEffect="non-scaling-stroke" fill="none" />
+            </svg>
+            <span className="absolute left-[78%] top-1/2 -ml-[3px] -mt-[3px] h-[6px] w-[6px] rounded-full bg-amber shadow-[0_0_14px_3px_rgba(200,150,90,0.4)]" />
+          </div>
         </div>
-      </div>
 
-      {/* Scroll cue */}
-      <div
-        className="absolute bottom-8 left-1/2 -translate-x-1/2"
-        aria-hidden="true"
-        data-hero-sub
-        data-reveal=""
-        style={{ '--bl-rise': '0px', '--bl-delay': '0.5s' } as React.CSSProperties}
-      >
-        <div className="w-px h-14 bg-gradient-to-b from-offwhite/0 to-offwhite/25 mx-auto" />
+        <div className="grid gap-8 md:grid-cols-12 md:gap-x-8 md:items-start">
+          <p
+            data-hero-sub
+            data-reveal=""
+            className="bl-label md:col-span-5 lg:col-span-4 md:pt-1.5"
+            style={{ '--bl-rise': '14px' } as React.CSSProperties}
+          >
+            Dallas, Texas&nbsp;&nbsp;·&nbsp;&nbsp;By appointment
+          </p>
+
+          <div className="md:col-span-7 lg:col-start-7 lg:col-span-6 xl:col-start-8 xl:col-span-5">
+            <p
+              data-hero-sub
+              data-reveal=""
+              className="bl-lead text-body"
+              style={{ '--bl-rise': '14px', '--bl-delay': '0.1s' } as React.CSSProperties}
+            >
+              a private optimization practice built around one person at a time. hormones, training,
+              nutrition, and the way you live.
+            </p>
+
+            <div data-hero-sub data-reveal="" className="mt-9" style={{ '--bl-rise': '14px', '--bl-delay': '0.2s' } as React.CSSProperties}>
+              <Button asChild size="lg">
+                <Link href="/contact">request a consult</Link>
+              </Button>
+            </div>
+          </div>
+        </div>
       </div>
     </section>
   )

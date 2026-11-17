@@ -167,24 +167,25 @@ export function MethodSection() {
     [isStatic, go, gl]
   )
 
-  const bodyClass = 'font-sans text-sm md:text-[15px] text-body leading-relaxed tracking-wide max-w-md'
+  const bodyClass = 'bl-body max-w-md'
 
   return (
     <section
       ref={sectionRef}
-      className={['bg-black border-t border-hairline', isStatic ? '' : 'bl-pinned md:min-h-[100svh] md:flex md:items-center'].join(' ')}
+      className={['bg-black', isStatic ? '' : 'bl-pinned md:min-h-[100svh] md:flex md:items-center'].join(' ')}
       aria-label="The Method"
     >
-      <div className="max-w-7xl mx-auto px-6 md:px-12 w-full py-20 md:py-20">
+      <div className="bl-wrap w-full py-20 md:py-20 relative">
+        <span className="bl-rule absolute top-0 left-[var(--bl-gutter)] right-[var(--bl-gutter)] w-auto" aria-hidden="true" />
         <div className="md:grid md:grid-cols-2 md:gap-x-20 md:items-center">
           {/* Heading: scrolls normally on phones, left column on desktop */}
           <div className="md:col-start-1 md:row-start-1">
-            <Reveal as="p" className="bl-label mb-8">
+            <Reveal as="p" className="bl-label bl-tick mb-10">
               the method
             </Reveal>
             <SplitReveal
               as="h2"
-              className="font-serif font-light text-offwhite lowercase tracking-wider leading-[1.05] text-[clamp(2.5rem,4.8vw,5rem)]"
+              className="bl-h2"
             >
               four pillars. one system.
             </SplitReveal>
@@ -215,7 +216,7 @@ export function MethodSection() {
                 <div className="space-y-9">
                   {PILLARS.map((pillar) => (
                     <div key={pillar.id}>
-                      <p className="bl-label bl-label-amber mb-3">{pillar.label}</p>
+                      <p className="font-serif font-light text-offwhite text-[1.75rem] leading-none tracking-[-0.015em] lowercase mb-4">{pillar.label}</p>
                       <p className={bodyClass}>{pillar.description}</p>
                     </div>
                   ))}
@@ -224,12 +225,12 @@ export function MethodSection() {
                 <div className="grid min-h-[9.5rem] md:min-h-[8.5rem]">
                   {PILLARS.map((pillar) => (
                     <div key={pillar.id} data-pillar className="[grid-area:1/1]">
-                      <p className="bl-label bl-label-amber mb-3">{pillar.label}</p>
+                      <p className="font-serif font-light text-offwhite text-[1.75rem] leading-none tracking-[-0.015em] lowercase mb-4">{pillar.label}</p>
                       <p className={bodyClass}>{pillar.description}</p>
                     </div>
                   ))}
                   <div data-whole className="[grid-area:1/1]">
-                    <p className="bl-label bl-label-amber mb-3">One system</p>
+                    <p className="font-serif font-light text-offwhite text-[1.75rem] leading-none tracking-[-0.015em] lowercase mb-4">One system</p>
                     <p className={bodyClass}>
                       Adjusting one without understanding the others produces incomplete results. The
                       four are read together, around you.
@@ -239,12 +240,9 @@ export function MethodSection() {
               )}
 
               <div className="mt-10 md:mt-12" data-cta>
-                <Link
-                  href="/method"
-                  className="group inline-flex items-center gap-3 min-h-[44px] font-sans text-[11px] tracking-[0.2em] uppercase text-amber-muted transition-colors duration-600 hover:text-amber"
-                >
+                <Link href="/method" className="group bl-link">
                   <span className="bl-underline">Explore the full method</span>
-                  <span aria-hidden="true" className="transition-transform duration-600 ease-lux group-hover:translate-x-1">→</span>
+                  <span aria-hidden="true" className="bl-arrow" />
                 </Link>
               </div>
             </div>

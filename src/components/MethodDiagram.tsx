@@ -29,7 +29,7 @@ export function MethodDiagram({ className = '' }: MethodDiagramProps) {
         cx={cx}
         cy={cy}
         r={195}
-        stroke="#C8965A"
+        stroke="#8F8D86"
         strokeOpacity={0.08}
         strokeWidth={0.75}
         strokeDasharray="2 9"
@@ -38,7 +38,7 @@ export function MethodDiagram({ className = '' }: MethodDiagramProps) {
         cx={cx}
         cy={cy}
         r={175}
-        stroke="#2A2A2A"
+        stroke="#262624"
         strokeOpacity={0.6}
         strokeWidth={0.5}
         strokeDasharray="3 12"
@@ -47,7 +47,7 @@ export function MethodDiagram({ className = '' }: MethodDiagramProps) {
       {/* Outer diamond connecting pillars */}
       <polygon
         points={pillars.map((p) => `${p.x},${p.y}`).join(' ')}
-        stroke="#2A2A2A"
+        stroke="#262624"
         strokeWidth={0.75}
         strokeOpacity={0.9}
       />
@@ -60,7 +60,7 @@ export function MethodDiagram({ className = '' }: MethodDiagramProps) {
           y1={cy}
           x2={p.x}
           y2={p.y}
-          stroke="#C8965A"
+          stroke="#8F8D86"
           strokeWidth={0.75}
           strokeOpacity={0.35}
           strokeDasharray="4 7"
@@ -70,8 +70,8 @@ export function MethodDiagram({ className = '' }: MethodDiagramProps) {
       {/* Pillar nodes */}
       {pillars.map((p) => (
         <g key={p.id}>
-          <circle cx={p.x} cy={p.y} r={5} fill="#0A0A0A" stroke="#2A2A2A" strokeWidth={1} />
-          <circle cx={p.x} cy={p.y} r={2} fill="#C8965A" fillOpacity={0.6} />
+          <circle cx={p.x} cy={p.y} r={5} fill="#080808" stroke="#262624" strokeWidth={1} />
+          <circle cx={p.x} cy={p.y} r={2} fill="#F2F1EC" fillOpacity={0.6} />
         </g>
       ))}
 
@@ -97,7 +97,7 @@ export function MethodDiagram({ className = '' }: MethodDiagramProps) {
       ))}
 
       {/* Center node */}
-      <circle cx={cx} cy={cy} r={34} fill="#0A0A0A" stroke="#2A2A2A" strokeWidth={0.75} />
+      <circle cx={cx} cy={cy} r={34} fill="#080808" stroke="#262624" strokeWidth={0.75} />
       <circle cx={cx} cy={cy} r={34} stroke="#C8965A" strokeWidth={0.5} strokeOpacity={0.2} />
       <text
         x={cx}

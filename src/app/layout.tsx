@@ -8,12 +8,16 @@ import { SmoothScroll } from '@/components/motion/SmoothScroll'
 import { Loader } from '@/components/motion/Loader'
 import { PageTransition } from '@/components/motion/PageTransition'
 import { Grain } from '@/components/motion/Grain'
+import { Parallax } from '@/components/motion/Parallax'
 import { FLAGS_SCRIPT } from '@/lib/flags'
 
+// Variable Fraunces with its optical-size and softness axes: display sizes pick
+// the high-contrast cut automatically (font-optical-sizing), SOFT is pinned to 0
+// in globals.css so the letterforms stay sharp rather than rounded.
 const fraunces = Fraunces({
   subsets: ['latin'],
-  weight: ['300', '400'],
   style: ['normal', 'italic'],
+  axes: ['opsz', 'SOFT'],
   variable: '--font-fraunces',
   display: 'swap',
 })
@@ -66,7 +70,7 @@ export const metadata: Metadata = {
 }
 
 export const viewport: Viewport = {
-  themeColor: '#0A0A0A',
+  themeColor: '#080808',
   colorScheme: 'dark',
 }
 
@@ -97,6 +101,7 @@ export default function RootLayout({
           <main id="bl-main">{children}</main>
           <Footer />
           <Grain />
+          <Parallax />
         </MotionProvider>
       </body>
     </html>

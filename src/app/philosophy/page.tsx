@@ -46,24 +46,24 @@ const SECTIONS = [
 
 export default function PhilosophyPage() {
   return (
-    <div className="bg-black min-h-screen pt-36 md:pt-40 pb-24">
+    <div className="bg-black min-h-screen pt-36 md:pt-48 pb-24">
       {/* Hero */}
-      <section aria-label="Philosophy introduction" className="px-6 md:px-12 max-w-7xl mx-auto mb-24 md:mb-32">
-        <Reveal as="p" className="bl-label mb-8">
+      <section aria-label="Philosophy introduction" className="bl-wrap mb-24 md:mb-32">
+        <Reveal as="p" className="bl-label bl-tick mb-10">
           philosophy
         </Reveal>
         <SplitReveal
           as="h1"
-          className="font-serif font-light text-offwhite lowercase leading-[1.05] tracking-wider text-[clamp(3rem,8vw,8rem)] mb-12 max-w-5xl"
+          className="bl-h1 mb-12 max-w-5xl"
         >
           the standard is too low.
         </SplitReveal>
         <Reveal stagger delay={0.3} className="space-y-5">
-          <p className="font-serif italic text-body text-xl leading-relaxed max-w-xl">
+          <p className="bl-lead max-w-xl">
             Standard primary care is built for triage. It is structured to identify disease, manage
             chronic conditions, and catch what is urgent. It does those things well.
           </p>
-          <p className="font-serif italic text-body text-xl leading-relaxed max-w-xl">
+          <p className="bl-lead max-w-xl">
             It was never built for optimization. Neither is &ldquo;in range.&rdquo;
           </p>
         </Reveal>
@@ -71,21 +71,21 @@ export default function PhilosophyPage() {
 
       {SECTIONS.map((section, i) => (
         <div key={section.index}>
-          <div className={`mx-6 md:mx-12 ${i === 0 ? 'hairline-amber' : 'h-px bg-hairline'}`} aria-hidden="true" />
-          <section aria-label={section.title} className="px-6 md:px-12 max-w-7xl mx-auto py-24 md:py-32">
+          <div className="bl-wrap" aria-hidden="true"><Reveal as="span" className="bl-rule" y={0} start="top 96%">{null}</Reveal></div>
+          <section aria-label={section.title} className="bl-wrap py-24 md:py-32">
             <div className="grid md:grid-cols-2 gap-12 md:gap-24 items-start">
-              <div>
-                <Reveal as="span" className="block bl-label mb-8">
+              <div className="md:sticky md:top-[calc(var(--bl-header)+3rem)]">
+                <Reveal as="span" className="block bl-label bl-tick mb-10 tabular-nums">
                   {section.index}
                 </Reveal>
                 <SplitReveal
                   as="h2"
-                  className="font-serif font-light text-offwhite lowercase leading-[1.05] tracking-wider text-[clamp(2.5rem,5vw,5.5rem)]"
+                  className="bl-h2"
                 >
                   {section.title}
                 </SplitReveal>
               </div>
-              <Reveal stagger delay={0.15} className="space-y-6 font-sans text-sm md:text-[15px] text-body leading-relaxed tracking-wide md:pt-20">
+              <Reveal stagger delay={0.15} className="space-y-6 bl-body md:pt-20">
                 {section.paragraphs.map((p) => (
                   <p key={p.slice(0, 24)}>{p}</p>
                 ))}
@@ -96,31 +96,31 @@ export default function PhilosophyPage() {
       ))}
 
       {/* The practice */}
-      <div className="mx-6 md:mx-12 h-px bg-hairline" aria-hidden="true" />
-      <section aria-label="The practice" className="px-6 md:px-12 max-w-7xl mx-auto py-24 md:py-32">
-        <Reveal as="p" className="bl-label mb-8">
+      <div className="bl-wrap" aria-hidden="true"><Reveal as="span" className="bl-rule" y={0} start="top 96%">{null}</Reveal></div>
+      <section aria-label="The practice" className="bl-wrap py-24 md:py-32">
+        <Reveal as="p" className="bl-label bl-tick mb-10">
           the practice
         </Reveal>
         <SplitReveal
           as="h2"
-          className="font-serif font-light text-offwhite lowercase leading-[1.05] tracking-wider text-[clamp(2.5rem,5vw,5.5rem)]"
+          className="bl-h2"
         >
           the practice.
         </SplitReveal>
-        <Reveal as="p" delay={0.2} className="mt-8 font-serif italic text-body text-lg md:text-xl leading-relaxed max-w-xl">
+        <Reveal as="p" delay={0.2} className="mt-8 bl-lead max-w-xl">
           two people. a small number of clients. by design.
         </Reveal>
         <PracticeCards className="mt-14 md:mt-16" />
       </section>
 
       {/* CTA */}
-      <section aria-label="Contact CTA" className="px-6 md:px-12 max-w-7xl mx-auto border-t border-hairline pt-16 pb-6">
+      <section aria-label="Contact CTA" className="bl-wrap pt-16 pb-6">
         <Reveal>
           <div className="flex flex-col sm:flex-row sm:items-center gap-8">
-            <p className="font-serif text-xl text-offwhite/80 font-light tracking-wide">
+            <p className="bl-lead text-offwhite/85">
               Engagements are limited. That is by design.
             </p>
-            <Button asChild className="shrink-0" glow>
+            <Button asChild className="shrink-0">
               <Link href="/contact">request a consult</Link>
             </Button>
           </div>

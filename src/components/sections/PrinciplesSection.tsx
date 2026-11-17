@@ -60,7 +60,7 @@ export function PrinciplesSection() {
           gsap.set(s, { opacity: i === 0 ? 1 : 0, y: i === 0 ? 0 : PRINCIPLES.slideY, pointerEvents: i === 0 ? 'auto' : 'none' })
         )
         bars.forEach((b, i) => gsap.set(b, { scaleX: i === 0 ? 1 : 0 }))
-        marks.forEach((m, i) => gsap.set(m, { color: i === 0 ? '#C8965A' : '#8C8A84' }))
+        marks.forEach((m, i) => gsap.set(m, { color: i === 0 ? '#F2F1EC' : '#8C8A84' }))
 
         const tl = gsap.timeline({
           defaults: { ease: 'power2.inOut' },
@@ -83,7 +83,7 @@ export function PrinciplesSection() {
           tl.to(bars[i - 1], { scaleX: 0, transformOrigin: 'right center', duration: swap * 0.6 }, t)
           tl.to(bars[i], { scaleX: 1, transformOrigin: 'left center', duration: swap * 0.6 }, t + swap * 0.3)
           tl.to(marks[i - 1], { color: '#8C8A84', duration: swap * 0.5 }, t)
-          tl.to(marks[i], { color: '#C8965A', duration: swap * 0.5 }, t + swap * 0.3)
+          tl.to(marks[i], { color: '#F2F1EC', duration: swap * 0.5 }, t + swap * 0.3)
           t += swap + hold
         }
         tl.to({}, { duration: hold * 0.4 })
@@ -95,64 +95,61 @@ export function PrinciplesSection() {
   )
 
   return (
-    <>
-      <section
-        id="philosophy"
-        ref={sectionRef}
-        className={[
-          'bg-black border-t border-hairline',
-          isStatic ? '' : 'bl-pinned min-h-[100svh] flex items-center',
-        ].join(' ')}
-        aria-label="Philosophy"
-      >
-        <div className="max-w-7xl mx-auto px-6 md:px-12 w-full py-24 md:py-28">
-          <div className={isStatic ? 'space-y-24' : 'grid gap-10 md:grid-cols-[6rem_1fr] md:gap-16 items-start'}>
+    <section
+      id="philosophy"
+      ref={sectionRef}
+      className={['bg-black', isStatic ? '' : 'bl-pinned min-h-[100svh] flex items-center'].join(' ')}
+      aria-label="Philosophy"
+    >
+      <div className="bl-wrap w-full">
+        <span className="bl-rule" aria-hidden="true" />
+        <div className="bl-folio py-24 md:py-28">
+          <div className="bl-margin">
             {!isStatic && (
-              <div className="flex md:flex-col gap-6 md:gap-7 md:pt-3" aria-hidden="true">
+              <div className="flex lg:flex-col gap-6 lg:gap-5" aria-hidden="true">
                 {TENETS.map((t) => (
-                  <div key={t.id} className="flex items-center gap-3">
-                    <span data-mark className="font-sans text-[11px] tracking-[0.3em] text-label">
+                  <div key={t.id} className="flex items-center gap-4">
+                    <span data-mark className="font-sans text-[10.5px] font-medium tracking-[0.2em] text-label tabular-nums">
                       {t.index}
                     </span>
-                    <span className="block w-8 h-px bg-hairline relative overflow-hidden">
+                    <span className="block w-8 lg:w-14 h-px bg-hairline relative overflow-hidden">
                       <span data-bar className="absolute inset-0 bg-amber origin-left" />
                     </span>
                   </div>
                 ))}
               </div>
             )}
+          </div>
 
+          <div className="min-w-0">
             <div className={isStatic ? 'space-y-24' : 'grid'}>
               {TENETS.map((tenet) => (
                 <div key={tenet.id} data-slide className={isStatic ? '' : '[grid-area:1/1]'}>
-                  <span className="block bl-label mb-8">{tenet.index}</span>
+                  <span className="block bl-label mb-8 tabular-nums">{tenet.index}</span>
                   <h2
-                    className="font-serif font-light text-offwhite lowercase leading-[0.98] tracking-wider mb-10"
-                    style={{ fontSize: 'clamp(2.9rem, 9vw, 8.5rem)' }}
+                    className="font-serif font-light text-offwhite lowercase leading-[0.92] tracking-[-0.035em] mb-10 md:mb-12"
+                    style={{ fontSize: 'clamp(3rem, 10vw, 10rem)' }}
                   >
                     {tenet.name}
                   </h2>
-                  <p className="font-sans text-sm md:text-[15px] text-body leading-relaxed tracking-wide max-w-md">
-                    {tenet.description}
-                  </p>
+                  <div className="grid md:grid-cols-12">
+                    <p className="bl-body md:col-start-6 md:col-span-7 lg:col-start-7 lg:col-span-6">{tenet.description}</p>
+                  </div>
                 </div>
               ))}
             </div>
-          </div>
 
-          <div className={isStatic ? 'mt-20' : 'mt-14 md:mt-16 md:ml-[10rem]'}>
-            <Reveal>
-              <Link
-                href="/philosophy"
-                className="group inline-flex items-center gap-3 min-h-[44px] font-sans text-[11px] tracking-[0.2em] uppercase text-amber-muted transition-colors duration-600 hover:text-amber"
-              >
-                <span className="bl-underline">Read the full philosophy</span>
-                <span aria-hidden="true" className="transition-transform duration-600 ease-lux group-hover:translate-x-1">→</span>
-              </Link>
-            </Reveal>
+            <div className="mt-12 md:mt-14 grid md:grid-cols-12">
+              <Reveal className="md:col-start-6 md:col-span-7 lg:col-start-7 lg:col-span-6">
+                <Link href="/philosophy" className="group bl-link transition-opacity duration-600">
+                  <span className="bl-underline">Read the full philosophy</span>
+                  <span aria-hidden="true" className="bl-arrow" />
+                </Link>
+              </Reveal>
+            </div>
           </div>
         </div>
-      </section>
-    </>
+      </div>
+    </section>
   )
 }

@@ -156,6 +156,8 @@ components:
     textColor: "{colors.amber}"
 ---
 
+> **Revamp (Nov 2026):** the visual system was rebuilt as "the reading room" (monochrome, editorial, amber as signal only, the hero line, Fraunces optical sizes, the folio grid, underline inputs, no glow). The current, authoritative description is the "Design system" and "The hero line" sections of CLAUDE.md. The frontmatter tokens above and the prose below describe the previous system (the particle helix hero, amber buttons) and are kept for history; where they disagree with CLAUDE.md, CLAUDE.md wins.
+
 # Design System: Blackline Method
 
 ## Overview

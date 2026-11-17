@@ -1,7 +1,10 @@
 import type { Config } from 'tailwindcss'
 
 /**
- * Blackline design tokens.
+ * Blackline design tokens (revamp: "the reading room").
+ * Monochrome first. Amber is the signal colour: it marks a live reading
+ * (the hero readout point, the drawn timeline, the active principle, the
+ * optimal band, focus rings, form errors) and nothing decorative.
  * Palette is fixed (see DESIGN.md). The additions below are documented
  * tonal relatives of the existing palette, added for contrast and depth:
  *   ink          deeper black for the loader, veil, and 3D canvas ground
@@ -20,13 +23,14 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        black: '#0A0A0A',
-        ink: '#060606',
-        offwhite: '#F5F5F0',
+        black: '#080808',
+        ink: '#040404',
+        graphite: '#111110',
+        offwhite: '#F2F1EC',
         amber: '#C8965A',
         'amber-muted': '#A27A4A',
         gold: '#E2C48F',
-        hairline: '#2A2A2A',
+        hairline: '#262624',
         muted: '#6B6B6B',
         label: '#8C8A84',
         body: '#9C9B96',

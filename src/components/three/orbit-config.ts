@@ -18,7 +18,8 @@ export const ORBIT = {
   haloOpacity: 0.12,
   idleSpeed: 0.16, // radians per second in idle mode
   smoothing: 7, // progress damping; higher = tighter to scroll
-  colors: { amber: '#C8965A', gold: '#E2C48F', dim: '#8C8A84' },
+  // revamp: ring and resting nodes are neutral; amber marks the active pillar and "you" (the signal)
+  colors: { amber: '#8F8D86', gold: '#C8965A', dim: '#8C8A84' },
 }
 
 export const PILLAR_LABELS = ['Hormones', 'Training', 'Nutrition', 'Lifestyle'] as const

@@ -36,7 +36,7 @@ export function ProcessTimeline({ steps, bracket = true }: { steps: TimelineStep
           const { desktop } = mctx.conditions as { desktop: boolean }
           gsap.set(fill, desktop ? { scaleX: 0, scaleY: 1 } : { scaleY: 0, scaleX: 1 })
           gsap.set(bodies, { opacity: 0, y: 10 })
-          gsap.set(dots, { borderColor: '#2A2A2A', backgroundColor: '#0A0A0A', boxShadow: '0 0 0 rgba(0,0,0,0)' })
+          gsap.set(dots, { borderColor: '#262624', backgroundColor: '#080808', boxShadow: '0 0 0 rgba(0,0,0,0)' })
           if (bracketEl) gsap.set(bracketEl, { opacity: 0 })
 
           const tl = gsap.timeline({
@@ -49,7 +49,7 @@ export function ProcessTimeline({ steps, bracket = true }: { steps: TimelineStep
             const reach = desktop ? (i / n) * 0.98 + 0.01 : (i / n) * 0.9 + 0.03
             tl.to(
               dots[i],
-              { borderColor: '#C8965A', backgroundColor: '#C8965A', boxShadow: '0 0 16px rgba(200,150,90,0.55)', duration: 0.05, ease: 'power2.out' },
+              { borderColor: '#C8965A', backgroundColor: '#C8965A', boxShadow: '0 0 14px rgba(200,150,90,0.5)', duration: 0.05, ease: 'power2.out' },
               reach
             )
             tl.to(bodies[i], { opacity: 1, y: 0, duration: 0.12, ease: 'power2.out' }, reach + 0.01)
@@ -84,10 +84,10 @@ export function ProcessTimeline({ steps, bracket = true }: { steps: TimelineStep
           style={{ width: 'calc((100% - 4rem) / 3 + 2rem)' }}
           aria-hidden="true"
         >
-          <span className="bl-label bl-label-amber text-[10px]">the first ninety days</span>
-          <div className="mt-2 h-px bg-amber/30 relative">
-            <span className="absolute left-0 -top-[3px] h-[7px] w-px bg-amber/60" />
-            <span className="absolute right-0 -top-[3px] h-[7px] w-px bg-amber/60" />
+          <span className="bl-label text-[10px]">the first ninety days</span>
+          <div className="mt-2 h-px bg-offwhite/25 relative">
+            <span className="absolute left-0 -top-[3px] h-[7px] w-px bg-offwhite/50" />
+            <span className="absolute right-0 -top-[3px] h-[7px] w-px bg-offwhite/50" />
           </div>
         </div>
       )}
@@ -101,9 +101,9 @@ export function ProcessTimeline({ steps, bracket = true }: { steps: TimelineStep
               aria-hidden="true"
             />
             <div data-step-body>
-              <span className="block bl-label mb-3">{step.index}</span>
-              <p className="bl-label bl-label-amber mb-4">{step.label}</p>
-              <p className="font-sans text-sm md:text-[15px] text-body leading-relaxed tracking-wide max-w-sm">
+              <span className="block bl-label mb-4 tabular-nums">{step.index}</span>
+              <p className="font-serif font-light text-offwhite text-[1.75rem] md:text-[2rem] leading-none tracking-[-0.015em] lowercase mb-5">{step.label}</p>
+              <p className="bl-body max-w-sm">
                 {step.description}
               </p>
             </div>

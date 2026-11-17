@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback } from 'react'
 import Link from 'next/link'
+import { usePathname } from 'next/navigation'
 import { Menu, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 
@@ -25,6 +26,8 @@ export function Header() {
   const overlayRef = useRef<HTMLDivElement>(null)
   const triggerRef = useRef<HTMLButtonElement>(null)
   const closeRef = useRef<HTMLButtonElement>(null)
+  const pathname = usePathname()
+  const isCurrent = (href: string) => pathname === href || pathname.startsWith(`${href}/`)
 
   useEffect(() => {
     let ticking = false
@@ -94,32 +97,46 @@ export function Header() {
         className={[
           'fixed top-0 left-0 right-0 z-50',
           'transition-[background-color,border-color] duration-700 ease-out',
-          scrolled ? 'bg-black/90 backdrop-blur-md border-b border-hairline' : 'bg-transparent border-b border-transparent',
+          scrolled ? 'bg-black/80 backdrop-blur-md border-b border-hairline' : 'bg-transparent border-b border-transparent',
         ].join(' ')}
       >
-        <div className="max-w-7xl mx-auto px-6 md:px-12 h-20 flex items-center justify-between">
+        <div className="bl-wrap h-[var(--bl-header)] flex items-center justify-between">
           <Link
             href="/"
-            className="font-serif text-sm tracking-[0.35em] text-offwhite uppercase transition-opacity duration-600 hover:opacity-60 py-3"
+            className="font-serif text-[13px] tracking-[0.42em] text-offwhite uppercase transition-opacity duration-600 hover:opacity-60 py-3"
             aria-label="Blackline Method, home"
           >
             BLACKLINE
           </Link>
 
-          {/* Desktop navigation */}
-          <nav className="hidden lg:flex items-center gap-10" aria-label="Main navigation">
-            {NAV_LINKS.map((link) => (
-              <Link
-                key={link.href}
-                href={link.href}
-                className="font-sans text-[11px] tracking-[0.2em] uppercase text-label transition-colors duration-600 hover:text-amber py-3 whitespace-nowrap"
-              >
-                {link.label}
-              </Link>
-            ))}
-          </nav>
-
-          <div className="hidden lg:block">
+          {/* Desktop navigation: the current page carries an amber reading point */}
+          <div className="hidden lg:flex items-center gap-12">
+            <nav className="flex items-center gap-9" aria-label="Main navigation">
+              {NAV_LINKS.map((link) => {
+                const current = isCurrent(link.href)
+                return (
+                  <Link
+                    key={link.href}
+                    href={link.href}
+                    aria-current={current ? 'page' : undefined}
+                    className={[
+                      'group relative inline-flex items-center gap-2 py-3 whitespace-nowrap',
+                      'font-sans text-[10.5px] font-medium tracking-[0.2em] uppercase transition-colors duration-600',
+                      current ? 'text-offwhite' : 'text-label hover:text-offwhite',
+                    ].join(' ')}
+                  >
+                    <span
+                      aria-hidden="true"
+                      className={[
+                        'h-[4px] w-[4px] rounded-full bg-amber transition-[opacity,transform] duration-600 ease-lux',
+                        current ? 'opacity-100 scale-100' : 'opacity-0 scale-0',
+                      ].join(' ')}
+                    />
+                    <span className="bl-underline pb-1">{link.label}</span>
+                  </Link>
+                )
+              })}
+            </nav>
             <Button asChild size="sm">
               <Link href="/contact">request a consult</Link>
             </Button>
@@ -128,13 +145,13 @@ export function Header() {
           {/* Mobile trigger */}
           <button
             ref={triggerRef}
-            className="lg:hidden text-offwhite/80 transition-colors duration-600 hover:text-amber -mr-3 p-3"
+            className="lg:hidden text-offwhite/85 transition-colors duration-600 hover:text-offwhite -mr-3 p-3"
             onClick={open}
             aria-label="Open menu"
             aria-expanded={menuOpen}
             aria-controls="bl-mobile-menu"
           >
-            <Menu size={20} strokeWidth={1.25} />
+            <Menu size={20} strokeWidth={1} />
           </button>
         </div>
       </header>
@@ -149,10 +166,10 @@ export function Header() {
         aria-label="Navigation menu"
         aria-hidden={!menuOpen}
       >
-        <div className="flex items-center justify-between px-6 h-20 border-b border-hairline">
+        <div className="bl-wrap flex items-center justify-between h-[var(--bl-header)] border-b border-hairline">
           <Link
             href="/"
-            className="font-serif text-sm tracking-[0.35em] text-offwhite uppercase py-3"
+            className="font-serif text-[13px] tracking-[0.42em] text-offwhite uppercase py-3"
             onClick={close}
             tabIndex={menuOpen ? 0 : -1}
           >
@@ -160,33 +177,35 @@ export function Header() {
           </Link>
           <button
             ref={closeRef}
-            className="text-offwhite/80 transition-colors duration-600 hover:text-amber -mr-3 p-3"
+            className="text-offwhite/80 transition-colors duration-600 hover:text-offwhite -mr-3 p-3"
             onClick={close}
             aria-label="Close menu"
             tabIndex={menuOpen ? 0 : -1}
           >
-            <X size={20} strokeWidth={1.25} />
+            <X size={20} strokeWidth={1} />
           </button>
         </div>
 
-        <nav className="flex flex-col justify-center flex-1 px-6 gap-2" aria-label="Mobile navigation">
+        <nav className="bl-wrap flex flex-col justify-center flex-1 gap-1" aria-label="Mobile navigation">
           {MOBILE_LINKS.map((link) => (
-            <div key={link.href} className="overflow-hidden py-1" data-menu-item>
+            <div key={link.href} className="overflow-hidden py-1 border-b border-hairline/70" data-menu-item>
               <Link
                 href={link.href}
                 data-menu-link
-                className="block font-serif text-[2.6rem] leading-[1.15] font-light text-offwhite/85 tracking-wider lowercase transition-colors duration-600 hover:text-amber"
+                aria-current={isCurrent(link.href) ? 'page' : undefined}
+                className="flex items-center justify-between font-serif text-[2.75rem] leading-[1.2] font-light text-offwhite tracking-[-0.02em] lowercase transition-opacity duration-600 hover:opacity-70"
                 onClick={close}
                 tabIndex={menuOpen ? 0 : -1}
               >
                 {link.label.toLowerCase()}
+                {isCurrent(link.href) && <span aria-hidden="true" className="h-[6px] w-[6px] rounded-full bg-amber" />}
               </Link>
             </div>
           ))}
         </nav>
 
-        <div className="px-6 pb-10 border-t border-hairline pt-8 space-y-6" data-menu-foot>
-          <Button asChild size="lg" className="w-full" glow>
+        <div className="bl-wrap pb-10 pt-8 space-y-6" data-menu-foot>
+          <Button asChild size="lg" className="w-full">
             <Link href="/contact" onClick={close} tabIndex={menuOpen ? 0 : -1}>
               request a consult
             </Link>
