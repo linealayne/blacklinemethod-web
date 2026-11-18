@@ -1,5 +1,4 @@
 import { Reveal } from '@/components/motion/Reveal'
-import { SplitReveal } from '@/components/motion/SplitReveal'
 import { Folio } from '@/components/layout/Folio'
 
 export const PEOPLE = [
@@ -20,7 +19,7 @@ export const PEOPLE = [
 /**
  * Two cards, side by side on desktop, stacked on phones. No photos exist yet
  * (public/team/layne.jpg, public/team/spencer.jpg), so each card carries a
- * serif monogram; swap in a tall portrait when the files land.
+ * display-caps monogram; swap in a tall portrait when the files land.
  */
 export function PracticeCards({ className = '' }: { className?: string }) {
   return (
@@ -35,20 +34,17 @@ export function PracticeCards({ className = '' }: { className?: string }) {
         >
           <div className="flex items-start justify-between gap-6">
             <div>
-              <h3 className="font-serif font-light text-offwhite lowercase tracking-[-0.02em] text-[2.25rem] md:text-[2.75rem] leading-none">
-                {person.name.toLowerCase()}
-              </h3>
+              <h3 className="bl-h3">{person.name}</h3>
               <p className="mt-4 bl-label">{person.role}</p>
             </div>
             <span
-              data-parallax="-30"
-              className="font-serif font-light text-offwhite/[0.14] text-[6.5rem] md:text-[8.5rem] leading-[0.75] tracking-[-0.04em] select-none transition-colors duration-800 ease-lux group-hover:text-offwhite/25"
+              className="bl-serif-caps text-offwhite/[0.12] text-[6rem] md:text-[8rem] leading-[0.75] select-none transition-colors duration-600 ease-lux group-hover:text-amber/35"
               aria-hidden="true"
             >
               {person.name.charAt(0)}
             </span>
           </div>
-          <p className="mt-10 md:mt-14 bl-lead text-offwhite/80 max-w-md">&ldquo;{person.line}&rdquo;</p>
+          <p className="mt-10 md:mt-14 bl-lead text-offwhite/75 max-w-md">&ldquo;{person.line}&rdquo;</p>
         </article>
       ))}
     </Reveal>
@@ -59,11 +55,11 @@ export function PracticeSection() {
   return (
     <Folio label="the practice" ariaLabel="The practice">
       <div className="max-w-4xl">
-        <SplitReveal as="h2" className="bl-h2">
+        <Reveal as="h2" className="bl-h2">
           the practice.
-        </SplitReveal>
-        <Reveal as="p" delay={0.2} className="mt-8 md:mt-10 bl-lead">
-          two people. a small number of clients. by design.
+        </Reveal>
+        <Reveal as="p" delay={0.08} className="mt-7 md:mt-8 bl-lead">
+          Two people. A small number of clients. By design.
         </Reveal>
       </div>
       <PracticeCards className="mt-14 md:mt-20" />

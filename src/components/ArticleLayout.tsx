@@ -1,7 +1,6 @@
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Reveal } from '@/components/motion/Reveal'
-import { SplitReveal } from '@/components/motion/SplitReveal'
 import type { ReactNode } from 'react'
 
 interface ArticleLayoutProps {
@@ -43,23 +42,23 @@ export function ArticleLayout({
         </Reveal>
 
         {/* Title */}
-        <SplitReveal
+        <Reveal
           as="h1"
           className="bl-h2 mb-10"
         >
           {title}
-        </SplitReveal>
+        </Reveal>
 
         {/* Dek */}
-        <Reveal as="p" delay={0.3} className="bl-lead mb-14">
+        <Reveal as="p" delay={0.08} className="bl-lead mb-14">
           {dek}
         </Reveal>
 
         {/* Hairline */}
-        <Reveal as="span" className="bl-rule mb-14" y={0}>{null}</Reveal>
+        <span className="bl-rule mb-14" />
 
         {/* Body */}
-        <Reveal delay={0.15} className="article-body space-y-6 font-sans text-[16px] md:text-[17px] text-body leading-[1.85] tracking-[0.01em]">
+        <Reveal delay={0.08} className="article-body space-y-6 font-sans text-[16px] md:text-[17px] text-body leading-[1.85] tracking-[0.01em]">
           {children}
         </Reveal>
 

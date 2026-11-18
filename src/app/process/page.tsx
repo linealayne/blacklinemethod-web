@@ -1,7 +1,6 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { Reveal } from '@/components/motion/Reveal'
-import { SplitReveal } from '@/components/motion/SplitReveal'
 import { ProcessTimeline } from '@/components/ProcessTimeline'
 import { Button } from '@/components/ui/button'
 
@@ -97,46 +96,46 @@ export default function ProcessPage() {
         <Reveal as="p" className="bl-label bl-tick mb-10">
           the process
         </Reveal>
-        <SplitReveal
+        <Reveal
           as="h1"
           className="bl-h1 mb-10 max-w-4xl"
         >
           what working with us looks like.
-        </SplitReveal>
-        <Reveal as="p" delay={0.3} className="bl-body max-w-lg">
+        </Reveal>
+        <Reveal as="p" delay={0.08} className="bl-body max-w-lg">
           Engagements are structured, not open-ended. The first ninety days establish the baseline.
           Everything after is calibration.
         </Reveal>
       </section>
 
       {/* The first 90 days */}
-      <div className="bl-wrap" aria-hidden="true"><Reveal as="span" className="bl-rule" y={0} start="top 96%">{null}</Reveal></div>
+      <div className="bl-wrap" aria-hidden="true"><div className="relative"><span className="bl-rule" /><span className="bl-cross -left-1 -top-1" /><span className="bl-cross -right-1 -top-1" /></div></div>
       <section aria-label="The first 90 days" className="bl-wrap py-24 md:py-32">
         <Reveal as="p" className="bl-label bl-tick mb-10">
           the first 90 days
         </Reveal>
-        <SplitReveal
+        <Reveal
           as="h2"
           className="bl-h3 mb-16 md:mb-20"
         >
           intake. protocol. recalibration.
-        </SplitReveal>
+        </Reveal>
         <ProcessTimeline steps={STEPS} />
       </section>
 
       {/* Engagement tiers */}
-      <div className="bl-wrap" aria-hidden="true"><Reveal as="span" className="bl-rule" y={0} start="top 96%">{null}</Reveal></div>
+      <div className="bl-wrap" aria-hidden="true"><div className="relative"><span className="bl-rule" /><span className="bl-cross -left-1 -top-1" /><span className="bl-cross -right-1 -top-1" /></div></div>
       <section aria-label="Engagement tiers" className="bl-wrap py-24 md:py-32">
         <Reveal as="p" className="bl-label bl-tick mb-10">
           engagement tiers
         </Reveal>
-        <SplitReveal
+        <Reveal
           as="h2"
           className="bl-h3 mb-6"
         >
           three tiers. one conversation.
-        </SplitReveal>
-        <Reveal as="p" delay={0.2} className="bl-body max-w-lg mb-16 md:mb-20">
+        </Reveal>
+        <Reveal as="p" delay={0.08} className="bl-body max-w-lg mb-16 md:mb-20">
           The right engagement is determined in the intake consult. Pricing is a conversation, not a
           line item on a webpage.
         </Reveal>
@@ -144,7 +143,7 @@ export default function ProcessPage() {
         <Reveal stagger className="grid md:grid-cols-3 gap-12 md:gap-0 border-t border-hairline md:divide-x md:divide-hairline">
           {TIERS.map((tier) => (
             <div key={tier.id} className="pt-8 md:pt-10 md:px-8 md:first:pl-0 md:last:pr-0 h-full">
-              <p className="font-serif font-light text-offwhite text-[2rem] md:text-[2.4rem] leading-none tracking-[-0.02em] lowercase mb-6">{tier.name}</p>
+              <p className="bl-h3 mb-6">{tier.name}</p>
               <p className="bl-body mb-8">
                 {tier.description}
               </p>
@@ -162,17 +161,17 @@ export default function ProcessPage() {
       </section>
 
       {/* What we do / don't */}
-      <div className="bl-wrap" aria-hidden="true"><Reveal as="span" className="bl-rule" y={0} start="top 96%">{null}</Reveal></div>
+      <div className="bl-wrap" aria-hidden="true"><div className="relative"><span className="bl-rule" /><span className="bl-cross -left-1 -top-1" /><span className="bl-cross -right-1 -top-1" /></div></div>
       <section aria-label="What we do and don't do" className="bl-wrap py-24 md:py-32">
         <Reveal as="p" className="bl-label bl-tick mb-10">
           scope
         </Reveal>
-        <SplitReveal
+        <Reveal
           as="h2"
           className="bl-h3 mb-16 md:mb-20"
         >
           what we do. what we don&apos;t.
-        </SplitReveal>
+        </Reveal>
 
         <div className="grid md:grid-cols-2 gap-14 md:gap-24">
           <Reveal>
@@ -202,7 +201,7 @@ export default function ProcessPage() {
       </section>
 
       {/* CTA */}
-      <div className="bl-wrap" aria-hidden="true"><Reveal as="span" className="bl-rule" y={0} start="top 96%">{null}</Reveal></div>
+      <div className="bl-wrap" aria-hidden="true"><div className="relative"><span className="bl-rule" /><span className="bl-cross -left-1 -top-1" /><span className="bl-cross -right-1 -top-1" /></div></div>
       <section aria-label="Contact CTA" className="bl-wrap pt-16 pb-6">
         <Reveal>
           <div className="flex flex-col sm:flex-row sm:items-center gap-8">

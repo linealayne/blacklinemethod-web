@@ -46,14 +46,12 @@ export function Header() {
 
   const open = useCallback(() => {
     setMenuOpen(true)
-    window.__lenis?.stop()
     document.body.style.overflow = 'hidden'
     requestAnimationFrame(() => closeRef.current?.focus())
   }, [])
 
   const close = useCallback(() => {
     setMenuOpen(false)
-    window.__lenis?.start()
     document.body.style.overflow = ''
     triggerRef.current?.focus()
   }, [])
@@ -87,8 +85,7 @@ export function Header() {
   useEffect(() => {
     return () => {
       document.body.style.overflow = ''
-      window.__lenis?.start()
-    }
+      }
   }, [])
 
   return (
@@ -103,14 +100,15 @@ export function Header() {
         <div className="bl-wrap h-[var(--bl-header)] flex items-center justify-between">
           <Link
             href="/"
-            className="font-serif text-[13px] tracking-[0.42em] text-offwhite uppercase transition-opacity duration-600 hover:opacity-60 py-3"
+            data-intro="wordmark"
+            className="bl-wordmark text-offwhite transition-opacity duration-600 hover:opacity-60 py-3"
             aria-label="Blackline Method, home"
           >
             BLACKLINE
           </Link>
 
           {/* Desktop navigation: the current page carries an amber reading point */}
-          <div className="hidden lg:flex items-center gap-12">
+          <div className="hidden lg:flex items-center gap-12" data-intro="" style={{ '--bl-intro-delay': '0.35s' } as React.CSSProperties}>
             <nav className="flex items-center gap-9" aria-label="Main navigation">
               {NAV_LINKS.map((link) => {
                 const current = isCurrent(link.href)
@@ -145,6 +143,8 @@ export function Header() {
           {/* Mobile trigger */}
           <button
             ref={triggerRef}
+            data-intro=""
+            style={{ '--bl-intro-delay': '0.35s' } as React.CSSProperties}
             className="lg:hidden text-offwhite/85 transition-colors duration-600 hover:text-offwhite -mr-3 p-3"
             onClick={open}
             aria-label="Open menu"
@@ -169,7 +169,7 @@ export function Header() {
         <div className="bl-wrap flex items-center justify-between h-[var(--bl-header)] border-b border-hairline">
           <Link
             href="/"
-            className="font-serif text-[13px] tracking-[0.42em] text-offwhite uppercase py-3"
+            className="bl-wordmark text-offwhite py-3"
             onClick={close}
             tabIndex={menuOpen ? 0 : -1}
           >
@@ -188,16 +188,16 @@ export function Header() {
 
         <nav className="bl-wrap flex flex-col justify-center flex-1 gap-1" aria-label="Mobile navigation">
           {MOBILE_LINKS.map((link) => (
-            <div key={link.href} className="overflow-hidden py-1 border-b border-hairline/70" data-menu-item>
+            <div key={link.href} className="overflow-hidden py-2 border-b border-hairline/70" data-menu-item>
               <Link
                 href={link.href}
                 data-menu-link
                 aria-current={isCurrent(link.href) ? 'page' : undefined}
-                className="flex items-center justify-between font-serif text-[2.75rem] leading-[1.2] font-light text-offwhite tracking-[-0.02em] lowercase transition-opacity duration-600 hover:opacity-70"
+                className="flex items-center justify-between bl-serif-caps text-[1.9rem] leading-[1.6] tracking-[0.08em] transition-opacity duration-600 hover:opacity-70"
                 onClick={close}
                 tabIndex={menuOpen ? 0 : -1}
               >
-                {link.label.toLowerCase()}
+                {link.label}
                 {isCurrent(link.href) && <span aria-hidden="true" className="h-[6px] w-[6px] rounded-full bg-amber" />}
               </Link>
             </div>

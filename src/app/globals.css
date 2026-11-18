@@ -3,9 +3,10 @@
 @tailwind utilities;
 
 /* ------------------------------------------------------------------
-   Design tokens (mirrors tailwind.config.ts; see DESIGN.md and CLAUDE.md)
-   "The reading room": monochrome, editorial, clinical. Amber is the
-   signal colour and marks a live reading only.
+   Design tokens (mirrors tailwind.config.ts; see CLAUDE.md and DESIGN.md)
+   "The living sequence": near-black, greys, off-white, amber as the
+   accent. Teal and violet are rich in the hero scene only; outside it,
+   teal is a rare secondary accent (a decoded card, the selected pillar).
    ------------------------------------------------------------------ */
 :root {
   --bl-black: #080808;
@@ -14,7 +15,8 @@
   --bl-offwhite: #F2F1EC;
   --bl-amber: #C8965A;
   --bl-amber-muted: #A27A4A;
-  --bl-gold: #E2C48F;
+  --bl-teal: #2FA39A;
+  --bl-violet: #7A6CF2;
   --bl-hairline: #262624;
   --bl-label: #8C8A84;
   --bl-body: #9C9B96;
@@ -27,10 +29,8 @@
   /* motion */
   --bl-ease-lux: cubic-bezier(0.22, 1, 0.36, 1);
   --bl-ease-out: cubic-bezier(0.23, 1, 0.32, 1);
-  --bl-ease-draw: cubic-bezier(0.65, 0, 0.35, 1);
-  --bl-dur-fast: 160ms;
-  --bl-dur-ui: 240ms;
-  --bl-dur-slow: 600ms;
+  --bl-ease-draw: cubic-bezier(0.45, 0, 0.2, 1);
+  --bl-ease-flip: cubic-bezier(0.7, 0, 0.2, 1);
 }
 @media (min-width: 768px) {
   :root { --bl-gutter: 48px; --bl-header: 84px; }
@@ -47,11 +47,6 @@
     overflow-x: clip;
   }
 
-  /* Native smooth scroll only when Lenis is not driving the page */
-  html:not(.bl-lenis):not(.bl-reduced) {
-    scroll-behavior: smooth;
-  }
-
   body {
     background-color: var(--bl-black);
     color: var(--bl-offwhite);
@@ -62,14 +57,14 @@
     overflow-x: clip;
   }
 
-  /* Fraunces: optical sizes on, softness off. Display sizes get the sharp,
-     high-contrast cut; small italic leads get the sturdier text cut. */
+  /* Fraunces is set exactly as the nav wordmark: weight 400, the small
+     optical size (sturdy, low contrast), softness off. Pinning the optical
+     size keeps headlines the same face as the wordmark at any size. */
   .font-serif {
-    font-optical-sizing: auto;
-    font-variation-settings: 'SOFT' 0;
+    font-optical-sizing: none;
+    font-variation-settings: 'opsz' 14, 'SOFT' 0;
   }
 
-  /* Browser surfaces carry the palette too */
   ::selection {
     background: rgba(242, 241, 236, 0.9);
     color: var(--bl-black);
@@ -85,15 +80,12 @@
   input, textarea { caret-color: var(--bl-amber); scroll-margin-top: 7rem; }
   [id] { scroll-margin-top: 6rem; }
 
-  /* Focus ring: amber hairline, no browser default */
   *:focus-visible {
     outline: 1px solid var(--bl-amber);
     outline-offset: 3px;
   }
 
-  button {
-    background: none;
-  }
+  button { background: none; }
 
   a, button, [role="button"], [role="slider"], label[for], summary {
     cursor: pointer;
@@ -102,81 +94,93 @@
 }
 
 /* ------------------------------------------------------------------
-   Type scale. Lowercase Fraunces headlines set tight (negative tracking,
-   sub-1 leading) the way a printed masthead is set; Inter for everything
-   that carries information.
+   Type. Two faces only:
+   - Fraunces, set like the BLACKLINE wordmark (uppercase, tracked) for
+     every piece of display type.
+   - Inter for labels, nav, buttons (small, tracked, uppercase) and body
+     (sentence case).
    ------------------------------------------------------------------ */
 @layer components {
   .bl-display,
   .bl-h1,
   .bl-h2,
   .bl-h3,
-  .bl-title {
+  .bl-title,
+  .bl-serif-caps {
     font-family: var(--font-fraunces), Georgia, serif;
-    font-weight: 300;
+    font-weight: 400;
+    font-style: normal;
     color: var(--bl-offwhite);
-    text-transform: lowercase;
-    font-optical-sizing: auto;
-    font-variation-settings: 'SOFT' 0;
+    text-transform: uppercase;
+    font-optical-sizing: none;
+    font-variation-settings: 'opsz' 14, 'SOFT' 0;
     text-wrap: balance;
   }
-  /* The hero line only */
+  /* The hero headline only */
   .bl-display {
-    font-size: clamp(3.4rem, 11.2vw, 11.5rem);
-    line-height: 0.9;
-    letter-spacing: -0.035em;
+    font-size: clamp(2.35rem, 6vw, 6.1rem);
+    line-height: 1.02;
+    letter-spacing: 0.045em;
   }
   /* Page titles */
   .bl-h1 {
-    font-size: clamp(3rem, 8.4vw, 8.75rem);
-    line-height: 0.94;
-    letter-spacing: -0.032em;
+    font-size: clamp(2.05rem, 4.6vw, 4.6rem);
+    line-height: 1.06;
+    letter-spacing: 0.055em;
   }
   /* Section statements */
   .bl-h2 {
-    font-size: clamp(2.4rem, 5.2vw, 5.4rem);
-    line-height: 0.98;
-    letter-spacing: -0.028em;
+    font-size: clamp(1.65rem, 3.05vw, 3rem);
+    line-height: 1.12;
+    letter-spacing: 0.065em;
   }
   /* Sub-section statements */
   .bl-h3 {
-    font-size: clamp(2rem, 3.6vw, 3.6rem);
-    line-height: 1.02;
-    letter-spacing: -0.022em;
+    font-size: clamp(1.35rem, 2.2vw, 2.1rem);
+    line-height: 1.16;
+    letter-spacing: 0.07em;
   }
-  /* Entry titles in lists */
+  /* Entry titles: cards, pillars, tiers, list rows */
   .bl-title {
-    font-size: clamp(1.45rem, 2.3vw, 2.05rem);
-    line-height: 1.12;
-    letter-spacing: -0.012em;
+    font-size: clamp(1.05rem, 1.4vw, 1.3rem);
+    line-height: 1.3;
+    letter-spacing: 0.11em;
   }
-  /* Italic serif aside */
-  .bl-lead {
+  /* The wordmark itself */
+  .bl-wordmark {
     font-family: var(--font-fraunces), Georgia, serif;
-    font-style: italic;
-    font-weight: 300;
-    font-size: 1.1875rem;
-    line-height: 1.55;
-    color: var(--bl-body);
-    max-width: 34rem;
+    font-weight: 400;
+    font-size: 13px;
+    letter-spacing: 0.42em;
+    text-transform: uppercase;
+    font-optical-sizing: none;
+    font-variation-settings: 'opsz' 14, 'SOFT' 0;
+  }
+  /* A larger body line (formerly the italic serif aside): Inter, sentence case */
+  .bl-lead {
+    font-family: var(--font-inter), system-ui, sans-serif;
+    font-weight: 400;
+    font-size: 17px;
+    line-height: 1.6;
+    letter-spacing: 0;
+    color: #B9B8B2;
+    max-width: 36rem;
   }
   @media (min-width: 768px) {
-    .bl-lead { font-size: 1.3125rem; }
+    .bl-lead { font-size: 18.5px; }
   }
-  /* Body copy */
   .bl-body {
     font-family: var(--font-inter), system-ui, sans-serif;
     font-size: 14.5px;
     line-height: 1.7;
     letter-spacing: 0.005em;
     color: var(--bl-body);
-    max-width: 30rem;
+    max-width: 32rem;
   }
   @media (min-width: 768px) {
     .bl-body { font-size: 15.5px; }
   }
 
-  /* The container every section shares */
   .bl-wrap {
     width: 100%;
     max-width: 1440px;
@@ -184,33 +188,33 @@
     padding-inline: var(--bl-gutter);
   }
 
-  /* Folio grid: a margin column for the section label (sticky on desktop,
-     like an annotation in a report margin) and a content column. */
+  /* Folio grid: the section label in a margin column, the content beside it.
+     Nothing sticks; the label scrolls with its section. */
   .bl-folio {
     display: grid;
     grid-template-columns: minmax(0, 1fr);
-    row-gap: 2rem;
+    row-gap: 2.25rem;
   }
   @media (min-width: 1024px) {
     .bl-folio {
       grid-template-columns: minmax(12rem, 3fr) minmax(0, 9fr);
       column-gap: 3rem;
     }
-    .bl-folio > .bl-margin {
-      position: sticky;
-      top: calc(var(--bl-header) + 2.5rem);
-      align-self: start;
-    }
+  }
+
+  .bl-rule {
+    display: block;
+    height: 1px;
+    width: 100%;
+    background: var(--bl-hairline);
   }
 }
 
 @layer utilities {
   .hairline-top    { border-top: 1px solid var(--bl-hairline); }
   .hairline-bottom { border-bottom: 1px solid var(--bl-hairline); }
-  .hairline-amber  { border-top: 1px solid rgba(200, 150, 90, 0.35); }
 
-  /* Quiet uppercase label, set like a column heading on a lab report:
-     small, medium weight, moderately tracked, led by a short tick. */
+  /* "DALLAS, TEXAS · BY APPOINTMENT": Inter 500, 10.5px, 0.2em, uppercase */
   .bl-label {
     font-family: var(--font-inter), system-ui, sans-serif;
     font-size: 10.5px;
@@ -236,7 +240,6 @@
     flex: none;
   }
 
-  /* Quiet text link with a drawn underline */
   .bl-link {
     display: inline-flex;
     align-items: center;
@@ -251,66 +254,50 @@
   }
 }
 
-/* ------------------------------------------------------------------
-   Drawn rules: a 1px line that draws left to right when it enters view
-   (Reveal adds .bl-in). The site's one recurring gesture after the hero.
-   ------------------------------------------------------------------ */
-@layer components {
-  .bl-rule {
-    display: block;
-    height: 1px;
-    width: 100%;
-    background: var(--bl-hairline);
-    transform-origin: left center;
-  }
+/* Section corner marks: a small registration cross where a top rule
+   starts and ends, like the crop marks on a printed report. */
+.bl-cross {
+  position: absolute;
+  width: 9px;
+  height: 9px;
+  pointer-events: none;
 }
-html.bl-motion .bl-rule[data-reveal]:not(.bl-in) { opacity: 1; transform: scaleX(0); }
-html.bl-motion .bl-rule[data-reveal] {
-  transition: transform 1.4s var(--bl-ease-draw);
-  transition-delay: var(--bl-delay, 0s);
+.bl-cross::before, .bl-cross::after {
+  content: '';
+  position: absolute;
+  background: rgba(242, 241, 236, 0.32);
 }
+.bl-cross::before { left: 4px; top: 0; width: 1px; height: 9px; }
+.bl-cross::after { top: 4px; left: 0; height: 1px; width: 9px; }
 
 /* ------------------------------------------------------------------
-   Reveal choreography
-   CSS-driven: hidden until .bl-in, then a 0.9s rise. Stagger containers
-   keep themselves visible and animate their children with nth-child
-   delays. The hero headline never carries data-reveal, so it paints at
-   first paint. If JS never arrives, everything shows after 4s.
+   Entrances: the only scroll-related motion. A one-time 0.5s fade and
+   12px rise when an element first enters view. Reduced motion never hides
+   anything; without JavaScript everything shows after 2.5s.
    ------------------------------------------------------------------ */
 html.bl-motion [data-reveal]:not(.bl-in),
 html.bl-motion [data-reveal="stagger"]:not(.bl-in) > * {
   opacity: 0;
-  transform: translateY(var(--bl-rise, 24px));
+  transform: translateY(var(--bl-rise, 12px));
 }
 html.bl-motion [data-reveal],
 html.bl-motion [data-reveal="stagger"] > * {
-  transition: opacity 1s var(--bl-ease-lux), transform 1s var(--bl-ease-lux);
+  transition: opacity 0.5s var(--bl-ease-out), transform 0.5s var(--bl-ease-out);
   transition-delay: var(--bl-delay, 0s);
 }
 html.bl-motion [data-reveal="stagger"]:not(.bl-in) {
   opacity: 1;
   transform: none;
 }
-html.bl-motion [data-reveal="stagger"] > *:nth-child(2) { transition-delay: calc(var(--bl-delay, 0s) + 0.08s); }
-html.bl-motion [data-reveal="stagger"] > *:nth-child(3) { transition-delay: calc(var(--bl-delay, 0s) + 0.16s); }
-html.bl-motion [data-reveal="stagger"] > *:nth-child(4) { transition-delay: calc(var(--bl-delay, 0s) + 0.24s); }
-html.bl-motion [data-reveal="stagger"] > *:nth-child(5) { transition-delay: calc(var(--bl-delay, 0s) + 0.32s); }
-html.bl-motion [data-reveal="stagger"] > *:nth-child(6) { transition-delay: calc(var(--bl-delay, 0s) + 0.4s); }
-html.bl-motion [data-reveal="stagger"] > *:nth-child(n + 7) { transition-delay: calc(var(--bl-delay, 0s) + 0.48s); }
-/* Returning desktop visitors: the headline waits for its masked reveal */
-html.bl-motion.bl-desktop.bl-no-loader:not(.bl-hydrated) [data-hero-h1] { opacity: 0; animation: bl-reveal-safety 0s 4s forwards; }
+html.bl-motion [data-reveal="stagger"] > *:nth-child(2) { transition-delay: calc(var(--bl-delay, 0s) + 0.06s); }
+html.bl-motion [data-reveal="stagger"] > *:nth-child(3) { transition-delay: calc(var(--bl-delay, 0s) + 0.12s); }
+html.bl-motion [data-reveal="stagger"] > *:nth-child(n + 4) { transition-delay: calc(var(--bl-delay, 0s) + 0.18s); }
 
 html.bl-motion:not(.bl-hydrated) [data-reveal]:not(.bl-in),
 html.bl-motion:not(.bl-hydrated) [data-reveal="stagger"]:not(.bl-in) > * {
-  animation: bl-reveal-safety 0s 4s forwards;
+  animation: bl-reveal-safety 0s 2.5s forwards;
 }
-@keyframes bl-reveal-safety { to { opacity: 1; transform: none; } }
-
-/* Pinned sections on short desktop viewports: align to the top under the header */
-@media (min-width: 768px) and (max-height: 820px) {
-  .bl-pinned { align-items: flex-start; }
-  .bl-pinned > div { padding-top: 6.5rem; padding-bottom: 2rem; }
-}
+@keyframes bl-reveal-safety { to { opacity: 1; transform: none; filter: none; } }
 
 /* Skip link: visible only when focused */
 .bl-skip {
@@ -330,98 +317,71 @@ html.bl-motion:not(.bl-hydrated) [data-reveal="stagger"]:not(.bl-in) > * {
 }
 .bl-skip:focus-visible { transform: translateY(0); }
 
-/* SplitText line masks: give descenders room so the clip never bites */
-.bl-line-mask {
-  padding-bottom: 0.2em;
-  margin-bottom: -0.2em;
-}
-
 /* ------------------------------------------------------------------
-   Hero line. The static trace is the server-rendered fallback (reduced
-   motion, no JS). Motion clients hide it while the canvas draws; it
-   comes back after 4s if JS never arrives.
+   Hero intro (first homepage visit per session, motion + WebGL). The
+   page starts dark; the particles converge into the helix; when it locks,
+   finishIntro() adds .bl-intro-done and the wordmark, the header, and the
+   hero copy resolve in. Click, tap, scroll, or a key skips. Safety: if the
+   scene never reports, everything shows after 5s.
    ------------------------------------------------------------------ */
-html.bl-motion .bl-line-static { opacity: 0; animation: bl-reveal-safety 0s 4s forwards; }
-html.bl-motion.bl-hydrated .bl-line-static { animation: none; }
-.bl-line-canvas { opacity: 0; transition: opacity 0.6s var(--bl-ease-out); }
-.bl-line-canvas.is-live { opacity: 1; }
-
-/* ------------------------------------------------------------------
-   Loader (first visit per session, every device). A biomarker trace
-   draws across the screen: erratic at the left, settling to a calm line
-   at the right. Click, tap, or any key skips it. Hidden immediately for
-   returning visitors and reduced motion; safety-hidden after 3s.
-   ------------------------------------------------------------------ */
-#bl-loader {
-  position: fixed;
-  inset: 0;
-  z-index: 200;
-  background: var(--bl-ink);
-  animation: bl-loader-safety 0s 3s forwards;
-  cursor: pointer;
-}
-@keyframes bl-loader-safety { to { visibility: hidden; pointer-events: none; } }
-html.bl-no-loader #bl-loader,
-html.bl-reduced #bl-loader,
-html.bl-loader-done #bl-loader { display: none; }
-#bl-loader .wordmark {
-  position: absolute;
-  left: 50%;
-  top: calc(50% - 48px);
-  transform: translateX(-50%);
-  font-family: var(--font-fraunces), Georgia, serif;
-  font-size: 13px;
-  letter-spacing: 0.42em;
-  padding-left: 0.42em;
-  text-transform: uppercase;
-  color: var(--bl-offwhite);
+html.bl-intro:not(.bl-intro-done) [data-intro] {
   opacity: 0;
-  white-space: nowrap;
+  animation: bl-reveal-safety 0s 5s forwards;
 }
-#bl-loader .trace {
-  position: absolute;
-  left: 0;
-  top: calc(50% - 20px);
-  width: 100%;
-  height: 40px;
+html.bl-intro:not(.bl-intro-done) [data-intro="resolve"] { filter: blur(12px); transform: translateY(10px); }
+html.bl-intro:not(.bl-intro-done) [data-intro="wordmark"] { letter-spacing: 0.9em; filter: blur(6px); }
+html.bl-intro [data-intro] {
+  transition:
+    opacity 0.9s var(--bl-ease-out) var(--bl-intro-delay, 0s),
+    filter 1s var(--bl-ease-out) var(--bl-intro-delay, 0s),
+    transform 1s var(--bl-ease-out) var(--bl-intro-delay, 0s),
+    letter-spacing 1.2s var(--bl-ease-out) var(--bl-intro-delay, 0s);
+}
+
+/* The hero scene: canvas fades in on its first frame */
+.bl-helix-canvas { opacity: 0; transition: opacity 0.8s var(--bl-ease-out); }
+.bl-helix-canvas.is-live { opacity: 1; }
+
+/* Static rendered fallback (reduced motion, no WebGL, no JavaScript). The
+   image only downloads when one of these applies. */
+.bl-helix-still {
+  display: none;
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-position: 70% 50%;
+  background-image: url('/hero/helix-desktop.jpg');
+}
+@media (max-width: 767px) {
+  .bl-helix-still { background-image: url('/hero/helix-mobile.jpg'); background-position: 50% 0%; }
+}
+html:not(.bl-motion) .bl-helix-still,
+html.bl-nowebgl .bl-helix-still,
+.bl-helix-still.is-on { display: block; }
+
+/* HUD biomarker range bars: a soft segment that breathes along a hairline track */
+.bl-hud-bar {
+  position: relative;
+  height: 1px;
+  background: rgba(242, 241, 236, 0.14);
   overflow: visible;
 }
-#bl-loader .trace path {
-  fill: none;
-  stroke: var(--bl-offwhite);
-  stroke-width: 1;
-}
-/* revealed by a clip that moves in x, so the read head stays on the tip */
-#bl-loader .trace { clip-path: inset(-20px 100% -20px 0); }
-#bl-loader .head {
+.bl-hud-bar > i {
   position: absolute;
-  top: calc(50% - 2.5px);
-  left: 0;
-  width: 5px;
-  height: 5px;
-  margin-left: -2.5px;
-  border-radius: 9999px;
-  background: var(--bl-amber);
-  box-shadow: 0 0 14px 2px rgba(200, 150, 90, 0.55);
-  opacity: 0;
+  top: -1px;
+  height: 3px;
+  left: var(--a, 30%);
+  width: var(--w, 30%);
+  background: linear-gradient(90deg, transparent, var(--c, var(--bl-teal)), transparent);
+  opacity: 0.8;
+  animation: bl-hud-drift var(--d, 7s) ease-in-out infinite alternate;
 }
-/* Playing: trace 1.15s, wordmark from 0.25s, hold, fade 0.45s from 1.35s */
-#bl-loader.is-playing { animation: bl-loader-out 0.45s var(--bl-ease-out) 1.35s forwards; }
-#bl-loader.is-playing .trace { animation: bl-loader-trace 1.15s var(--bl-ease-draw) forwards; }
-#bl-loader.is-playing .head { animation: bl-loader-head 1.15s var(--bl-ease-draw) forwards; }
-#bl-loader.is-playing .wordmark { animation: bl-loader-word 0.9s var(--bl-ease-out) 0.25s forwards; }
-#bl-loader.is-skipped { animation: bl-loader-out 0.3s var(--bl-ease-out) forwards; }
-@keyframes bl-loader-trace { to { clip-path: inset(-20px 0 -20px 0); } }
-@keyframes bl-loader-head {
-  0% { transform: translateX(0); opacity: 0; }
-  8% { opacity: 1; }
-  92% { opacity: 1; }
-  100% { transform: translateX(100vw); opacity: 0; }
+@keyframes bl-hud-drift {
+  0% { transform: translateX(-18%); opacity: 0.5; }
+  100% { transform: translateX(18%); opacity: 0.95; }
 }
-@keyframes bl-loader-word { from { opacity: 0; letter-spacing: 0.3em; } to { opacity: 1; letter-spacing: 0.42em; } }
-@keyframes bl-loader-out { to { opacity: 0; visibility: hidden; pointer-events: none; } }
+html.bl-reduced .bl-hud-bar > i { animation: none; }
 
-/* Route veil: fade through black between routes (CSS transitions, no library) */
+/* Route veil: fade through black between routes */
 #bl-veil {
   position: fixed;
   inset: 0;
@@ -438,16 +398,16 @@ html.bl-loader-done #bl-loader { display: none; }
   transition: opacity 0.22s cubic-bezier(0.4, 0, 1, 1), visibility 0s;
 }
 
-/* Mobile menu: overlay fades, serif links slide up through masks in sequence */
+/* Mobile menu: overlay fades, the display-caps links slide up through masks */
 #bl-mobile-menu {
   opacity: 0;
   visibility: hidden;
-  transition: opacity 0.5s var(--bl-ease-lux), visibility 0s linear 0.5s;
+  transition: opacity 0.4s var(--bl-ease-lux), visibility 0s linear 0.4s;
 }
 #bl-mobile-menu.is-open {
   opacity: 1;
   visibility: visible;
-  transition: opacity 0.5s var(--bl-ease-lux), visibility 0s;
+  transition: opacity 0.4s var(--bl-ease-lux), visibility 0s;
 }
 #bl-mobile-menu [data-menu-link] {
   transform: translateY(110%);
@@ -455,55 +415,43 @@ html.bl-loader-done #bl-loader { display: none; }
 }
 #bl-mobile-menu.is-open [data-menu-link] {
   transform: none;
-  transition: transform 0.9s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
 }
-#bl-mobile-menu.is-open [data-menu-item]:nth-child(1) [data-menu-link] { transition-delay: 0.12s; }
-#bl-mobile-menu.is-open [data-menu-item]:nth-child(2) [data-menu-link] { transition-delay: 0.19s; }
-#bl-mobile-menu.is-open [data-menu-item]:nth-child(3) [data-menu-link] { transition-delay: 0.26s; }
-#bl-mobile-menu.is-open [data-menu-item]:nth-child(4) [data-menu-link] { transition-delay: 0.33s; }
-#bl-mobile-menu.is-open [data-menu-item]:nth-child(5) [data-menu-link] { transition-delay: 0.4s; }
-#bl-mobile-menu [data-menu-foot] {
-  opacity: 0;
-  transition: opacity 0.2s var(--bl-ease-out);
-}
-#bl-mobile-menu.is-open [data-menu-foot] {
-  opacity: 1;
-  transition: opacity 0.6s var(--bl-ease-lux) 0.45s;
-}
+#bl-mobile-menu.is-open [data-menu-item]:nth-child(1) [data-menu-link] { transition-delay: 0.08s; }
+#bl-mobile-menu.is-open [data-menu-item]:nth-child(2) [data-menu-link] { transition-delay: 0.13s; }
+#bl-mobile-menu.is-open [data-menu-item]:nth-child(3) [data-menu-link] { transition-delay: 0.18s; }
+#bl-mobile-menu.is-open [data-menu-item]:nth-child(4) [data-menu-link] { transition-delay: 0.23s; }
+#bl-mobile-menu.is-open [data-menu-item]:nth-child(5) [data-menu-link] { transition-delay: 0.28s; }
+#bl-mobile-menu [data-menu-foot] { opacity: 0; transition: opacity 0.2s var(--bl-ease-out); }
+#bl-mobile-menu.is-open [data-menu-foot] { opacity: 1; transition: opacity 0.5s var(--bl-ease-lux) 0.32s; }
 
-/* Film grain: a very light static texture, drifted in steps */
+/* Film grain: a very light static texture over everything */
 #bl-grain {
   position: fixed;
-  inset: -50%;
-  width: 200%;
-  height: 200%;
+  inset: 0;
   z-index: 140;
   pointer-events: none;
-  opacity: 0.03;
+  opacity: 0.035;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 1 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
   background-size: 240px 240px;
-  animation: bl-grain 1.6s steps(6) infinite;
 }
-@keyframes bl-grain {
-  0% { transform: translate3d(0, 0, 0); }
-  100% { transform: translate3d(-6%, -4%, 0); }
-}
-html.bl-reduced #bl-grain { animation: none; }
 
-/* Drawn underline (entry titles, quiet links) */
+/* ------------------------------------------------------------------
+   Links: a drawn underline (resting low-contrast, drawn in amber on
+   hover) and a drawn 1px arrow that extends.
+   ------------------------------------------------------------------ */
 .bl-underline {
   background-image: linear-gradient(currentColor, currentColor);
   background-repeat: no-repeat;
   background-size: 0% 1px;
   background-position: left 100%;
-  transition: background-size 0.7s var(--bl-ease-lux);
+  transition: background-size 0.5s var(--bl-ease-lux);
 }
 @media (hover: hover) and (pointer: fine) {
   .group:hover .bl-underline, .bl-underline:hover { background-size: 100% 1px; }
 }
-/* Quiet links carry a resting underline at low contrast, drawn bright on hover */
 .bl-link .bl-underline {
-  background-image: linear-gradient(currentColor, currentColor), linear-gradient(rgba(242, 241, 236, 0.22), rgba(242, 241, 236, 0.22));
+  background-image: linear-gradient(var(--bl-amber), var(--bl-amber)), linear-gradient(rgba(242, 241, 236, 0.22), rgba(242, 241, 236, 0.22));
   background-size: 0% 1px, 100% 1px;
   background-position: left 100%, left 100%;
   padding-bottom: 6px;
@@ -511,14 +459,13 @@ html.bl-reduced #bl-grain { animation: none; }
 @media (hover: hover) and (pointer: fine) {
   .bl-link:hover .bl-underline { background-size: 100% 1px, 100% 1px; }
 }
-/* The arrow after a quiet link is a drawn 1px line with a tip, not a glyph */
 .bl-arrow {
   position: relative;
   display: inline-block;
   width: 22px;
   height: 1px;
   background: currentColor;
-  transition: width 0.6s var(--bl-ease-lux);
+  transition: width 0.45s var(--bl-ease-lux);
   flex: none;
 }
 .bl-arrow::after {
@@ -531,7 +478,6 @@ html.bl-reduced #bl-grain { animation: none; }
   border-top: 1px solid currentColor;
   border-right: 1px solid currentColor;
   transform: rotate(45deg);
-  transform-origin: center;
 }
 @media (hover: hover) and (pointer: fine) {
   .group:hover .bl-arrow, .bl-link:hover .bl-arrow { width: 34px; }
@@ -541,8 +487,59 @@ html.bl-reduced #bl-grain { animation: none; }
 .bl-status-in { animation: bl-status 0.3s var(--bl-ease-out); }
 @keyframes bl-status { from { opacity: 0.2; transform: translateY(4px); } to { opacity: 1; transform: none; } }
 
-/* Pressable feedback on every real button */
-.bl-press { transition: transform var(--bl-dur-fast) var(--bl-ease-out); }
+/* ------------------------------------------------------------------
+   Sequence cards (principles). A 3D flip on hover or focus (desktop),
+   tap on touch. Reduced motion: the back content shows directly.
+   ------------------------------------------------------------------ */
+.bl-card { perspective: 1400px; }
+.bl-card-inner {
+  position: relative;
+  height: 100%;
+  transform-style: preserve-3d;
+  transition: transform 0.85s var(--bl-ease-flip);
+}
+.bl-card.is-flipped .bl-card-inner { transform: rotateY(180deg); }
+.bl-card-face {
+  position: absolute;
+  inset: 0;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  border: 1px solid var(--bl-hairline);
+  background: linear-gradient(180deg, rgba(242, 241, 236, 0.025), rgba(242, 241, 236, 0) 40%), var(--bl-black);
+  transition: border-color 0.5s var(--bl-ease-out), box-shadow 0.6s var(--bl-ease-out);
+}
+.bl-card-back { transform: rotateY(180deg); }
+.bl-card.is-flipped .bl-card-back {
+  border-color: rgba(47, 163, 154, 0.45);
+  box-shadow: 0 0 0 1px rgba(47, 163, 154, 0.08), 0 0 48px -16px rgba(47, 163, 154, 0.45), inset 0 0 60px -30px rgba(47, 163, 154, 0.25);
+}
+@media (hover: hover) and (pointer: fine) {
+  .bl-card:not(.is-flipped):hover .bl-card-front { border-color: rgba(200, 150, 90, 0.45); }
+}
+.bl-card-back-body { opacity: 0; transform: translateY(8px); transition: opacity 0.4s var(--bl-ease-out), transform 0.4s var(--bl-ease-out); }
+.bl-card.is-flipped .bl-card-back-body { opacity: 1; transform: none; transition-delay: 0.45s; }
+.bl-tap-hint { display: none; }
+@media (hover: none) { .bl-tap-hint { display: inline-flex; } }
+/* Static (reduced motion): no 3D, the back face is the card */
+.bl-card.is-static .bl-card-inner { transform: none; transition: none; height: auto; }
+.bl-card.is-static .bl-card-front { display: none; }
+.bl-card.is-static .bl-card-back { position: relative; transform: none; }
+.bl-card.is-static .bl-card-back-body { opacity: 1; transform: none; }
+
+/* ------------------------------------------------------------------
+   Footer load-in (once, when it enters view): the hairlines draw across,
+   the wordmark letters rise one by one, then contacts and links fade up.
+   ------------------------------------------------------------------ */
+html.bl-motion.bl-hydrated footer[data-foot]:not(.is-in) [data-foot-rule] { transform: scaleX(0); }
+html.bl-motion.bl-hydrated footer[data-foot]:not(.is-in) [data-foot-letter] { transform: translateY(105%); }
+html.bl-motion.bl-hydrated footer[data-foot]:not(.is-in) [data-foot-item],
+html.bl-motion.bl-hydrated footer[data-foot]:not(.is-in) [data-foot-dot] { opacity: 0; transform: translateY(10px); }
+footer[data-foot] [data-foot-rule] { transform-origin: left center; transition: transform 0.9s var(--bl-ease-draw); }
+footer[data-foot] [data-foot-letter] { display: inline-block; transition: transform 0.75s var(--bl-ease-out); transition-delay: calc(0.25s + var(--i) * 0.045s); }
+footer[data-foot] [data-foot-item] { transition: opacity 0.5s var(--bl-ease-out), transform 0.5s var(--bl-ease-out); transition-delay: calc(0.55s + var(--i) * 0.06s); }
+footer[data-foot] [data-foot-dot] { transition: opacity 0.4s var(--bl-ease-out) 0.8s, transform 0.4s var(--bl-ease-out) 0.8s; }
+
+.bl-press { transition: transform 160ms var(--bl-ease-out); }
 .bl-press:active { transform: scale(0.98); }
 
 /* Reduced motion: no autonomous motion anywhere */

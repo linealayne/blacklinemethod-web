@@ -1,8 +1,7 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { Reveal } from '@/components/motion/Reveal'
-import { SplitReveal } from '@/components/motion/SplitReveal'
-import { MethodOrbitIdle } from '@/components/MethodOrbitIdle'
+import { MethodWheelNav } from '@/components/MethodWheel'
 import { Button } from '@/components/ui/button'
 
 export const metadata: Metadata = {
@@ -66,13 +65,13 @@ export default function MethodPage() {
         <Reveal as="p" className="bl-label bl-tick mb-10">
           the method
         </Reveal>
-        <SplitReveal
+        <Reveal
           as="h1"
           className="bl-h1 mb-10 max-w-5xl"
         >
           four pillars. one system.
-        </SplitReveal>
-        <Reveal as="p" delay={0.3} className="bl-body max-w-lg">
+        </Reveal>
+        <Reveal as="p" delay={0.08} className="bl-body max-w-lg">
           Hormones, training, nutrition, and lifestyle are not four separate services. They are one
           circular system. Adjusting one without understanding the others produces incomplete
           results. The Blackline Method addresses all four simultaneously — because that is what it
@@ -82,9 +81,9 @@ export default function MethodPage() {
 
       {/* Orbit */}
       <section aria-label="System diagram" className="bl-wrap mb-16 md:mb-24">
-        <Reveal delay={0.2}>
+        <Reveal delay={0.08}>
           <div className="py-10 md:py-14 border-y border-hairline">
-            <MethodOrbitIdle />
+            <MethodWheelNav pillars={PILLARS.map((p) => ({ id: p.id, label: p.label }))} className="mx-auto max-w-[380px] md:max-w-[560px]" />
           </div>
         </Reveal>
       </section>
@@ -92,22 +91,22 @@ export default function MethodPage() {
       {/* Pillars */}
       {PILLARS.map((pillar) => (
         <div key={pillar.id}>
-          <div className="bl-wrap" aria-hidden="true"><Reveal as="span" className="bl-rule" y={0} start="top 96%">{null}</Reveal></div>
-          <section aria-label={pillar.label} className="bl-wrap py-24 md:py-32">
+          <div className="bl-wrap" aria-hidden="true"><div className="relative"><span className="bl-rule" /><span className="bl-cross -left-1 -top-1" /><span className="bl-cross -right-1 -top-1" /></div></div>
+          <section id={pillar.id} aria-label={pillar.label} className="bl-wrap py-24 md:py-32">
             <div className="grid md:grid-cols-2 gap-12 md:gap-24 items-start">
-              <div className="md:sticky md:top-[calc(var(--bl-header)+3rem)]">
+              <div>
                 <Reveal stagger className="mb-8">
                   <span className="block bl-label bl-tick mb-4 tabular-nums">{pillar.index}</span>
                   <span className="block bl-label bl-label-strong">{pillar.label}</span>
                 </Reveal>
-                <SplitReveal
+                <Reveal
                   as="h2"
                   className="bl-h3"
                 >
                   {pillar.headline}
-                </SplitReveal>
+                </Reveal>
               </div>
-              <Reveal stagger delay={0.15} className="space-y-6 bl-body md:pt-20">
+              <Reveal stagger delay={0.08} className="space-y-6 bl-body md:pt-20">
                 {pillar.body.map((para, j) => (
                   <p key={j}>{para}</p>
                 ))}
@@ -118,7 +117,7 @@ export default function MethodPage() {
       ))}
 
       {/* CTA */}
-      <div className="bl-wrap" aria-hidden="true"><Reveal as="span" className="bl-rule" y={0} start="top 96%">{null}</Reveal></div>
+      <div className="bl-wrap" aria-hidden="true"><div className="relative"><span className="bl-rule" /><span className="bl-cross -left-1 -top-1" /><span className="bl-cross -right-1 -top-1" /></div></div>
       <section aria-label="Contact CTA" className="bl-wrap pt-16 pb-6">
         <Reveal>
           <div className="flex flex-col sm:flex-row sm:items-center gap-8">

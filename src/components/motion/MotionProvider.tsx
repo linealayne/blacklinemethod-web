@@ -15,14 +15,15 @@ export interface MotionState {
   mounted: boolean
   reduced: boolean
   webgl: boolean
-  loaderDone: boolean
+  /** no hero intro pending */
+  introDone: boolean
 }
 
 const DEFAULT: MotionState = {
   mounted: false,
   reduced: false,
   webgl: false,
-  loaderDone: false,
+  introDone: true,
 }
 
 const MotionContext = createContext<MotionState>(DEFAULT)
@@ -32,17 +33,14 @@ const useIsoLayoutEffect = typeof window === 'undefined' ? useEffect : useLayout
 export function MotionProvider({ children }: { children: ReactNode }) {
   const [state, setState] = useState<MotionState>(DEFAULT)
 
-  // Layout effect so it runs before paint, after every child's layout effect
-  // (children effects fire first), which lets the CSS pre-hydration
-  // hiding hand off to GSAP's inline styles without a flash.
   useIsoLayoutEffect(() => {
     const flags = motionFlags()
     document.documentElement.classList.add('bl-hydrated')
     setState({ mounted: true, ...flags })
 
-    const onLoaderDone = () => setState((s) => ({ ...s, loaderDone: true }))
-    window.addEventListener('bl:loader-done', onLoaderDone)
-    return () => window.removeEventListener('bl:loader-done', onLoaderDone)
+    const onIntroDone = () => setState((s) => ({ ...s, introDone: true }))
+    window.addEventListener('bl:intro-done', onIntroDone)
+    return () => window.removeEventListener('bl:intro-done', onIntroDone)
   }, [])
 
   return <MotionContext.Provider value={state}>{children}</MotionContext.Provider>

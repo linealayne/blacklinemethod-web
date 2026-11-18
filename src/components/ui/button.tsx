@@ -4,10 +4,11 @@ import { cva, type VariantProps } from 'class-variance-authority'
 import { cn } from '@/lib/utils'
 
 /**
- * Buttons are hairline-framed labels. Primary: an off-white frame whose fill
- * rises from the bottom edge on hover (a scaleY'd pseudo-element, so no
- * layout or colour flash), text inverting to black. Ghost: a hairline frame
- * that brightens. Amber is never a button colour; it is reserved for signal.
+ * Buttons are hairline-framed labels in the label face (Inter, small,
+ * tracked, uppercase). Primary: an off-white frame whose fill sweeps in from
+ * the left on hover and out to the right on leave (a scaleX'd pseudo-element,
+ * so no layout shift), text inverting to black. Ghost: a hairline frame that
+ * brightens.
  */
 const buttonVariants = cva(
   [
@@ -15,8 +16,8 @@ const buttonVariants = cva(
     'font-sans text-[10.5px] font-medium tracking-[0.2em] uppercase',
     'rounded-[1px]',
     'transition-[color,border-color,transform] duration-600 ease-lux',
-    "before:absolute before:inset-0 before:-z-10 before:origin-bottom before:scale-y-0 before:content-['']",
-    'before:transition-transform before:duration-600 before:ease-lux hover:before:scale-y-100',
+    "before:absolute before:inset-0 before:-z-10 before:origin-right before:scale-x-0 before:content-['']",
+    'before:transition-transform before:duration-500 before:ease-lux hover:before:origin-left hover:before:scale-x-100',
     'active:scale-[0.98] active:duration-150',
     'disabled:pointer-events-none disabled:opacity-40',
     'focus-visible:outline focus-visible:outline-1 focus-visible:outline-amber focus-visible:outline-offset-2',

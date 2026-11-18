@@ -2,7 +2,6 @@
 
 import { useState } from 'react'
 import { Reveal } from '@/components/motion/Reveal'
-import { SplitReveal } from '@/components/motion/SplitReveal'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
@@ -80,13 +79,13 @@ export function ContactSection() {
             <Reveal as="p" className="bl-label bl-tick mb-10">
               request a consult
             </Reveal>
-            <SplitReveal
+            <Reveal
               as="h1"
               className="bl-h2 mb-12"
             >
               the first conversation.
-            </SplitReveal>
-            <Reveal stagger delay={0.25} className="space-y-6 bl-body max-w-sm">
+            </Reveal>
+            <Reveal stagger delay={0.08} className="space-y-6 bl-body max-w-sm">
               <p>
                 The initial consult is ninety minutes. We cover your history, your current state,
                 your goals, and what has and hasn&apos;t worked. Nothing is prescribed in that session.
@@ -99,13 +98,13 @@ export function ContactSection() {
               <div className="pt-2 flex flex-col items-start">
                 <a
                   href="mailto:layne@blacklinemethod.com"
-                  className="inline-flex items-center min-h-[44px] font-serif font-light text-[1.3rem] tracking-[-0.01em] text-offwhite/90 transition-opacity duration-600 hover:opacity-60"
+                  className="group inline-flex items-center min-h-[44px] font-sans text-[17px] md:text-[18px] text-offwhite/90 transition-colors duration-500 hover:text-offwhite"
                 >
                   layne@blacklinemethod.com
                 </a>
                 <a
                   href="mailto:spencer@blacklinemethod.com"
-                  className="inline-flex items-center min-h-[44px] font-serif font-light text-[1.3rem] tracking-[-0.01em] text-offwhite/90 transition-opacity duration-600 hover:opacity-60"
+                  className="group inline-flex items-center min-h-[44px] font-sans text-[17px] md:text-[18px] text-offwhite/90 transition-colors duration-500 hover:text-offwhite"
                 >
                   spencer@blacklinemethod.com
                 </a>
@@ -117,11 +116,11 @@ export function ContactSection() {
           </div>
 
           {/* Right: form or success state */}
-          <Reveal delay={0.18} className="md:pt-4">
+          <Reveal delay={0.08} className="md:pt-4">
             {status === 'success' ? (
               <div className="flex flex-col justify-center h-full min-h-[320px]" role="status">
-                <div className="relative w-24 h-px bg-offwhite/40 mb-8" aria-hidden="true"><span className="absolute right-0 -top-[2px] h-[5px] w-[5px] rounded-full bg-amber" /></div>
-                <p className="font-serif text-[2rem] text-offwhite font-light tracking-[-0.015em] mb-4">
+                <span className="block h-[7px] w-[7px] rounded-full bg-teal shadow-[0_0_16px_3px_rgba(47,163,154,0.45)] mb-8" aria-hidden="true" />
+                <p className="bl-h3 mb-4">
                   Request received.
                 </p>
                 <p className="font-sans text-sm text-body tracking-wide leading-relaxed">

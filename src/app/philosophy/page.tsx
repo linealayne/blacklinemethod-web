@@ -1,7 +1,6 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { Reveal } from '@/components/motion/Reveal'
-import { SplitReveal } from '@/components/motion/SplitReveal'
 import { Button } from '@/components/ui/button'
 import { PracticeCards } from '@/components/sections/PracticeSection'
 
@@ -52,13 +51,13 @@ export default function PhilosophyPage() {
         <Reveal as="p" className="bl-label bl-tick mb-10">
           philosophy
         </Reveal>
-        <SplitReveal
+        <Reveal
           as="h1"
           className="bl-h1 mb-12 max-w-5xl"
         >
           the standard is too low.
-        </SplitReveal>
-        <Reveal stagger delay={0.3} className="space-y-5">
+        </Reveal>
+        <Reveal stagger delay={0.08} className="space-y-5">
           <p className="bl-lead max-w-xl">
             Standard primary care is built for triage. It is structured to identify disease, manage
             chronic conditions, and catch what is urgent. It does those things well.
@@ -71,21 +70,21 @@ export default function PhilosophyPage() {
 
       {SECTIONS.map((section, i) => (
         <div key={section.index}>
-          <div className="bl-wrap" aria-hidden="true"><Reveal as="span" className="bl-rule" y={0} start="top 96%">{null}</Reveal></div>
+          <div className="bl-wrap" aria-hidden="true"><div className="relative"><span className="bl-rule" /><span className="bl-cross -left-1 -top-1" /><span className="bl-cross -right-1 -top-1" /></div></div>
           <section aria-label={section.title} className="bl-wrap py-24 md:py-32">
             <div className="grid md:grid-cols-2 gap-12 md:gap-24 items-start">
-              <div className="md:sticky md:top-[calc(var(--bl-header)+3rem)]">
+              <div>
                 <Reveal as="span" className="block bl-label bl-tick mb-10 tabular-nums">
                   {section.index}
                 </Reveal>
-                <SplitReveal
+                <Reveal
                   as="h2"
                   className="bl-h2"
                 >
                   {section.title}
-                </SplitReveal>
+                </Reveal>
               </div>
-              <Reveal stagger delay={0.15} className="space-y-6 bl-body md:pt-20">
+              <Reveal stagger delay={0.08} className="space-y-6 bl-body md:pt-20">
                 {section.paragraphs.map((p) => (
                   <p key={p.slice(0, 24)}>{p}</p>
                 ))}
@@ -96,19 +95,19 @@ export default function PhilosophyPage() {
       ))}
 
       {/* The practice */}
-      <div className="bl-wrap" aria-hidden="true"><Reveal as="span" className="bl-rule" y={0} start="top 96%">{null}</Reveal></div>
+      <div className="bl-wrap" aria-hidden="true"><div className="relative"><span className="bl-rule" /><span className="bl-cross -left-1 -top-1" /><span className="bl-cross -right-1 -top-1" /></div></div>
       <section aria-label="The practice" className="bl-wrap py-24 md:py-32">
         <Reveal as="p" className="bl-label bl-tick mb-10">
           the practice
         </Reveal>
-        <SplitReveal
+        <Reveal
           as="h2"
           className="bl-h2"
         >
           the practice.
-        </SplitReveal>
-        <Reveal as="p" delay={0.2} className="mt-8 bl-lead max-w-xl">
-          two people. a small number of clients. by design.
+        </Reveal>
+        <Reveal as="p" delay={0.08} className="mt-8 bl-lead max-w-xl">
+          Two people. A small number of clients. By design.
         </Reveal>
         <PracticeCards className="mt-14 md:mt-16" />
       </section>

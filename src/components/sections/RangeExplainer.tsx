@@ -1,7 +1,6 @@
 'use client'
 
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { SplitReveal } from '@/components/motion/SplitReveal'
 import { Reveal } from '@/components/motion/Reveal'
 import { Folio } from '@/components/layout/Folio'
 import { motionFlags } from '@/lib/flags'
@@ -146,19 +145,16 @@ export function RangeExplainer() {
     <Folio label="illustrative" ariaLabel="Optimal is not a range, illustrated">
         <div className="grid gap-14 xl:grid-cols-2 xl:gap-20 items-center">
           <div>
-            <SplitReveal
-              as="h2"
-              className="bl-h2"
-            >
+            <Reveal as="h2" className="bl-h2">
               optimal is not a range.
-            </SplitReveal>
-            <Reveal as="p" delay={0.2} className="mt-8 bl-body max-w-md">
+            </Reveal>
+            <Reveal as="p" delay={0.08} className="mt-7 bl-body max-w-md">
               A reference range describes where most of a population falls. What is optimal for one
               person is a much narrower question. Move the marker.
             </Reveal>
           </div>
 
-          <Reveal delay={0.1}>
+          <Reveal delay={0.05}>
             <div className="pt-10 pb-2">
               <div className="relative h-5 mb-3 font-sans text-[10px] font-medium tracking-[0.2em] uppercase text-label">
                 <span className="absolute" style={{ left: pct(RANGE.reference[0]) }}>
@@ -191,7 +187,7 @@ export function RangeExplainer() {
                   className="absolute top-0 bottom-0 left-0 w-11 -ml-[22px] touch-none group rounded-[1px]"
                 >
                   <span className="absolute left-1/2 top-0 bottom-0 w-px bg-offwhite/80 -translate-x-1/2 transition-colors duration-300 group-focus-visible:bg-amber" />
-                  <span className="absolute left-1/2 top-1/2 w-3 h-3 -translate-x-1/2 -translate-y-1/2 rounded-full bg-black border border-offwhite/80 shadow-[0_0_18px_rgba(226,196,143,0.45)] transition-[border-color,box-shadow] duration-300 group-focus-visible:border-amber group-hover:border-gold" />
+                  <span className="absolute left-1/2 top-1/2 w-3 h-3 -translate-x-1/2 -translate-y-1/2 rounded-full bg-black border border-offwhite/80 shadow-[0_0_18px_rgba(200,150,90,0.4)] transition-[border-color,box-shadow] duration-300 group-focus-visible:border-amber group-hover:border-amber" />
                 </div>
               </div>
 
@@ -205,7 +201,7 @@ export function RangeExplainer() {
               </div>
 
               <div className="mt-10 pt-8 border-t border-hairline min-h-[7rem]">
-                <p ref={statusRef} className="font-serif font-light text-offwhite text-[1.75rem] md:text-[2.25rem] tracking-[-0.015em]">
+                <p ref={statusRef} className="bl-serif-caps text-[1.3rem] md:text-[1.6rem] tracking-[0.09em]">
                   {STATUS_TEXT[status]}
                 </p>
                 <p className="mt-2 bl-body text-body-dim">{STATUS_NOTE[status]}</p>

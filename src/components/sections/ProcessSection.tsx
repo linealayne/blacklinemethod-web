@@ -1,6 +1,5 @@
 import Link from 'next/link'
 import { Reveal } from '@/components/motion/Reveal'
-import { SplitReveal } from '@/components/motion/SplitReveal'
 import { ProcessTimeline } from '@/components/ProcessTimeline'
 import { Folio } from '@/components/layout/Folio'
 
@@ -29,10 +28,10 @@ export function ProcessSection() {
   return (
     <Folio label="the process" ariaLabel="The process">
       <div className="max-w-4xl">
-        <SplitReveal as="h2" className="bl-h2">
+        <Reveal as="h2" className="bl-h2">
           what working with us looks like.
-        </SplitReveal>
-        <Reveal as="p" delay={0.2} className="mt-8 md:mt-10 bl-body">
+        </Reveal>
+        <Reveal as="p" delay={0.08} className="mt-7 md:mt-8 bl-body">
           Engagements are structured, not open-ended. The first ninety days establish the baseline.
           Everything after is calibration.
         </Reveal>

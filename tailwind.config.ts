@@ -1,14 +1,12 @@
 import type { Config } from 'tailwindcss'
 
 /**
- * Blackline design tokens (revamp: "the reading room").
- * Monochrome first. Amber is the signal colour: it marks a live reading
- * (the hero readout point, the drawn timeline, the active principle, the
- * optimal band, focus rings, form errors) and nothing decorative.
- * Palette is fixed (see DESIGN.md). The additions below are documented
- * tonal relatives of the existing palette, added for contrast and depth:
- *   ink          deeper black for the loader, veil, and 3D canvas ground
- *   gold         muted gold highlight for particle warm-white and hover glows
+ * Blackline design tokens (pass two: "the living sequence").
+ * Near-black, greys, off-white, amber as the accent. Teal and violet are
+ * used richly in the hero scene only; outside it teal is a rare secondary
+ * accent (a decoded sequence card, the selected method pillar). No
+ * gradients on text. See CLAUDE.md and DESIGN.md.
+ *   ink          deeper black for the veil and the mobile menu
  *   amber-muted  amber at readable small-label strength (about 5.1:1 on black)
  *   label        warm grey for quiet uppercase labels (about 5.7:1 on black)
  *   body / body-dim  body copy greys that clear WCAG AA (7.2:1 and 5.4:1)
@@ -29,7 +27,8 @@ const config: Config = {
         offwhite: '#F2F1EC',
         amber: '#C8965A',
         'amber-muted': '#A27A4A',
-        gold: '#E2C48F',
+        teal: '#2FA39A',
+        violet: '#7A6CF2',
         hairline: '#262624',
         muted: '#6B6B6B',
         label: '#8C8A84',

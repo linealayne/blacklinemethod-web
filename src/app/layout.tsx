@@ -4,19 +4,16 @@ import './globals.css'
 import { Header } from '@/components/Header'
 import { Footer } from '@/components/Footer'
 import { MotionProvider } from '@/components/motion/MotionProvider'
-import { SmoothScroll } from '@/components/motion/SmoothScroll'
-import { Loader } from '@/components/motion/Loader'
 import { PageTransition } from '@/components/motion/PageTransition'
 import { Grain } from '@/components/motion/Grain'
-import { Parallax } from '@/components/motion/Parallax'
 import { FLAGS_SCRIPT } from '@/lib/flags'
 
-// Variable Fraunces with its optical-size and softness axes: display sizes pick
-// the high-contrast cut automatically (font-optical-sizing), SOFT is pinned to 0
-// in globals.css so the letterforms stay sharp rather than rounded.
+// Variable Fraunces: the face of the BLACKLINE wordmark, used for all display
+// type. globals.css pins it the way the wordmark renders (weight 400, the
+// small optical size, SOFT 0) so headlines match the wordmark at any size.
 const fraunces = Fraunces({
   subsets: ['latin'],
-  style: ['normal', 'italic'],
+  style: ['normal'],
   axes: ['opsz', 'SOFT'],
   variable: '--font-fraunces',
   display: 'swap',
@@ -86,7 +83,7 @@ export default function RootLayout({
       suppressHydrationWarning
     >
       <head>
-        {/* Sets motion/WebGL/loader flags on <html> before first paint. See src/lib/flags.ts */}
+        {/* Sets motion/WebGL/intro flags on <html> before first paint. See src/lib/flags.ts */}
         <script dangerouslySetInnerHTML={{ __html: FLAGS_SCRIPT }} />
       </head>
       <body>
@@ -94,14 +91,11 @@ export default function RootLayout({
           <a href="#bl-main" className="bl-skip">
             Skip to content
           </a>
-          <Loader />
-          <SmoothScroll />
           <PageTransition />
           <Header />
           <main id="bl-main">{children}</main>
           <Footer />
           <Grain />
-          <Parallax />
         </MotionProvider>
       </body>
     </html>

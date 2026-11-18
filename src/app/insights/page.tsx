@@ -1,7 +1,6 @@
 import type { Metadata } from 'next'
 import { InsightRow } from '@/components/InsightRow'
 import { Reveal } from '@/components/motion/Reveal'
-import { SplitReveal } from '@/components/motion/SplitReveal'
 import { articles } from '@/content/insights/registry'
 
 export const metadata: Metadata = {
@@ -18,13 +17,13 @@ export default function InsightsPage() {
         <Reveal as="p" className="bl-label bl-tick mb-10">
           insights
         </Reveal>
-        <SplitReveal
+        <Reveal
           as="h1"
           className="bl-h1 mb-10"
         >
           from the practice.
-        </SplitReveal>
-        <Reveal as="p" delay={0.3} className="bl-body max-w-md mb-20 md:mb-24">
+        </Reveal>
+        <Reveal as="p" delay={0.08} className="bl-body max-w-md mb-20 md:mb-24">
           Long-form essays on hormone physiology, diagnostics, training, and the structure of
           optimization. Not tips. Not guides. Writing that demonstrates how we think.
         </Reveal>

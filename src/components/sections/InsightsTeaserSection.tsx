@@ -1,6 +1,5 @@
 import Link from 'next/link'
 import { Reveal } from '@/components/motion/Reveal'
-import { SplitReveal } from '@/components/motion/SplitReveal'
 import { articles } from '@/content/insights/registry'
 import { Folio } from '@/components/layout/Folio'
 import { InsightRow } from '@/components/InsightRow'
@@ -12,9 +11,9 @@ export function InsightsTeaserSection() {
   return (
     <Folio label="insights" ariaLabel="Insights">
       <div className="flex items-end justify-between gap-6 mb-12 md:mb-16">
-        <SplitReveal as="h2" className="bl-h2">
+        <Reveal as="h2" className="bl-h2">
           from the practice.
-        </SplitReveal>
+        </Reveal>
         <Reveal className="hidden md:block shrink-0">
           <Link href="/insights" className="group bl-link">
             <span className="bl-underline">All articles</span>
@@ -29,7 +28,7 @@ export function InsightsTeaserSection() {
         ))}
       </Reveal>
 
-      <Reveal delay={0.1} className="mt-8 md:hidden">
+      <Reveal className="mt-8 md:hidden">
         <Link href="/insights" className="group bl-link">
           <span className="bl-underline">All articles</span>
           <span aria-hidden="true" className="bl-arrow" />
