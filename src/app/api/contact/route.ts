@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { Resend } from 'resend'
+import { consultRequestEmail } from '@/lib/email'
 
 // Constructed per request so builds and previews without RESEND_API_KEY
 // still compile; the key is read from the environment at send time.
@@ -41,12 +42,16 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    // The branded notification (src/lib/email.ts): HTML with a plain-text twin.
+    const { html, text } = consultRequestEmail({ name: name.trim(), email: email.trim(), message: message.trim() })
+
     const { error } = await resend.emails.send({
       from: 'Blackline Method <hello@blacklinemethod.com>',
       to: ['layne@blacklinemethod.com', 'spencer@blacklinemethod.com'],
       replyTo: email.trim(),
       subject: `Consult request from ${name.trim()}`,
-      text: `Name: ${name.trim()}\nEmail: ${email.trim()}\n\n${message.trim()}`,
+      html,
+      text,
     })
 
     // The Resend SDK reports failures here rather than throwing.

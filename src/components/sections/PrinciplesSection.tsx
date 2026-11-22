@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { useMotion } from '@/components/motion/MotionProvider'
 import { Reveal } from '@/components/motion/Reveal'
 import { HelixFragment } from '@/components/Strand'
+import { LivingStrand, type StrandLife } from '@/components/LivingStrand'
 
 export const TENETS = [
   {
@@ -37,12 +38,16 @@ export const TENETS = [
 const CARDS = {
   scrambleMs: 720, // how long the title takes to decode
   scrambleDelayMs: 260, // decode starts as the card passes edge-on
-  // the strand on each card: a different length of the same helix
+  // The gene on each card: one family, three temperaments. 01 turns slowest,
+  // with the fewest twists and the teal strand leading; 02 is the middle pace
+  // with violet leading; 03 is wound tighter, a little faster, and denser.
+  // speed is radians per second about the strand's axis; pulseRate is rungs
+  // per second for the ripple.
   fragments: [
-    { turns: 1.5, phase: 0, rungCount: 9, lit: 3 },
-    { turns: 2.1, phase: 0.9, rungCount: 12, lit: 7 },
-    { turns: 2.8, phase: 1.7, rungCount: 15, lit: 5 },
-  ],
+    { turns: 1.5, phase: 0, rungCount: 9, lit: 3, density: 0.44, lead: 'teal', speed: 0.3, pulseRate: 2.4 },
+    { turns: 2.1, phase: 0.9, rungCount: 12, lit: 7, density: 0.5, lead: 'violet', speed: 0.46, pulseRate: 3.2 },
+    { turns: 2.8, phase: 1.7, rungCount: 15, lit: 5, density: 0.7, lead: 'both', speed: 0.62, pulseRate: 4 },
+  ] satisfies (StrandLife & { turns: number; phase: number; rungCount: number; lit: number; density: number })[],
 }
 
 const BASES = 'ATGC'
@@ -125,6 +130,10 @@ function PrincipleCard({ tenet, i, isStatic }: { tenet: (typeof TENETS)[number];
   const pointerType = useRef<string>('mouse')
   const headingId = `tenet-${tenet.id}`
   const fragment = CARDS.fragments[i]
+  const [flips, setFlips] = useState(0)
+  useEffect(() => {
+    if (flipped) setFlips((n) => n + 1)
+  }, [flipped])
 
   const hoverCapable = () => window.matchMedia('(hover: hover) and (pointer: fine)').matches
 
@@ -165,7 +174,7 @@ function PrincipleCard({ tenet, i, isStatic }: { tenet: (typeof TENETS)[number];
         <div className="bl-card-face bl-card-front flex flex-col p-7 md:p-8" aria-hidden="true">
           <span className="bl-label text-tan tabular-nums">{tenet.index}</span>
           <div className="my-auto py-8">
-            <HelixFragment {...fragment} />
+            {isStatic ? <HelixFragment {...fragment} /> : <LivingStrand {...fragment} running={!flipped} />}
           </div>
           <div className="flex items-end justify-between gap-6">
             <p className="bl-title max-w-[14ch]">{tenet.name}</p>
@@ -180,7 +189,11 @@ function PrincipleCard({ tenet, i, isStatic }: { tenet: (typeof TENETS)[number];
         <div className="bl-card-face bl-card-back flex flex-col p-7 md:p-8">
           <div className="flex items-center justify-between gap-6">
             <span className="bl-label text-tan tabular-nums">{tenet.index}</span>
-            <HelixFragment {...fragment} width={132} height={22} density={0.42} className="h-[22px] w-[132px] shrink-0 opacity-90" />
+            {isStatic ? (
+              <HelixFragment {...fragment} width={132} height={22} density={0.42} className="h-[22px] w-[132px] shrink-0 opacity-90" />
+            ) : (
+              <LivingStrand {...fragment} width={132} height={22} density={0.42} running={flipped} burst={flips} className="h-[22px] w-[132px] shrink-0 opacity-90" />
+            )}
           </div>
           <h3 id={headingId} className="mt-10 bl-h3 text-[1.45rem] md:text-[1.6rem] leading-[1.2]">
             <span className="sr-only">{tenet.name}</span>

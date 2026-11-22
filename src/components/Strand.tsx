@@ -7,7 +7,7 @@
  */
 
 /** offset between the two strands: the same groove as the hero helix */
-const GROOVE = Math.PI * 0.82
+export const GROOVE = Math.PI * 0.82
 
 interface Dot {
   /** position along the axis */
@@ -52,20 +52,7 @@ function rungs(length: number, amp: number, turns: number, phase: number, count:
 
 const f = (n: number) => n.toFixed(2)
 
-/**
- * A length of the helix, drawn horizontally. `lit` marks one rung in tan,
- * the way the hero's ripple lights one base pair at a time.
- */
-export function HelixFragment({
-  width = 300,
-  height = 96,
-  turns,
-  phase = 0,
-  rungCount,
-  lit,
-  density = 0.5,
-  className = 'w-full h-auto',
-}: {
+export interface FragmentShape {
   width?: number
   height?: number
   turns: number
@@ -75,13 +62,32 @@ export function HelixFragment({
   lit?: number
   /** particles per unit of length, per strand */
   density?: number
-  className?: string
-}) {
+}
+
+/**
+ * A length of the helix, drawn horizontally. `lit` marks one rung in tan,
+ * the way the hero's ripple lights one base pair at a time. `lead` picks the
+ * strand that sits in front (the other is dimmed). This is the still form;
+ * LivingStrand.tsx draws the same thing turning.
+ */
+export function HelixFragment({
+  width = 300,
+  height = 96,
+  turns,
+  phase = 0,
+  rungCount,
+  lit,
+  density = 0.5,
+  lead = 'both',
+  className = 'w-full h-auto',
+}: FragmentShape & { lead?: 'teal' | 'violet' | 'both'; className?: string }) {
   const mid = height / 2
   const amp = height / 2 - 6
   const n = Math.round(width * density)
   const a = strand(width, amp, turns, phase, n, 3.4)
   const b = strand(width, amp, turns, phase + GROOVE, n, 3.4)
+  const teal = { name: 'teal', fill: 'fill-teal', dots: a }
+  const violet = { name: 'violet', fill: 'fill-violet', dots: b }
   return (
     <svg viewBox={`0 0 ${width} ${height}`} className={className} fill="none" aria-hidden="true">
       {rungs(width, amp, turns, phase, rungCount).map((l, k) => (
@@ -97,16 +103,13 @@ export function HelixFragment({
           strokeWidth="1"
         />
       ))}
-      <g className="fill-violet" style={{ filter: 'drop-shadow(0 0 3px rgb(var(--bl-violet-rgb) / 0.9))' }}>
-        {b.map((d, k) => (
-          <circle key={k} cx={f(d.u)} cy={f(mid + d.v)} r={f(d.r)} opacity={f(d.o)} />
-        ))}
-      </g>
-      <g className="fill-teal" style={{ filter: 'drop-shadow(0 0 3px rgb(var(--bl-teal-rgb) / 0.9))' }}>
-        {a.map((d, k) => (
-          <circle key={k} cx={f(d.u)} cy={f(mid + d.v)} r={f(d.r)} opacity={f(d.o)} />
-        ))}
-      </g>
+      {(lead === 'violet' ? [teal, violet] : [violet, teal]).map((s) => (
+        <g key={s.name} className={s.fill} opacity={lead !== 'both' && lead !== s.name ? 0.6 : 1} style={{ filter: `drop-shadow(0 0 3px rgb(var(--bl-${s.name}-rgb) / 0.9))` }}>
+          {s.dots.map((d, k) => (
+            <circle key={k} cx={f(d.u)} cy={f(mid + d.v)} r={f(d.r)} opacity={f(d.o)} />
+          ))}
+        </g>
+      ))}
     </svg>
   )
 }

@@ -46,7 +46,7 @@ export interface HelixColors {
   offwhite: string
 }
 
-const VERT_POINTS = /* glsl */ `
+export const VERT_POINTS = /* glsl */ `
   attribute vec3 aStart;
   attribute float aSeed;
   attribute float aT;
@@ -171,7 +171,7 @@ const VERT_POINTS = /* glsl */ `
   }
 `
 
-const FRAG_POINTS = /* glsl */ `
+export const FRAG_POINTS = /* glsl */ `
   varying vec3 vColor;
   varying float vAlpha;
   void main() {
@@ -185,7 +185,7 @@ const FRAG_POINTS = /* glsl */ `
   }
 `
 
-const VERT_LINES = /* glsl */ `
+export const VERT_LINES = /* glsl */ `
   attribute float aT;
   attribute float aRung;
   uniform float uTime;
@@ -209,7 +209,7 @@ const VERT_LINES = /* glsl */ `
   }
 `
 
-const FRAG_LINES = /* glsl */ `
+export const FRAG_LINES = /* glsl */ `
   uniform vec3 uBase;
   uniform vec3 uAmber;
   varying float vA;
@@ -221,7 +221,7 @@ const FRAG_LINES = /* glsl */ `
   }
 `
 
-const VERT_RING = /* glsl */ `
+export const VERT_RING = /* glsl */ `
   attribute float aAngle;
   uniform float uSweep;
   varying float vH;
@@ -232,7 +232,7 @@ const VERT_RING = /* glsl */ `
   }
 `
 
-const FRAG_RING = /* glsl */ `
+export const FRAG_RING = /* glsl */ `
   uniform vec3 uColor;
   uniform float uOpacity;
   varying float vH;
@@ -242,7 +242,7 @@ const FRAG_RING = /* glsl */ `
   }
 `
 
-const VERT_HALO = /* glsl */ `
+export const VERT_HALO = /* glsl */ `
   varying vec2 vUv;
   void main() {
     vUv = uv;
@@ -250,7 +250,7 @@ const VERT_HALO = /* glsl */ `
   }
 `
 
-const FRAG_HALO = /* glsl */ `
+export const FRAG_HALO = /* glsl */ `
   uniform vec3 uA;
   uniform vec3 uB;
   uniform float uTime;
@@ -268,13 +268,13 @@ const FRAG_HALO = /* glsl */ `
 `
 
 /** premultiplied colour added over what is below (the shaders output colour * alpha) */
-const ADDITIVE = {
+export const ADDITIVE = {
   blending: THREE.CustomBlending,
   blendSrc: THREE.OneFactor,
   blendDst: THREE.OneFactor,
 } as const
 
-function rand(seed: number) {
+export function rand(seed: number) {
   // deterministic so the still and the live scene match
   let s = seed >>> 0
   return () => {
