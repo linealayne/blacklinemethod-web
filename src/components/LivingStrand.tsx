@@ -243,8 +243,9 @@ export function LivingStrand({ running = true, burst = 0, className = '', speed,
     }
 
     // in the frame loop only while on screen
-    const io = new IntersectionObserver(([e]) => {
-      visible = e.isIntersecting
+    const io = new IntersectionObserver((entries) => {
+      // several changes can arrive together: the newest one is the truth
+      visible = entries[entries.length - 1].isIntersecting
       if (visible && !draw) draw = setup()
       if (visible && draw && !stop) stop = subscribe(draw)
       if (!visible && stop) {
