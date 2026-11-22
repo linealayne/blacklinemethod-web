@@ -11,8 +11,9 @@ import { GROOVE, HelixFragment, type FragmentShape } from '@/components/Strand'
  * hero's does. Drawn on a small 2D canvas with additive glow sprites; all
  * the canvases on a page share one animation frame.
  *
- * It only draws while it is on screen, the tab is visible, and `running` is
- * true. Reduced motion, or no canvas, leaves the static HelixFragment that
+ * It costs nothing until it is first scrolled into view (no sprites, no
+ * particles, no frame), and after that it only draws while it is on screen,
+ * the tab is visible, and `running` is true. Reduced motion, or no canvas, leaves the static HelixFragment that
  * is rendered underneath (and is what the server sends).
  */
 
@@ -85,7 +86,14 @@ function particles(count: number, phase: number): Particle[] {
     const h2 = Math.sin(n * 78.233 + phase * 3.7) * 12543.1337
     const r1 = h1 - Math.floor(h1)
     const r2 = h2 - Math.floor(h2)
-    return { t: (n + 0.5) / count, du: (r2 - 0.5) * 1.6, jit: (r1 - 0.5) * 3.4, size: r2 > 0.9 ? 1.7 : 0.6 + r2 * 0.7, bright: r2 > 0.9 ? 1.25 : 1, seed: r1 * 40 }
+    return {
+      t: (n + 0.5) / count,
+      du: (r2 - 0.5) * 1.6,
+      jit: (r1 - 0.5) * 3.4,
+      size: r2 > 0.9 ? 1.7 : 0.6 + r2 * 0.7,
+      bright: r2 > 0.9 ? 1.25 : 1,
+      seed: r1 * 40,
+    }
   })
 }
 
@@ -99,130 +107,155 @@ export function LivingStrand({ running = true, burst = 0, className = '', speed,
   useEffect(() => {
     const canvas = canvasRef.current
     if (!canvas || document.documentElement.classList.contains('bl-reduced')) return
-    const ctx = canvas.getContext('2d')
-    if (!ctx) return
-
-    const colors = {
-      teal: sprite(tokenHex('teal', '#2FA39A')),
-      violet: sprite(tokenHex('violet', '#7A6CF2')),
-      ember: sprite(tokenHex('ember', '#C8965A')),
-    }
-    const ember = tokenHex('ember', '#C8965A')
-    const white = tokenHex('offwhite', '#F2F1EC')
-    const n = Math.round(width * density)
-    const strands = [
-      { dots: particles(n, phase), offset: 0, sprite: colors.teal, gain: lead === 'violet' ? 0.6 : 1 },
-      { dots: particles(n, phase + GROOVE), offset: GROOVE, sprite: colors.violet, gain: lead === 'teal' ? 0.6 : 1 },
-    ]
-    // the leading strand is drawn last, over the other
-    if (lead !== 'violet') strands.reverse()
-
-    const mid = height / 2
-    const amp = height / 2 - 6
+    let stop: (() => void) | null = null
+    let ro: ResizeObserver | null = null
     let visible = false
-    let scale = 1
-    let last = 0
-    let rot = 0
-    let pulse = -1
-    let seenBurst = flags.current.burst
-    let wait = 0
-    let drawn = false
+    let draw: ((now: number) => void) | null = null
 
-    const fit = () => {
-      const r = canvas.getBoundingClientRect()
-      const dpr = Math.min(window.devicePixelRatio || 1, 2)
-      const w = Math.max(1, Math.round(r.width * dpr))
-      const h = Math.max(1, Math.round(r.height * dpr))
-      if (canvas.width !== w || canvas.height !== h) {
-        canvas.width = w
-        canvas.height = h
+    /** built the first time the strand comes into view */
+    const setup = () => {
+      const ctx = canvas.getContext('2d')
+      if (!ctx) return null
+
+      const colors = {
+        teal: sprite(tokenHex('teal', '#2FA39A')),
+        violet: sprite(tokenHex('violet', '#7A6CF2')),
+        ember: sprite(tokenHex('ember', '#C8965A')),
       }
-      scale = w / width
-      drawn = false
-    }
+      const ember = tokenHex('ember', '#C8965A')
+      const white = tokenHex('offwhite', '#F2F1EC')
+      const n = Math.round(width * density)
+      const strands = [
+        {
+          dots: particles(n, phase),
+          offset: 0,
+          sprite: colors.teal,
+          gain: lead === 'violet' ? 0.6 : 1,
+        },
+        {
+          dots: particles(n, phase + GROOVE),
+          offset: GROOVE,
+          sprite: colors.violet,
+          gain: lead === 'teal' ? 0.6 : 1,
+        },
+      ]
+      // the leading strand is drawn last, over the other
+      if (lead !== 'violet') strands.reverse()
 
-    const draw = (now: number) => {
-      const on = visible && flags.current.running
-      if (!on && drawn) {
-        last = 0
-        return
+      const mid = height / 2
+      const amp = height / 2 - 6
+      let scale = 1
+      let last = 0
+      let rot = 0
+      let pulse = -1
+      let seenBurst = flags.current.burst
+      let wait = 0
+      let drawn = false
+
+      const fit = () => {
+        const r = canvas.getBoundingClientRect()
+        const dpr = Math.min(window.devicePixelRatio || 1, 2)
+        const w = Math.max(1, Math.round(r.width * dpr))
+        const h = Math.max(1, Math.round(r.height * dpr))
+        if (canvas.width !== w || canvas.height !== h) {
+          canvas.width = w
+          canvas.height = h
+        }
+        scale = w / width
+        drawn = false
       }
-      const dt = last ? Math.min(0.05, (now - last) / 1000) : 0
-      last = on ? now : 0
-      rot += dt * speed
-      // a flip sends one ripple from the start, after the card has turned
-      if (flags.current.burst !== seenBurst) {
-        seenBurst = flags.current.burst
-        pulse = -1
-        wait = 0.45
-      }
-      if (wait > 0) wait -= dt
-      else pulse += dt * pulseRate
-      if (pulse > rungCount + 5) pulse = -3
 
-      ctx.setTransform(scale, 0, 0, scale, 0, 0)
-      ctx.clearRect(0, 0, width, height)
-      ctx.globalCompositeOperation = 'lighter'
+      const frame = (now: number) => {
+        const on = visible && flags.current.running
+        if (!on && drawn) {
+          last = 0
+          return
+        }
+        const dt = last ? Math.min(0.05, (now - last) / 1000) : 0
+        last = on ? now : 0
+        rot += dt * speed
+        // a flip sends one ripple from the start, after the card has turned
+        if (flags.current.burst !== seenBurst) {
+          seenBurst = flags.current.burst
+          pulse = -1
+          wait = 0.45
+        }
+        if (wait > 0) wait -= dt
+        else pulse += dt * pulseRate
+        if (pulse > rungCount + 5) pulse = -3
 
-      // rungs: faint, lit in ember as the ripple passes
-      ctx.lineWidth = 1
-      for (let k = 0; k < rungCount; k++) {
-        const t = (k + 0.5) / rungCount
-        const a = t * Math.PI * 2 * turns + phase + rot
-        const x = t * width
-        const y1 = mid + Math.sin(a) * amp
-        const y2 = mid + Math.sin(a + GROOVE) * amp
-        const lag = pulse - k
-        const lit = Math.min(1, Math.exp(-lag * lag * 1.6) + (lag > 0 ? Math.exp(-lag * 0.9) * 0.35 : 0))
-        ctx.globalAlpha = 0.14 + lit * 0.7
-        ctx.strokeStyle = lit > 0.5 ? ember : white
-        ctx.beginPath()
-        ctx.moveTo(x, y1)
-        ctx.lineTo(x, y2)
-        ctx.stroke()
-        if (lit > 0.06) {
-          // a few ember particles along the lit rung, sized to the strand
-          ctx.globalAlpha = lit * 0.5
-          for (let m = 0; m < 5; m++) {
-            const u = 0.12 + m * 0.19
-            const s = (0.045 + lit * 0.035) * height
-            ctx.drawImage(colors.ember, x - s / 2, y1 + (y2 - y1) * u - s / 2, s, s)
+        ctx.setTransform(scale, 0, 0, scale, 0, 0)
+        ctx.clearRect(0, 0, width, height)
+        ctx.globalCompositeOperation = 'lighter'
+
+        // rungs: faint, lit in ember as the ripple passes
+        ctx.lineWidth = 1
+        for (let k = 0; k < rungCount; k++) {
+          const t = (k + 0.5) / rungCount
+          const a = t * Math.PI * 2 * turns + phase + rot
+          const x = t * width
+          const y1 = mid + Math.sin(a) * amp
+          const y2 = mid + Math.sin(a + GROOVE) * amp
+          const lag = pulse - k
+          const lit = Math.min(1, Math.exp(-lag * lag * 1.6) + (lag > 0 ? Math.exp(-lag * 0.9) * 0.35 : 0))
+          ctx.globalAlpha = 0.14 + lit * 0.7
+          ctx.strokeStyle = lit > 0.5 ? ember : white
+          ctx.beginPath()
+          ctx.moveTo(x, y1)
+          ctx.lineTo(x, y2)
+          ctx.stroke()
+          if (lit > 0.06) {
+            // a few ember particles along the lit rung, sized to the strand
+            ctx.globalAlpha = lit * 0.5
+            for (let m = 0; m < 5; m++) {
+              const u = 0.12 + m * 0.19
+              const s = (0.045 + lit * 0.035) * height
+              ctx.drawImage(colors.ember, x - s / 2, y1 + (y2 - y1) * u - s / 2, s, s)
+            }
           }
         }
-      }
 
-      // the two strands: the near side of each is larger and brighter
-      for (const strand of strands) {
-        for (const d of strand.dots) {
-          const a = d.t * Math.PI * 2 * turns + phase + strand.offset + rot
-          const near = (Math.cos(a) + 1) / 2
-          const r = (0.5 + near * 0.8) * d.size
-          const twinkle = 0.9 + 0.1 * Math.sin(now * 0.0011 + d.seed)
-          // the strand tapers out at both ends instead of stopping at the edge
-          const end = Math.min(1, Math.min(d.t, 1 - d.t) / 0.06)
-          ctx.globalAlpha = Math.min(1, (0.2 + near * 0.7) * d.bright * strand.gain * twinkle) * end
-          const s = r * 9
-          ctx.drawImage(strand.sprite, d.t * width + d.du - s / 2, mid + Math.sin(a) * amp + d.jit - s / 2, s, s)
+        // the two strands: the near side of each is larger and brighter
+        for (const strand of strands) {
+          for (const d of strand.dots) {
+            const a = d.t * Math.PI * 2 * turns + phase + strand.offset + rot
+            const near = (Math.cos(a) + 1) / 2
+            const r = (0.5 + near * 0.8) * d.size
+            const twinkle = 0.9 + 0.1 * Math.sin(now * 0.0011 + d.seed)
+            // the strand tapers out at both ends instead of stopping at the edge
+            const end = Math.min(1, Math.min(d.t, 1 - d.t) / 0.06)
+            ctx.globalAlpha = Math.min(1, (0.2 + near * 0.7) * d.bright * strand.gain * twinkle) * end
+            const s = r * 9
+            ctx.drawImage(strand.sprite, d.t * width + d.du - s / 2, mid + Math.sin(a) * amp + d.jit - s / 2, s, s)
+          }
+        }
+        ctx.globalAlpha = 1
+        if (!drawn) {
+          drawn = true
+          setLive(true)
         }
       }
-      ctx.globalAlpha = 1
-      if (!drawn) {
-        drawn = true
-        setLive(true)
-      }
+
+      fit()
+      ro = new ResizeObserver(fit)
+      ro.observe(canvas)
+      return frame
     }
 
-    fit()
-    const ro = new ResizeObserver(fit)
-    ro.observe(canvas)
+    // in the frame loop only while on screen
     const io = new IntersectionObserver(([e]) => {
       visible = e.isIntersecting
+      if (visible && !draw) draw = setup()
+      if (visible && draw && !stop) stop = subscribe(draw)
+      if (!visible && stop) {
+        stop()
+        stop = null
+      }
     })
     io.observe(canvas)
-    const off = subscribe(draw)
     return () => {
-      off()
-      ro.disconnect()
+      stop?.()
+      ro?.disconnect()
       io.disconnect()
     }
   }, [width, height, turns, phase, rungCount, density, speed, pulseRate, lead])
