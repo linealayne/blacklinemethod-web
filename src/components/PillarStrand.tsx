@@ -10,7 +10,9 @@ export interface Pillar {
 }
 
 /**
- * The four pillars as nodes on one strand (it replaced the turning wheel).
+ * The four pillars as nodes on one still strand, all four listed in full.
+ * On the home page this is what reduced motion, no WebGL, and no JavaScript
+ * get in place of the rotating gene (pillars/PillarGene.tsx).
  * The strand runs down the left for the full height of the list; each
  * pillar hangs off it on a short rung: number, name, description, all of it
  * always visible and real text. Phones get exactly the same thing, since it

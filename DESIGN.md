@@ -140,7 +140,10 @@ One palette, defined once as CSS variables in `globals.css` and referenced every
 - **Links:** label face with a resting low-contrast underline drawn tan on hover, and a drawn 1px arrow that extends.
 - **Inputs:** underline-only, tan on focus.
 - **Principle cards:** hairline cards with a strand of light on the top edge. Front: tan number, a particle strand, the title. Back: the title (decoded from A T G C during the flip, with zero reflow), the description, a teal and violet edge glow.
-- **Pillar strand:** four nodes on one particle strand, each with its number, name, and description. Lit: tan node with a teal and violet halo; hover adds a teal ring.
+- **The rotating pillars gene (home page, protected):** the hero's gene seen closer, turning once every 8.8 seconds with four pillar nodes on its strands. The active node glows tan at the front and that pillar's number, name, and description cross-fade in beside it, one at a time; a 01 to 04 index jumps between them, with a pause control. One screen tall from 1024px; stacked with a horizontal gene, index dots, and swipe below that. Reduced motion or no WebGL: the pillar strand below.
+- **Card genes:** each principle card carries a small living gene (slow turn, ember ripple along the rungs); the three differ slightly in pace, twist, leading strand, and density. Still under reduced motion.
+- **Pillar strand (the static fallback, and the /method index):** four nodes on one particle strand, each with its number, name, and description. Lit: tan node with a teal and violet halo; hover adds a teal ring.
+- **Email:** the consult notification is branded HTML (`src/lib/email.ts`): near-black, the wordmark and a still gene as hosted PNGs, tan accent, spaced-caps labels, label and value rows.
 - **Footer:** contacts in Inter, link columns, a hairline with one tan reading point, the full-width wordmark; one-time load-in.
 
 ## Do

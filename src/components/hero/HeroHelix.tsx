@@ -2,8 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react'
 import { INTRO } from '@/lib/flags'
-import { HELIX } from './helix-config'
-import type { HelixColors, Tier } from './HelixScene'
+import { canUseWorker, pickTier, readColors } from './gene-env'
 import type { FromWorker, ToWorker } from './helix.worker'
 
 interface HeroHelixProps {
@@ -27,35 +26,6 @@ interface SceneHandle {
   setActive(active: boolean): void
   dispose(): void
 }
-
-function pickTier(phone: boolean): Tier {
-  const nav = navigator as Navigator & { deviceMemory?: number }
-  const cores = nav.hardwareConcurrency || 4
-  const mem = nav.deviceMemory ?? 8
-  // phones always get a lighter gene (fewer particles)
-  if (phone) return cores >= 8 && mem >= 6 ? 'mid' : 'low'
-  if (mem < 4 || cores < 4) return 'low'
-  return cores >= 8 && window.innerWidth >= 1280 ? 'high' : 'mid'
-}
-
-/** The palette, from the CSS tokens in globals.css (helix-config holds fallbacks). */
-function readColors(): HelixColors {
-  const css = getComputedStyle(document.documentElement)
-  const hex = (name: string, fallback: string) => {
-    const v = css.getPropertyValue(`--bl-${name}-rgb`).trim().split(/\s+/).map(Number)
-    if (v.length !== 3 || v.some((n) => !Number.isFinite(n))) return fallback
-    return `#${v.map((n) => n.toString(16).padStart(2, '0')).join('')}`
-  }
-  return {
-    amber: hex('ember', HELIX.colors.amber),
-    teal: hex('teal', HELIX.colors.teal),
-    violet: hex('violet', HELIX.colors.violet),
-    offwhite: hex('offwhite', HELIX.colors.offwhite),
-  }
-}
-
-const canUseWorker = () =>
-  typeof Worker !== 'undefined' && typeof OffscreenCanvas !== 'undefined' && 'transferControlToOffscreen' in HTMLCanvasElement.prototype
 
 /**
  * The hero scene. It runs in a web worker on an OffscreenCanvas wherever

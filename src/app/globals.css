@@ -722,6 +722,12 @@ html.bl-motion .bl-card.is-flipped .bl-card-back .bl-strand-rung {
   100% { opacity: 0.12; }
 }
 
+/* The living strand on each card (LivingStrand.tsx): the canvas fades in
+   over the still strand it is drawn from, which then steps back */
+.bl-living-canvas { opacity: 0; transition: opacity 0.6s var(--bl-ease-out); }
+.bl-living-canvas.is-live { opacity: 1; }
+.bl-living-canvas.is-live + svg { opacity: 0; transition: opacity 0.6s var(--bl-ease-out); }
+
 /* Static (reduced motion): no 3D, the back face is the card */
 .bl-card.is-static .bl-card-inner { transform: none; transition: none; height: auto; }
 .bl-card.is-static .bl-card-front { display: none; }
@@ -771,6 +777,157 @@ html:not(.bl-motion) .bl-node,
   .bl-pillar:hover .bl-pillar-rung { background: rgb(var(--bl-teal-rgb) / 0.75); }
 }
 .bl-pillar:focus-visible .bl-node::after { opacity: 1; transform: none; }
+
+/* ------------------------------------------------------------------
+   The rotating gene (home page, "Four pillars. One system."). PROTECTED:
+   a staple of the site, not to be changed unless Layne asks.
+
+   From 1024px the section is exactly one screen below the header: the
+   statement on the left, the turning gene and the active pillar's text on
+   the right. Below that it stacks: statement, gene (lying across), the
+   active pillar, the index dots, then "One system" and the link.
+
+   The gene and the cross-fading text (.bl-rotor) only show when motion is
+   allowed and WebGL exists. Otherwise, and with no JavaScript, the static
+   strand with all four pillars listed (.bl-rotor-static) takes its place.
+   ------------------------------------------------------------------ */
+.bl-method { overflow: hidden; }
+.bl-method-grid { display: grid; grid-template-columns: minmax(0, 1fr); padding-block: 1rem 1.5rem; }
+.bl-method-head, .bl-method-foot { position: relative; z-index: 1; }
+.bl-method-foot { margin-top: 0.75rem; }
+.bl-rotor { display: none; position: relative; touch-action: pan-y; }
+.bl-rotor-static { margin-top: 3rem; }
+html.bl-motion:not(.bl-nowebgl) .bl-rotor:not(.is-failed) { display: block; }
+html.bl-motion:not(.bl-nowebgl) .bl-rotor:not(.is-failed) + .bl-rotor-static { display: none; }
+
+/* the gene: lying across the top, edge to edge */
+.bl-rotor-stage {
+  position: relative;
+  height: clamp(96px, 14svh, 150px);
+  margin: 0 calc(var(--bl-gutter) * -1);
+  pointer-events: none;
+  -webkit-mask-image: linear-gradient(180deg, transparent, #000 22%, #000 78%, transparent);
+  mask-image: linear-gradient(180deg, transparent, #000 22%, #000 78%, transparent);
+}
+.bl-rotor-canvas { display: block; width: 100%; height: 100%; opacity: 0; transition: opacity 0.9s var(--bl-ease-out); }
+.bl-rotor-canvas.is-live { opacity: 1; }
+
+/* one pillar at a time: all four share one cell, so the block is as tall as
+   the longest and nothing moves when they change */
+.bl-rotor-text { display: grid; }
+.bl-rotor-text > li {
+  grid-area: 1 / 1;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  column-gap: 0.9rem;
+  opacity: 0;
+  transform: translateY(6px);
+  pointer-events: none;
+  transition: opacity 0.4s var(--bl-ease-draw), transform 0.6s var(--bl-ease-out);
+}
+.bl-rotor-text > li.is-active {
+  opacity: 1;
+  transform: none;
+  pointer-events: auto;
+  transition-delay: 0.16s;
+}
+.bl-rotor-text .bl-body { flex-basis: 100%; margin-top: 0.5rem; max-width: 30rem; line-height: 1.62; }
+
+/* the index: four nodes, and the pause control */
+.bl-rotor-index {
+  display: flex;
+  align-items: center;
+  margin-top: 0;
+  margin-left: -15px;
+}
+.bl-rotor-tab {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  min-width: 44px;
+  height: 44px;
+  color: var(--bl-label);
+  transition: color 0.4s var(--bl-ease-out);
+}
+.bl-rotor-num { display: none; color: inherit; }
+.bl-rotor-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  border: 1px solid rgb(var(--bl-offwhite-rgb) / 0.45);
+  transition: border-color 0.5s var(--bl-ease-out), background-color 0.5s var(--bl-ease-out), box-shadow 0.8s var(--bl-ease-out);
+}
+.bl-rotor-tab[aria-current] { color: var(--bl-offwhite); }
+.bl-rotor-tab[aria-current] .bl-rotor-dot {
+  border-color: var(--bl-tan);
+  background: var(--bl-tan);
+  box-shadow: 0 0 14px 3px rgb(var(--bl-tan-rgb) / 0.4), 0 0 30px 9px rgb(var(--bl-violet-rgb) / 0.22);
+}
+.bl-rotor-pause {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  margin-left: auto;
+  margin-right: -15px;
+  color: var(--bl-label);
+  transition: color 0.4s var(--bl-ease-out);
+}
+@media (hover: hover) and (pointer: fine) {
+  .bl-rotor-tab:hover, .bl-rotor-pause:hover { color: var(--bl-offwhite); }
+  .bl-rotor-tab:not([aria-current]):hover .bl-rotor-dot { border-color: rgb(var(--bl-teal-rgb) / 0.9); box-shadow: 0 0 12px 2px rgb(var(--bl-teal-rgb) / 0.35); }
+}
+
+@media (min-width: 1024px) {
+  .bl-method-wrap { display: flex; flex-direction: column; min-height: calc(100svh - var(--bl-header)); }
+  .bl-method-grid {
+    flex: 1;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    grid-template-rows: 1fr auto auto 1fr;
+    column-gap: 2rem;
+    padding-block: 2rem;
+  }
+  .bl-method-head { grid-column: 1 / span 5; grid-row: 2; }
+  .bl-method-foot { grid-column: 1 / span 5; grid-row: 3; margin-top: clamp(1.75rem, 4.5vh, 3rem); }
+  .bl-rotor-static { grid-column: 7 / -1; grid-row: 1 / -1; align-self: center; margin-block: 3rem; }
+
+  html.bl-motion:not(.bl-nowebgl) .bl-rotor:not(.is-failed) {
+    display: grid;
+    grid-column: 6 / -1;
+    grid-row: 1 / -1;
+    grid-template-columns: minmax(0, 0.78fr) minmax(0, 1fr);
+    align-items: center;
+  }
+  /* the gene stands at the left of this box; its canvas runs past the box
+     on every side so the glow and the loose particles fade out, not cut */
+  .bl-rotor-stage {
+    position: absolute;
+    inset: -2rem -3% -2rem -14%;
+    height: auto;
+    margin: 0;
+    -webkit-mask-image: linear-gradient(90deg, transparent, #000 16%, #000 90%, transparent), linear-gradient(180deg, transparent, #000 7%, #000 93%, transparent);
+    mask-image: linear-gradient(90deg, transparent, #000 16%, #000 90%, transparent), linear-gradient(180deg, transparent, #000 7%, #000 93%, transparent);
+    -webkit-mask-composite: source-in;
+    mask-composite: intersect;
+  }
+  .bl-rotor-panel { grid-column: 2; position: relative; }
+  .bl-rotor-text > li { display: block; }
+  .bl-rotor-text .bl-h3 { margin-top: 1rem; }
+  .bl-rotor-text .bl-body { margin-top: 1rem; max-width: 25rem; line-height: 1.7; }
+  .bl-rotor-index {
+    margin-top: clamp(1.25rem, 4vh, 2.25rem);
+    padding-top: 0.5rem;
+    margin-left: 0;
+    border-top: 1px solid var(--bl-hairline);
+    max-width: 25rem;
+  }
+  .bl-rotor-tab { justify-content: flex-start; min-width: 0; padding-right: 1.5rem; }
+  .bl-rotor-num { display: inline; }
+  .bl-rotor-pause { margin-right: -16px; }
+}
 
 /* ------------------------------------------------------------------
    Footer load-in (once, when it enters view): the hairlines draw across,
