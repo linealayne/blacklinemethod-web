@@ -1,264 +1,102 @@
 'use client'
 
-import { useEffect, useLayoutEffect, useRef, useState } from 'react'
-import Link from 'next/link'
+import { useCallback, useLayoutEffect, useEffect, useRef, useState } from 'react'
 import dynamic from 'next/dynamic'
-import { Button } from '@/components/ui/button'
 import { useMotion } from '@/components/motion/MotionProvider'
-import { motionFlags } from '@/lib/flags'
-import { isDesktop, isFinePointer, isPhone } from '@/lib/motion'
-import { useFirstInteraction } from '@/lib/useFirstInteraction'
-import { useGsapEffect } from '@/lib/useGsap'
-import type { HeroHandles } from '@/components/three/HeroField'
+import { introPlaying } from '@/lib/flags'
 import { supportsWebGL } from '@/components/three/webgl'
 
-const HeroField = dynamic(() => import('@/components/three/HeroField'), { ssr: false })
+const HeroHelix = dynamic(() => import('@/components/hero/HeroHelix'), { ssr: false })
 
-/** Hero reveal choreography (seconds) */
-const HERO = {
-  lineDuration: 1.3,
-  lineStagger: 0.1,
-  subOverlap: 0.75, // how early the sub elements start before the lines finish
-  fadeStart: 0.3, // scroll progress where the copy starts to fade
-}
+const HEADLINE = ['run', 'your', 'own', 'biology.']
 
 /**
- * On phones and tablets the headline is never hidden: it paints in the
- * metric-matched fallback at first paint, then swaps to Fraunces, and the
- * subhead and button rise through the CSS reveal. On desktop the masked
- * line reveal runs on every visit: under the loader on the first visit,
- * straight after hydration on later ones (the CSS keeps the headline
- * hidden until then so nothing flashes).
+ * The living sequence. A three.js double helix (HeroHelix) fills the hero
+ * behind and beside the type. The composition is two things only: the
+ * headline, lower left, and one quiet line beneath a hairline (the place,
+ * and the practice in a sentence). The consult button lives in the header.
+ *
+ * On the first page of a session the loading sequence (globals.css, "The
+ * loading sequence") hands over to this section: the headline rises word by
+ * word and the gene forms from scattered particles. Reduced motion and no
+ * WebGL get the static rendered still (.bl-helix-still).
  */
 export function HeroSection() {
-  const { mounted, reduced, webgl, loaderDone } = useMotion()
+  const { mounted, reduced, webgl } = useMotion()
   const sectionRef = useRef<HTMLElement>(null)
-  const contentRef = useRef<HTMLDivElement>(null)
-  const h1Ref = useRef<HTMLHeadingElement>(null)
-  const playRef = useRef<(() => void) | null>(null)
-  const loaderDoneRef = useRef(false)
-  const handles = useRef<HeroHandles>({
-    pointer: { x: 0, y: 0, active: 0 },
-    scroll: { value: 0 },
-  }).current
+  const [intro, setIntro] = useState(false)
+  const [failed, setFailed] = useState(false)
+  const [showScene, setShowScene] = useState(false)
 
-  const [show3d, setShow3d] = useState(false)
-  const [active, setActive] = useState(true)
-  const [phone, setPhone] = useState(false)
-
-  // Lazy-load WebGL once the loader is done and the visitor has moved, scrolled,
-  // or touched (or after a quiet while). Text renders first, always.
-  const go = useFirstInteraction(mounted && !reduced && webgl && loaderDone)
-  useEffect(() => {
-    if (!go) return
-    if (!supportsWebGL()) return
-    setPhone(isPhone())
-    setShow3d(true)
-    // warm the orbit chunk too: three is shared, the rest is small
-    import('@/components/three/OrbitScene').catch(() => {})
-  }, [go])
-
-  // Pause rendering when the hero is off screen or the tab is hidden.
-  useEffect(() => {
-    const el = sectionRef.current
-    if (!el || !show3d) return
-    let inView = true
-    const update = () => setActive(inView && !document.hidden)
-    const io = new IntersectionObserver(
-      ([entry]) => {
-        inView = entry.isIntersecting
-        update()
-      },
-      { threshold: 0 }
-    )
-    io.observe(el)
-    document.addEventListener('visibilitychange', update)
-    return () => {
-      io.disconnect()
-      document.removeEventListener('visibilitychange', update)
-    }
-  }, [show3d])
-
-  // Pointer (desktop) or device tilt (phones) feeds the particle push.
-  useEffect(() => {
-    const el = sectionRef.current
-    if (!el || !show3d) return
-    const p = handles.pointer
-    if (isFinePointer()) {
-      const onMove = (e: PointerEvent) => {
-        const r = el.getBoundingClientRect()
-        p.x = ((e.clientX - r.left) / r.width) * 2 - 1
-        p.y = -(((e.clientY - r.top) / r.height) * 2 - 1)
-        p.active = 1
-      }
-      const onLeave = () => {
-        p.active = 0
-      }
-      el.addEventListener('pointermove', onMove, { passive: true })
-      el.addEventListener('pointerleave', onLeave)
-      return () => {
-        el.removeEventListener('pointermove', onMove)
-        el.removeEventListener('pointerleave', onLeave)
-      }
-    }
-    const onTilt = (e: DeviceOrientationEvent) => {
-      if (e.gamma == null || e.beta == null) return
-      p.x = Math.max(-1, Math.min(1, e.gamma / 25)) * 0.6
-      p.y = Math.max(-1, Math.min(1, (e.beta - 40) / 25)) * 0.6
-      p.active = 0.7
-    }
-    window.addEventListener('deviceorientation', onTilt)
-    return () => window.removeEventListener('deviceorientation', onTilt)
-  }, [show3d, handles])
-
-  // Phones, tablets, reduced motion: subs rise right away through the CSS reveal.
-  // Desktop: the headline timeline reveals them after the lines (see below).
-  useEffect(() => {
-    if (!mounted) return
-    const flags = motionFlags()
-    if (flags.reduced || !isDesktop()) revealSubs(contentRef.current)
-  }, [mounted])
-
-  // Returning desktop visitors: keep the headline hidden synchronously until
-  // the split takes over (the pre-hydration CSS rule stops applying at hydration).
+  // decided before paint: is the loading sequence running right now?
   useLayoutEffect(() => {
-    const h1 = h1Ref.current
-    if (!h1) return
-    const flags = motionFlags()
-    if (!flags.reduced && isDesktop() && flags.loaderDone) h1.style.opacity = '0'
+    setIntro(introPlaying())
   }, [])
 
-  // Desktop: masked line reveal (under the loader on first visit), then the subs.
-  useGsapEffect(
-    async ({ gsap, ScrollTrigger, loadSplitText }) => {
-      const h1 = h1Ref.current
-      const content = contentRef.current
-      const section = sectionRef.current
-      if (!h1 || !content || !section) return
-      const flags = motionFlags()
-      if (flags.reduced) return
-
-      const ctx = gsap.context(() => {
-        // Scrolling past the hero: copy drifts up and fades; the field loosens.
-        ScrollTrigger.create({
-          trigger: section,
-          start: 'top top',
-          end: 'bottom top',
-          scrub: true,
-          onUpdate: (self) => {
-            handles.scroll.value = self.progress
-            const f = gsap.utils.clamp(0, 1, (self.progress - HERO.fadeStart) / (0.95 - HERO.fadeStart))
-            gsap.set(content, { yPercent: -10 * self.progress, opacity: 1 - f })
-          },
-        })
-      }, section)
-
-      if (!isDesktop()) return () => ctx.revert()
-
-      // Split now; reveal when the loader hands off, or at once if there is none.
-      const SplitText = await loadSplitText()
-      if (document.fonts?.ready) await document.fonts.ready
-      const split = SplitText.create(h1, {
-        type: 'lines',
-        mask: 'lines',
-        linesClass: 'bl-line',
-        autoSplit: true,
-        onSplit(self) {
-          gsap.set(self.lines, { yPercent: 110 })
-          const tl = gsap.timeline({ paused: true })
-          tl.to(self.lines, {
-            yPercent: 0,
-            duration: HERO.lineDuration,
-            ease: 'expo.out',
-            stagger: HERO.lineStagger,
-          })
-          tl.call(() => revealSubs(content), [], `-=${HERO.subOverlap}`)
-          playRef.current = () => tl.play()
-          if (loaderDoneRef.current) tl.play()
-          return tl
-        },
-      })
-      gsap.set(h1, { opacity: 1 })
-      return () => {
-        split.revert()
-        ctx.revert()
-      }
-    },
-    [mounted],
-    { immediate: typeof window !== 'undefined' && isDesktop() }
-  )
-
   useEffect(() => {
-    loaderDoneRef.current = loaderDone
-    if (loaderDone) playRef.current?.()
-  }, [loaderDone])
+    if (!mounted) return
+    if (reduced || !webgl || !supportsWebGL()) {
+      if (!reduced && webgl) setFailed(true)
+      return
+    }
+    setShowScene(true)
+  }, [mounted, reduced, webgl])
+
+  const onFail = useCallback(() => {
+    setFailed(true)
+    setShowScene(false)
+  }, [])
+
+  const i = (n: number) => ({ '--i': n }) as React.CSSProperties
 
   return (
     <section
       ref={sectionRef}
-      className="relative min-h-[100svh] bg-black flex items-center justify-center overflow-hidden"
+      className="relative min-h-[100svh] bg-black flex flex-col overflow-hidden touch-pan-y"
       aria-label="Introduction"
     >
-      {/* Particle field (decorative, lazy) */}
-      <div className="absolute inset-0 pointer-events-none" aria-hidden="true">
-        {show3d && <HeroField handles={handles} start={loaderDone} active={active} phone={phone} />}
+      {/* The scene (decorative) */}
+      <div className="absolute inset-0" aria-hidden="true">
+        <div className={`bl-helix-still absolute inset-0 ${failed ? 'is-on' : ''}`} />
+        {showScene && !failed && <HeroHelix hostRef={sectionRef} intro={intro} onFail={onFail} />}
+        {/* soft vignettes keep the type fully legible over the scene */}
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_70%_60%_at_18%_88%,rgb(var(--bl-black-rgb)/0.92)_0%,rgb(var(--bl-black-rgb)/0.6)_45%,transparent_75%)]" />
+        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-black to-transparent" />
+        <div className="pointer-events-none absolute inset-x-0 top-0 h-32 bg-gradient-to-b from-black/80 to-transparent" />
       </div>
-      {/* Soft darkening behind the words so the headline always reads */}
-      <div
-        className="absolute inset-0 pointer-events-none"
-        aria-hidden="true"
-        style={{
-          background:
-            'radial-gradient(ellipse 60% 54% at 50% 56%, rgba(10,10,10,0.62) 0%, rgba(10,10,10,0.3) 50%, rgba(10,10,10,0) 74%)',
-        }}
-      />
 
-      <div ref={contentRef} className="relative z-10 text-center px-6 max-w-5xl mx-auto pt-16 pb-10">
-        <h1
-          ref={h1Ref}
-          data-hero-h1=""
-          className="font-serif font-light text-offwhite lowercase leading-[1.05] tracking-wider text-[clamp(2.75rem,7vw,7rem)]"
-        >
-          run your own biology.
+      <div className="relative z-10 bl-wrap flex-1 flex flex-col justify-end pt-[calc(var(--bl-header)+4rem)] pb-12 md:pb-16 pointer-events-none">
+        <h1 data-hero-h1="" className="bl-display max-w-[13ch] md:max-w-[9.5ch] lg:max-w-[10ch]">
+          {HEADLINE.map((word, n) => (
+            <span key={word}>
+              <span data-hero-word="">
+                <span style={i(n)}>{word}</span>
+              </span>
+              {n < HEADLINE.length - 1 ? ' ' : ''}
+            </span>
+          ))}
         </h1>
 
-        <p data-hero-sub data-reveal="" className="mt-8 bl-label" style={{ '--bl-rise': '18px' } as React.CSSProperties}>
-          Dallas, Texas&nbsp;&nbsp;·&nbsp;&nbsp;By appointment
-        </p>
-
-        <p
-          data-hero-sub
-          data-reveal=""
-          className="mt-6 font-serif italic text-body-dim text-base md:text-lg tracking-wide max-w-md mx-auto"
-          style={{ '--bl-rise': '18px', '--bl-delay': '0.1s' } as React.CSSProperties}
-        >
-          a private optimization practice built around one person at a time. hormones, training,
-          nutrition, and the way you live.
-        </p>
-
-        <div data-hero-sub data-reveal="" className="mt-12" style={{ '--bl-rise': '18px', '--bl-delay': '0.2s' } as React.CSSProperties}>
-          <Button asChild size="lg" glow>
-            <Link href="/contact">request a consult</Link>
-          </Button>
+        {/* One line beneath the headline: where, and what. The label hangs
+            under the headline's left edge; the sentence sits on the right,
+            under the gene, both on the same first baseline. */}
+        <div className="mt-10 md:mt-14">
+          <span data-intro="rule" className="block h-px w-full bg-offwhite/15" aria-hidden="true" />
+          <div className="pt-6 md:pt-8 grid gap-4 md:grid-cols-12 md:gap-x-8 md:items-baseline">
+            <p data-intro="copy" style={i(0)} className="bl-label md:col-span-5">
+              Dallas, Texas&nbsp;&nbsp;·&nbsp;&nbsp;By appointment
+            </p>
+            <p
+              data-intro="copy"
+              style={i(1)}
+              className="bl-lead text-offwhite/80 max-w-[34rem] md:col-span-7 lg:col-start-7 lg:col-span-6 xl:col-start-8 xl:col-span-5"
+            >
+              A private optimization practice built around one person at a time. Hormones, training,
+              nutrition, and the way you live.
+            </p>
+          </div>
         </div>
-      </div>
-
-      {/* Scroll cue */}
-      <div
-        className="absolute bottom-8 left-1/2 -translate-x-1/2"
-        aria-hidden="true"
-        data-hero-sub
-        data-reveal=""
-        style={{ '--bl-rise': '0px', '--bl-delay': '0.5s' } as React.CSSProperties}
-      >
-        <div className="w-px h-14 bg-gradient-to-b from-offwhite/0 to-offwhite/25 mx-auto" />
       </div>
     </section>
   )
-}
-
-function revealSubs(root: HTMLElement | null) {
-  if (!root) return
-  const section = root.closest('section') ?? root
-  section.querySelectorAll('[data-hero-sub]').forEach((el) => el.classList.add('bl-in'))
 }

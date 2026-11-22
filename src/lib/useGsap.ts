@@ -1,13 +1,8 @@
 'use client'
 
-import { useEffect, useLayoutEffect, type DependencyList } from 'react'
+import { useEffect, type DependencyList } from 'react'
 import type { GsapModule } from './gsap'
 import { whenInteracted } from './useFirstInteraction'
-
-// Layout effect so the cleanup runs in React's mutation phase, before host
-// nodes are removed: ScrollTrigger pins reparent sections into spacers and
-// must be reverted before React unmounts them.
-const useIsoLayoutEffect = typeof window === 'undefined' ? useEffect : useLayoutEffect
 
 type Cleanup = void | (() => void)
 
@@ -18,16 +13,16 @@ interface Options {
 
 /**
  * Run a GSAP effect after the library has loaded on demand. The callback
- * receives the gsap module and returns a cleanup (usually `() => ctx.revert()`).
- * Loading waits for the visitor's first interaction (see whenInteracted), so
- * gsap is never part of the page's initial JavaScript or its idle period.
+ * receives the gsap module and returns a cleanup. Loading waits for the
+ * visitor's first interaction (see whenInteracted), so gsap is never part of
+ * the page's initial JavaScript or its idle period.
  */
 export function useGsapEffect(
   effect: (mod: GsapModule) => Cleanup | Promise<Cleanup>,
   deps: DependencyList,
   options: Options = {}
 ) {
-  useIsoLayoutEffect(() => {
+  useEffect(() => {
     let cancelled = false
     let cleanup: Cleanup
     const gate = options.immediate ? Promise.resolve() : whenInteracted()

@@ -4,16 +4,22 @@ import './globals.css'
 import { Header } from '@/components/Header'
 import { Footer } from '@/components/Footer'
 import { MotionProvider } from '@/components/motion/MotionProvider'
-import { SmoothScroll } from '@/components/motion/SmoothScroll'
-import { Loader } from '@/components/motion/Loader'
 import { PageTransition } from '@/components/motion/PageTransition'
 import { Grain } from '@/components/motion/Grain'
+import { Loader } from '@/components/motion/Loader'
 import { FLAGS_SCRIPT } from '@/lib/flags'
 
+// Fraunces: the face of the BLACKLINE wordmark, used for all display type.
+// The site only ever sets it at weight 400, the small optical size (14) and
+// SOFT 0, which is exactly Google's static 400 file, so that file is loaded
+// instead of the variable font: the same glyphs and widths at about a sixth
+// of the download (18 KB against 118 KB on the critical path). If a design
+// ever needs another weight or optical size, switch back to
+// `axes: ['opsz', 'SOFT']` and drop `weight`.
 const fraunces = Fraunces({
   subsets: ['latin'],
-  weight: ['300', '400'],
-  style: ['normal', 'italic'],
+  style: ['normal'],
+  weight: ['400'],
   variable: '--font-fraunces',
   display: 'swap',
 })
@@ -66,7 +72,7 @@ export const metadata: Metadata = {
 }
 
 export const viewport: Viewport = {
-  themeColor: '#0A0A0A',
+  themeColor: '#080808',
   colorScheme: 'dark',
 }
 
@@ -82,7 +88,7 @@ export default function RootLayout({
       suppressHydrationWarning
     >
       <head>
-        {/* Sets motion/WebGL/loader flags on <html> before first paint. See src/lib/flags.ts */}
+        {/* Sets the motion flags and runs the loading sequence clock before first paint. See src/lib/flags.ts */}
         <script dangerouslySetInnerHTML={{ __html: FLAGS_SCRIPT }} />
       </head>
       <body>
@@ -91,7 +97,6 @@ export default function RootLayout({
             Skip to content
           </a>
           <Loader />
-          <SmoothScroll />
           <PageTransition />
           <Header />
           <main id="bl-main">{children}</main>

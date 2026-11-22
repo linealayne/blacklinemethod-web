@@ -47,10 +47,10 @@ Mechanism a neighbor cannot truthfully copy: symptoms are read first; bloodwork 
 
 ## Brand Commitments
 
-- Name: Blackline Method. Wordmark: BLACKLINE, letter-spaced uppercase serif. [from code]
+- Name: Blackline Method. Wordmark: BLACKLINE, letter-spaced uppercase serif (Fraunces 400, optical size 14, 0.42em). Its face is the display face for the whole site. [from code]
 - Voice: confident, precise, calm, slightly provocative. Short declarative lines. Periods, not exclamation points. Never enthusiastic, never salesy. Reference line: "Engagements are limited. That is by design." [from brief and style bible]
 - Words never used in copy: elevate, premium, luxury, transform, unleash, unlock, experience the difference, your best self, wellness journey, holistic, cutting-edge, game-changing, world-class, unparalleled, best-in-class. The retired tagline "Train. Recover. Heal." is never used. [from style bible]
-- Binding visual constraints volunteered by the owner (recorded, not expanded): near-black background, off-white text, amber accent; lowercase serif headlines (Fraunces), sans body (Inter); restrained tone. One or two closely related tones may be added as documented tokens. [from brief, section 3]
+- Binding visual constraints (updated by the owner in the pass-two brief, November 2026): near-black background, greys, off-white text, and one palette taken from the hero gene: tan as the warm accent, teal and violet as its two glows (defined once as tokens; see CLAUDE.md, "Colour"). Two typefaces only: Fraunces set like the BLACKLINE wordmark (uppercase, tracked) for all display type, and Inter for labels, nav, buttons (small, tracked, uppercase) and body (sentence case). No lowercase headline styling, no italic display. Teal and violet are rich in the hero scene and appear elsewhere only as quiet light (glows, particles, live states), never as paint. No scroll animation: nothing pins, scrubs, or hijacks scrolling. [from the pass-two brief, palette unified in the final revamp pass]
 - Feeling to produce: a private members' practice. Quiet confidence. Nothing loud. Every detail considered. [from brief]
 
 ## Evidence on Hand
@@ -70,5 +70,5 @@ Mechanism a neighbor cannot truthfully copy: symptoms are read first; bloodwork 
 ## Accessibility & Inclusion
 
 - Small uppercase labels and body text must meet WCAG AA contrast on the near-black ground. [from brief, section 4]
-- prefers-reduced-motion and no-WebGL visitors get a calm static site with everything readable and usable; 3D and pinned motion are decoration only, and all text stays real HTML. [from brief, section 7]
+- prefers-reduced-motion and no-WebGL visitors get a calm static site with everything readable and usable (a rendered still of the hero, cards showing their content, the pillar strand with every node lit); the 3D hero is decoration only, and all text stays real HTML. Nothing on the site is tied to scroll position. [from brief, section 7, and the pass-two brief]
 - Interactive explainers are keyboard accessible. [from brief, section 5d]

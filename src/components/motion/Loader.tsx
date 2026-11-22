@@ -1,58 +1,46 @@
-'use client'
-
-import { useEffect, useRef } from 'react'
+const WORDMARK = 'BLACKLINE'
 
 /**
- * First-visit loader, desktop only: the wordmark letter-spaces in and one
- * amber rule draws beneath it (CSS keyframes, see globals.css "Loader").
- * Runs once per session (sessionStorage, in try/catch), never for reduced
- * motion, phones, or tablets, and finishes in about 1.15s. The overlay is
- * server-rendered so there is no flash before hydration; CSS hides it
- * immediately when it should not run.
+ * The wordmark as nine letter spans. The header logo and the loading screen
+ * both render exactly this, so the two are the same glyph runs, the same
+ * widths, and line up to the pixel when one hands over to the other.
  */
-export const LOADER = {
-  handoffMs: 750, // the hero starts revealing as the overlay begins to fade
-  totalMs: 1150,
+export function WordmarkLetters() {
+  return (
+    <>
+      {WORDMARK.split('').map((ch, i) => (
+        <span key={i} style={{ '--i': i } as React.CSSProperties}>
+          {ch}
+        </span>
+      ))}
+    </>
+  )
 }
 
+/**
+ * The loading screen: a dark screen, the BLACKLINE wordmark typing out in
+ * the centre with a small loading line filling beneath it, then the wordmark
+ * slides up and left onto the header logo.
+ *
+ * It is server-rendered and driven entirely by CSS (globals.css, "The
+ * loading sequence") from classes the inline flags script sets, so it shows
+ * on the very first paint and never waits for React.
+ *
+ * The wordmark here is laid out exactly as the header's: the same wrapper
+ * (`bl-wrap`, header height, vertically centred), the same class
+ * (`bl-wordmark`), the same padding, the same letter spans (WordmarkLetters). Its resting position IS the header
+ * logo's position; the centre of the screen is only a transform away. That
+ * is what makes the handoff exact, with no font swap and no jump.
+ */
 export function Loader() {
-  const ref = useRef<HTMLDivElement>(null)
-
-  useEffect(() => {
-    const html = document.documentElement
-    const el = ref.current
-    if (!el) return
-
-    const finish = () => {
-      html.classList.add('bl-loader-done')
-      window.dispatchEvent(new Event('bl:loader-done'))
-    }
-
-    if (html.classList.contains('bl-no-loader') || html.classList.contains('bl-reduced')) {
-      finish()
-      return
-    }
-
-    try {
-      window.sessionStorage.setItem('bl-visited', '1')
-    } catch {
-      /* storage unavailable: the loader simply plays on every load */
-    }
-
-    el.classList.add('is-playing')
-    const handoff = window.setTimeout(() => window.dispatchEvent(new Event('bl:loader-done')), LOADER.handoffMs)
-    const done = window.setTimeout(finish, LOADER.totalMs)
-    return () => {
-      window.clearTimeout(handoff)
-      window.clearTimeout(done)
-    }
-  }, [])
-
   return (
-    <div id="bl-loader" ref={ref} aria-hidden="true">
-      <div className="w-[150px] text-center">
-        <span className="wordmark">BLACKLINE</span>
-        <span className="rule" />
+    <div id="bl-loader" aria-hidden="true">
+      <div className="bl-loader-bg" />
+      <div className="bl-wrap relative h-[var(--bl-header)] flex items-center justify-between">
+        <span className="bl-wordmark bl-loader-word py-3">
+          <WordmarkLetters />
+          <i className="bl-loader-line" />
+        </span>
       </div>
     </div>
   )

@@ -1,27 +1,13 @@
 /**
- * Motion tokens. Slow, precise, never bouncy.
- * Every tuning knob for the site's motion lives here or in the
- * component-level CONFIG objects (see CLAUDE.md).
+ * Motion tokens. Precise, never bouncy, never tied to scroll position.
+ * The only scroll-related motion on the site is a one-time fade and rise
+ * (under 600ms) when an element first enters view.
  */
-export const EASE = {
-  reveal: 'expo.out', // masked line reveals
-  rise: 'power3.out', // body fade-and-rise
-  scrub: 'none', // scroll-scrubbed timelines
-  ui: 'power2.out', // hover and press
-  veil: 'power2.inOut', // route transition
-} as const
-
 export const DUR = {
-  line: 1.1, // seconds per headline line
-  lineStagger: 0.09,
-  rise: 0.9,
-  riseStagger: 0.08,
+  rise: 0.5, // seconds, the one-time entrance (see globals.css, "Entrances")
   veilIn: 0.22,
   veilOut: 0.3,
-  loader: 1.15, // total loader time, under 1.5s
 } as const
-
-export const REVEAL_START = 'top 86%'
 
 export function prefersReducedMotion(): boolean {
   if (typeof window === 'undefined') return false
@@ -33,7 +19,7 @@ export function isFinePointer(): boolean {
   return window.matchMedia('(hover: hover) and (pointer: fine)').matches
 }
 
-/** Fine pointer and 1024px or wider: the loader and the masked hero reveal run here. */
+/** Fine pointer and 1024px or wider. */
 export function isDesktop(): boolean {
   if (typeof window === 'undefined') return false
   return document.documentElement.classList.contains('bl-desktop')

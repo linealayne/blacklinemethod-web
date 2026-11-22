@@ -1,15 +1,14 @@
 import type { Config } from 'tailwindcss'
 
 /**
- * Blackline design tokens.
- * Palette is fixed (see DESIGN.md). The additions below are documented
- * tonal relatives of the existing palette, added for contrast and depth:
- *   ink          deeper black for the loader, veil, and 3D canvas ground
- *   gold         muted gold highlight for particle warm-white and hover glows
- *   amber-muted  amber at readable small-label strength (about 5.1:1 on black)
- *   label        warm grey for quiet uppercase labels (about 5.7:1 on black)
- *   body / body-dim  body copy greys that clear WCAG AA (7.2:1 and 5.4:1)
+ * Blackline design tokens (pass three: one palette, taken from the hero gene).
+ * Every colour is defined ONCE, as an RGB triplet, in src/app/globals.css
+ * (`:root`). Tailwind only points at those variables, so `text-tan/60`,
+ * `bg-teal`, `border-hairline` and friends all resolve to the same tokens.
+ * Roles are documented in CLAUDE.md ("Colour").
  */
+const token = (name: string) => `rgb(var(--bl-${name}-rgb) / <alpha-value>)`
+
 const config: Config = {
   future: { hoverOnlyWhenSupported: true },
   content: [
@@ -20,17 +19,21 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        black: '#0A0A0A',
-        ink: '#060606',
-        offwhite: '#F5F5F0',
-        amber: '#C8965A',
-        'amber-muted': '#A27A4A',
-        gold: '#E2C48F',
-        hairline: '#2A2A2A',
-        muted: '#6B6B6B',
-        label: '#8C8A84',
-        body: '#9C9B96',
-        'body-dim': '#85847F',
+        black: token('black'),
+        ink: token('ink'),
+        graphite: token('graphite'),
+        offwhite: token('offwhite'),
+        tan: token('tan'),
+        'tan-muted': token('tan-muted'),
+        teal: token('teal'),
+        violet: token('violet'),
+        hairline: token('hairline'),
+        'rule-strong': token('rule-strong'),
+        label: token('label'),
+        'label-strong': token('label-strong'),
+        lead: token('lead'),
+        body: token('body'),
+        'body-dim': token('body-dim'),
       },
       fontFamily: {
         serif: ['var(--font-fraunces)', 'Georgia', 'serif'],

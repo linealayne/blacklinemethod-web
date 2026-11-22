@@ -9,7 +9,7 @@ import { DUR } from '@/lib/motion'
  * Fade-through-black between routes, under 500ms total, with CSS transitions.
  * A capture-phase click listener intercepts same-origin navigations, raises
  * the veil, then pushes the route; when the new pathname renders, scroll
- * resets, ScrollTrigger refreshes (if it has loaded), and the veil lifts.
+ * resets and the veil lifts.
  * Next's Link honours defaultPrevented so prefetching is unaffected.
  */
 export function PageTransition() {
@@ -70,12 +70,8 @@ export function PageTransition() {
       window.clearTimeout(safety.current)
       safety.current = null
     }
-    const lenis = window.__lenis
-    if (lenis) lenis.scrollTo(0, { immediate: true, force: true })
-    else window.scrollTo(0, 0)
-
+    window.scrollTo({ top: 0, behavior: 'instant' as ScrollBehavior })
     requestAnimationFrame(() => {
-      ;(window as Window & { __ScrollTrigger?: { refresh: () => void } }).__ScrollTrigger?.refresh()
       window.setTimeout(() => veil.classList.remove('is-on'), 50)
     })
   }, [pathname])

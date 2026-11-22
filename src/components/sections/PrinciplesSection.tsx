@@ -1,13 +1,10 @@
 'use client'
 
-import { useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import { useMotion } from '@/components/motion/MotionProvider'
 import { Reveal } from '@/components/motion/Reveal'
-import { motionFlags } from '@/lib/flags'
-import { isPhone } from '@/lib/motion'
-import { useFirstInteraction } from '@/lib/useFirstInteraction'
-import { useGsapEffect } from '@/lib/useGsap'
+import { HelixFragment } from '@/components/Strand'
 
 export const TENETS = [
   {
@@ -33,126 +30,205 @@ export const TENETS = [
   },
 ]
 
-/** Pinned principles choreography */
-const PRINCIPLES = {
-  pinDesktop: '+=250%',
-  pinPhone: '+=200%',
-  scrub: 0.6,
-  slideY: 36, // px of vertical slide during the swap
+/**
+ * Card knobs. The flip itself (hover, focus, tap, and the title decoding from
+ * A T G C as the card turns) is Layne's: do not change it unless he asks.
+ */
+const CARDS = {
+  scrambleMs: 720, // how long the title takes to decode
+  scrambleDelayMs: 260, // decode starts as the card passes edge-on
+  // the strand on each card: a different length of the same helix
+  fragments: [
+    { turns: 1.5, phase: 0, rungCount: 9, lit: 3 },
+    { turns: 2.1, phase: 0.9, rungCount: 12, lit: 7 },
+    { turns: 2.8, phase: 1.7, rungCount: 15, lit: 5 },
+  ],
 }
 
-export function PrinciplesSection() {
-  const { mounted, reduced } = useMotion()
-  const sectionRef = useRef<HTMLElement>(null)
-  const isStatic = mounted && reduced
-  const go = useFirstInteraction(mounted && !reduced)
+const BASES = 'ATGC'
 
-  useGsapEffect(
-    ({ gsap, ScrollTrigger }) => {
-      const section = sectionRef.current
-      if (!section || !go || motionFlags().reduced) return
-      const ctx = gsap.context(() => {
-        const slides = gsap.utils.toArray<HTMLElement>('[data-slide]', section)
-        const bars = gsap.utils.toArray<HTMLElement>('[data-bar]', section)
-        const marks = gsap.utils.toArray<HTMLElement>('[data-mark]', section)
+/**
+ * The title, decoding. Letters cycle through A T G C and settle into the
+ * target, left to right, while the card turns.
+ *
+ * It types in place with zero reflow: every character has a cell that is
+ * already the width of its final glyph (an invisible ghost of the real
+ * letter), the cycling letter is laid over the cell, and words cannot break
+ * inside. So the line breaks, and the height of the title, are the final
+ * ones before the first letter changes. The cycling letters are written
+ * straight to the DOM (no React render per frame). Display only: the real
+ * title is in the heading as screen-reader text.
+ */
+function DecodeTitle({ text, run, delay }: { text: string; run: boolean; delay: number }) {
+  const cells = useRef<(HTMLElement | null)[]>([])
+  const words = text.split(' ')
+  const chars = words.join('')
 
-        slides.forEach((s, i) =>
-          gsap.set(s, { opacity: i === 0 ? 1 : 0, y: i === 0 ? 0 : PRINCIPLES.slideY, pointerEvents: i === 0 ? 'auto' : 'none' })
-        )
-        bars.forEach((b, i) => gsap.set(b, { scaleX: i === 0 ? 1 : 0 }))
-        marks.forEach((m, i) => gsap.set(m, { color: i === 0 ? '#C8965A' : '#8C8A84' }))
+  useEffect(() => {
+    const paint = (pick: (i: number) => string) =>
+      cells.current.forEach((el, i) => {
+        if (el) el.textContent = pick(i)
+      })
+    const rest = () => paint((i) => chars[i])
+    if (!run) {
+      rest()
+      return
+    }
+    let raf = 0
+    let start = 0
+    const tick = (now: number) => {
+      if (!start) start = now + delay
+      const p = Math.max(0, (now - start) / CARDS.scrambleMs)
+      const settled = Math.floor(p * chars.length)
+      if (p >= 1) {
+        rest()
+        return
+      }
+      paint((i) => (i < settled || chars[i] === '.' ? chars[i] : BASES[(Math.floor(now / 45) + i * 3) % 4]))
+      raf = requestAnimationFrame(tick)
+    }
+    raf = requestAnimationFrame(tick)
+    return () => cancelAnimationFrame(raf)
+  }, [chars, run, delay])
 
-        const tl = gsap.timeline({
-          defaults: { ease: 'power2.inOut' },
-          scrollTrigger: {
-            trigger: section,
-            start: 'top top',
-            end: isPhone() ? PRINCIPLES.pinPhone : PRINCIPLES.pinDesktop,
-            pin: true,
-            scrub: PRINCIPLES.scrub,
-            anticipatePin: 1,
-          },
-        })
-
-        const hold = 1
-        const swap = 1
-        let t = hold
-        for (let i = 1; i < slides.length; i++) {
-          tl.to(slides[i - 1], { opacity: 0, y: -PRINCIPLES.slideY, pointerEvents: 'none', duration: swap }, t)
-          tl.fromTo(slides[i], { opacity: 0, y: PRINCIPLES.slideY }, { opacity: 1, y: 0, pointerEvents: 'auto', duration: swap }, t + swap * 0.25)
-          tl.to(bars[i - 1], { scaleX: 0, transformOrigin: 'right center', duration: swap * 0.6 }, t)
-          tl.to(bars[i], { scaleX: 1, transformOrigin: 'left center', duration: swap * 0.6 }, t + swap * 0.3)
-          tl.to(marks[i - 1], { color: '#8C8A84', duration: swap * 0.5 }, t)
-          tl.to(marks[i], { color: '#C8965A', duration: swap * 0.5 }, t + swap * 0.3)
-          t += swap + hold
-        }
-        tl.to({}, { duration: hold * 0.4 })
-        ScrollTrigger.refresh()
-      }, section)
-      return () => ctx.revert()
-    },
-    [go]
+  let n = 0
+  return (
+    <span aria-hidden="true">
+      {words.map((word, w) => (
+        <span key={w}>
+          <span className="bl-decode-word">
+            {word.split('').map((ch) => {
+              const i = n++
+              return (
+                <span key={i} className="bl-decode-cell">
+                  <i>{ch}</i>
+                  <b
+                    ref={(el) => {
+                      cells.current[i] = el
+                    }}
+                  >
+                    {ch}
+                  </b>
+                </span>
+              )
+            })}
+          </span>
+          {w < words.length - 1 ? ' ' : ''}
+        </span>
+      ))}
+    </span>
   )
+}
+
+function PrincipleCard({ tenet, i, isStatic }: { tenet: (typeof TENETS)[number]; i: number; isStatic: boolean }) {
+  const [flipped, setFlipped] = useState(false)
+  const pointerType = useRef<string>('mouse')
+  const headingId = `tenet-${tenet.id}`
+  const fragment = CARDS.fragments[i]
+
+  const hoverCapable = () => window.matchMedia('(hover: hover) and (pointer: fine)').matches
 
   return (
-    <>
-      <section
-        id="philosophy"
-        ref={sectionRef}
-        className={[
-          'bg-black border-t border-hairline',
-          isStatic ? '' : 'bl-pinned min-h-[100svh] flex items-center',
-        ].join(' ')}
-        aria-label="Philosophy"
-      >
-        <div className="max-w-7xl mx-auto px-6 md:px-12 w-full py-24 md:py-28">
-          <div className={isStatic ? 'space-y-24' : 'grid gap-10 md:grid-cols-[6rem_1fr] md:gap-16 items-start'}>
-            {!isStatic && (
-              <div className="flex md:flex-col gap-6 md:gap-7 md:pt-3" aria-hidden="true">
-                {TENETS.map((t) => (
-                  <div key={t.id} className="flex items-center gap-3">
-                    <span data-mark className="font-sans text-[11px] tracking-[0.3em] text-label">
-                      {t.index}
-                    </span>
-                    <span className="block w-8 h-px bg-hairline relative overflow-hidden">
-                      <span data-bar className="absolute inset-0 bg-amber origin-left" />
-                    </span>
-                  </div>
-                ))}
-              </div>
-            )}
-
-            <div className={isStatic ? 'space-y-24' : 'grid'}>
-              {TENETS.map((tenet) => (
-                <div key={tenet.id} data-slide className={isStatic ? '' : '[grid-area:1/1]'}>
-                  <span className="block bl-label mb-8">{tenet.index}</span>
-                  <h2
-                    className="font-serif font-light text-offwhite lowercase leading-[0.98] tracking-wider mb-10"
-                    style={{ fontSize: 'clamp(2.9rem, 9vw, 8.5rem)' }}
-                  >
-                    {tenet.name}
-                  </h2>
-                  <p className="font-sans text-sm md:text-[15px] text-body leading-relaxed tracking-wide max-w-md">
-                    {tenet.description}
-                  </p>
-                </div>
-              ))}
-            </div>
+    <article
+      tabIndex={isStatic ? undefined : 0}
+      aria-labelledby={headingId}
+      className={['bl-card outline-offset-4', isStatic ? 'is-static' : 'h-[440px] md:h-[460px]', flipped ? 'is-flipped' : ''].join(' ')}
+      onPointerEnter={(e) => {
+        pointerType.current = e.pointerType
+        if (e.pointerType === 'mouse' && hoverCapable()) setFlipped(true)
+      }}
+      onPointerLeave={(e) => {
+        if (e.pointerType === 'mouse' && hoverCapable()) setFlipped(false)
+      }}
+      onPointerDown={(e) => {
+        pointerType.current = e.pointerType
+      }}
+      onClick={() => {
+        if (pointerType.current !== 'mouse' || !hoverCapable()) setFlipped((f) => !f)
+      }}
+      onFocus={(e) => {
+        if (e.target === e.currentTarget && e.currentTarget.matches(':focus-visible')) setFlipped(true)
+      }}
+      onBlur={(e) => {
+        if (e.target === e.currentTarget) setFlipped(false)
+      }}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault()
+          setFlipped((f) => !f)
+        }
+        if (e.key === 'Escape') setFlipped(false)
+      }}
+    >
+      <div className="bl-card-inner">
+        {/* Front: the number, a length of the strand, the title */}
+        <div className="bl-card-face bl-card-front flex flex-col p-7 md:p-8" aria-hidden="true">
+          <span className="bl-label text-tan tabular-nums">{tenet.index}</span>
+          <div className="my-auto py-8">
+            <HelixFragment {...fragment} />
           </div>
-
-          <div className={isStatic ? 'mt-20' : 'mt-14 md:mt-16 md:ml-[10rem]'}>
-            <Reveal>
-              <Link
-                href="/philosophy"
-                className="group inline-flex items-center gap-3 min-h-[44px] font-sans text-[11px] tracking-[0.2em] uppercase text-amber-muted transition-colors duration-600 hover:text-amber"
-              >
-                <span className="bl-underline">Read the full philosophy</span>
-                <span aria-hidden="true" className="transition-transform duration-600 ease-lux group-hover:translate-x-1">→</span>
-              </Link>
-            </Reveal>
+          <div className="flex items-end justify-between gap-6">
+            <p className="bl-title max-w-[14ch]">{tenet.name}</p>
+            <span className="bl-tap-hint bl-label text-[9.5px] whitespace-nowrap items-center gap-2">
+              <span className="h-[5px] w-[5px] rounded-full bg-teal shadow-[0_0_8px_1px_rgb(var(--bl-teal-rgb)/0.7)]" />
+              Tap to reveal
+            </span>
           </div>
         </div>
-      </section>
-    </>
+
+        {/* Back: the title, the full description */}
+        <div className="bl-card-face bl-card-back flex flex-col p-7 md:p-8">
+          <div className="flex items-center justify-between gap-6">
+            <span className="bl-label text-tan tabular-nums">{tenet.index}</span>
+            <HelixFragment {...fragment} width={132} height={22} density={0.42} className="h-[22px] w-[132px] shrink-0 opacity-90" />
+          </div>
+          <h3 id={headingId} className="mt-10 bl-h3 text-[1.45rem] md:text-[1.6rem] leading-[1.2]">
+            <span className="sr-only">{tenet.name}</span>
+            <DecodeTitle text={tenet.name} run={flipped && !isStatic} delay={CARDS.scrambleDelayMs} />
+          </h3>
+          <div className="bl-card-back-body mt-auto">
+            <span className="block h-px w-10 mb-6 [background:var(--bl-strand)]" aria-hidden="true" />
+            <p className="bl-body">{tenet.description}</p>
+          </div>
+        </div>
+      </div>
+    </article>
+  )
+}
+
+/**
+ * Principles as three cards. Desktop: hover or keyboard focus flips a card
+ * in 3D while its title decodes from base letters. Touch: tap flips, tap
+ * again flips back. Reduced motion: the back of each card shows directly.
+ * Every word is real text in the DOM.
+ */
+export function PrinciplesSection() {
+  const { mounted, reduced } = useMotion()
+  const isStatic = mounted && reduced
+
+  return (
+    <section id="philosophy" className="bg-black" aria-label="Philosophy">
+      <div className="bl-wrap">
+        <div className="relative">
+          <span className="bl-rule" aria-hidden="true" />
+          <span className="bl-cross -left-1 -top-1" aria-hidden="true" />
+          <span className="bl-cross -right-1 -top-1" aria-hidden="true" />
+        </div>
+        <div className="py-24 md:py-32">
+          <Reveal stagger className="grid gap-5 lg:grid-cols-3 lg:gap-6">
+            {TENETS.map((tenet, i) => (
+              <PrincipleCard key={tenet.id} tenet={tenet} i={i} isStatic={isStatic} />
+            ))}
+          </Reveal>
+
+          <Reveal className="mt-12 md:mt-14">
+            <Link href="/philosophy" className="group bl-link">
+              <span className="bl-underline">Read the full philosophy</span>
+              <span aria-hidden="true" className="bl-arrow" />
+            </Link>
+          </Reveal>
+        </div>
+      </div>
+    </section>
   )
 }

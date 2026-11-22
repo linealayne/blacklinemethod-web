@@ -1,8 +1,8 @@
 'use client'
 
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { SplitReveal } from '@/components/motion/SplitReveal'
 import { Reveal } from '@/components/motion/Reveal'
+import { Folio } from '@/components/layout/Folio'
 import { motionFlags } from '@/lib/flags'
 import { useGsapEffect } from '@/lib/useGsap'
 import type { GsapModule } from '@/lib/gsap'
@@ -142,42 +142,35 @@ export function RangeExplainer() {
   const pct = (f: number) => `${f * 100}%`
 
   return (
-    <section className="bg-black border-t border-hairline" aria-label="Optimal is not a range, illustrated">
-      <div className="max-w-7xl mx-auto px-6 md:px-12 py-24 md:py-32">
-        <div className="grid gap-14 md:grid-cols-2 md:gap-24 items-center">
+    <Folio label="illustrative" ariaLabel="Optimal is not a range, illustrated">
+        <div className="grid gap-14 xl:grid-cols-2 xl:gap-20 items-center">
           <div>
-            <Reveal as="p" className="bl-label mb-8">
-              illustrative
-            </Reveal>
-            <SplitReveal
-              as="h2"
-              className="font-serif font-light text-offwhite lowercase tracking-wider leading-[1.05] text-[clamp(2.5rem,4.6vw,4.75rem)]"
-            >
+            <Reveal as="h2" className="bl-h2">
               optimal is not a range.
-            </SplitReveal>
-            <Reveal as="p" delay={0.2} className="mt-8 font-sans text-sm md:text-[15px] text-body leading-relaxed tracking-wide max-w-md">
+            </Reveal>
+            <Reveal as="p" delay={0.08} className="mt-7 bl-body max-w-md">
               A reference range describes where most of a population falls. What is optimal for one
               person is a much narrower question. Move the marker.
             </Reveal>
           </div>
 
-          <Reveal delay={0.1}>
+          <Reveal delay={0.05}>
             <div className="pt-10 pb-2">
-              <div className="relative h-5 mb-3 font-sans text-[10px] tracking-[0.25em] uppercase text-label">
+              <div className="relative h-5 mb-3 font-sans text-[10px] font-medium tracking-[0.2em] uppercase text-label">
                 <span className="absolute" style={{ left: pct(RANGE.reference[0]) }}>
                   Reference range
                 </span>
               </div>
 
               <div ref={trackRef} className="relative h-14 cursor-pointer" onPointerDown={onTrackPointerDown}>
-                <div className="absolute inset-y-0 left-0 right-0 border-y border-hairline/60" aria-hidden="true" />
+                <div className="absolute top-1/2 left-0 right-0 h-px bg-hairline" aria-hidden="true" />
                 <div
-                  className="absolute inset-y-2 border border-hairline bg-offwhite/[0.035]"
+                  className="absolute inset-y-2 border-x border-dashed border-offwhite/25 bg-offwhite/[0.03]"
                   style={{ left: pct(RANGE.reference[0]), right: pct(1 - RANGE.reference[1]) }}
                   aria-hidden="true"
                 />
                 <div
-                  className="absolute inset-y-2 border border-amber/60 bg-amber/15"
+                  className="absolute inset-y-0 border-x border-tan/70 bg-tan/[0.12]"
                   style={{ left: pct(RANGE.optimal[0]), width: pct(RANGE.optimal[1] - RANGE.optimal[0]) }}
                   aria-hidden="true"
                 />
@@ -193,12 +186,12 @@ export function RangeExplainer() {
                   onKeyDown={onKeyDown}
                   className="absolute top-0 bottom-0 left-0 w-11 -ml-[22px] touch-none group rounded-[1px]"
                 >
-                  <span className="absolute left-1/2 top-0 bottom-0 w-px bg-offwhite/80 -translate-x-1/2 transition-colors duration-300 group-focus-visible:bg-amber" />
-                  <span className="absolute left-1/2 top-1/2 w-3 h-3 -translate-x-1/2 -translate-y-1/2 rounded-full bg-black border border-offwhite/80 shadow-[0_0_18px_rgba(226,196,143,0.45)] transition-[border-color,box-shadow] duration-300 group-focus-visible:border-amber group-hover:border-gold" />
+                  <span className="absolute left-1/2 top-0 bottom-0 w-px bg-offwhite/80 -translate-x-1/2 transition-colors duration-300 group-focus-visible:bg-tan" />
+                  <span className="absolute left-1/2 top-1/2 w-3 h-3 -translate-x-1/2 -translate-y-1/2 rounded-full bg-black border border-offwhite/80 shadow-[0_0_18px_rgb(var(--bl-tan-rgb)/0.4)] transition-[border-color,box-shadow] duration-300 group-focus-visible:border-tan group-hover:border-tan" />
                 </div>
               </div>
 
-              <div className="relative h-5 mt-3 font-sans text-[10px] tracking-[0.25em] uppercase text-amber-muted">
+              <div className="relative h-5 mt-3 font-sans text-[10px] font-medium tracking-[0.2em] uppercase text-tan-muted">
                 <span
                   className="absolute whitespace-nowrap"
                   style={{ left: pct((RANGE.optimal[0] + RANGE.optimal[1]) / 2), transform: 'translateX(-50%)' }}
@@ -207,16 +200,15 @@ export function RangeExplainer() {
                 </span>
               </div>
 
-              <div className="mt-10 min-h-[4.5rem]">
-                <p ref={statusRef} className="font-serif font-light text-offwhite text-2xl md:text-[1.75rem] tracking-wide">
+              <div className="mt-10 pt-8 border-t border-hairline min-h-[7rem]">
+                <p ref={statusRef} className="bl-serif-caps text-[1.3rem] md:text-[1.6rem] tracking-[0.09em]">
                   {STATUS_TEXT[status]}
                 </p>
-                <p className="mt-2 font-sans text-sm text-body-dim tracking-wide">{STATUS_NOTE[status]}</p>
+                <p className="mt-2 bl-body text-body-dim">{STATUS_NOTE[status]}</p>
               </div>
             </div>
           </Reveal>
         </div>
-      </div>
-    </section>
+    </Folio>
   )
 }

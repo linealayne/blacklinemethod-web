@@ -1,8 +1,7 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { Reveal } from '@/components/motion/Reveal'
-import { SplitReveal } from '@/components/motion/SplitReveal'
-import { MethodOrbitIdle } from '@/components/MethodOrbitIdle'
+import { PillarStrandNav } from '@/components/PillarStrand'
 import { Button } from '@/components/ui/button'
 
 export const metadata: Metadata = {
@@ -60,19 +59,19 @@ const PILLARS = [
 
 export default function MethodPage() {
   return (
-    <div className="bg-black min-h-screen pt-36 md:pt-40 pb-24">
+    <div className="bl-page min-h-screen pt-36 md:pt-48 pb-24">
       {/* Hero */}
-      <section aria-label="Method introduction" className="px-6 md:px-12 max-w-7xl mx-auto mb-16 md:mb-20">
-        <Reveal as="p" className="bl-label mb-8">
+      <section aria-label="Method introduction" className="bl-wrap mb-16 md:mb-20">
+        <Reveal as="p" className="bl-label bl-tick mb-10">
           the method
         </Reveal>
-        <SplitReveal
+        <Reveal
           as="h1"
-          className="font-serif font-light text-offwhite lowercase leading-[1.05] tracking-wider text-[clamp(3rem,8vw,8rem)] mb-10 max-w-5xl"
+          className="bl-h1 mb-10 max-w-5xl"
         >
           four pillars. one system.
-        </SplitReveal>
-        <Reveal as="p" delay={0.3} className="font-sans text-sm md:text-[15px] text-body leading-relaxed tracking-wide max-w-lg">
+        </Reveal>
+        <Reveal as="p" delay={0.08} className="bl-body max-w-lg">
           Hormones, training, nutrition, and lifestyle are not four separate services. They are one
           circular system. Adjusting one without understanding the others produces incomplete
           results. The Blackline Method addresses all four simultaneously — because that is what it
@@ -80,11 +79,11 @@ export default function MethodPage() {
         </Reveal>
       </section>
 
-      {/* Orbit */}
-      <section aria-label="System diagram" className="px-6 md:px-12 max-w-7xl mx-auto mb-16 md:mb-24">
-        <Reveal delay={0.2}>
-          <div className="py-10 md:py-14 border border-hairline max-w-3xl mx-auto">
-            <MethodOrbitIdle />
+      {/* The strand: an index of the four pillars */}
+      <section aria-label="System diagram" className="bl-wrap mb-16 md:mb-24">
+        <Reveal delay={0.08}>
+          <div className="py-10 md:py-14 border-y border-hairline">
+            <PillarStrandNav pillars={PILLARS.map((p) => ({ id: p.id, label: p.label }))} className="mx-auto max-w-[920px]" />
           </div>
         </Reveal>
       </section>
@@ -92,22 +91,22 @@ export default function MethodPage() {
       {/* Pillars */}
       {PILLARS.map((pillar) => (
         <div key={pillar.id}>
-          <div className="mx-6 md:mx-12 h-px bg-hairline" aria-hidden="true" />
-          <section aria-label={pillar.label} className="px-6 md:px-12 max-w-7xl mx-auto py-24 md:py-32">
+          <div className="bl-wrap" aria-hidden="true"><div className="relative"><span className="bl-rule" /><span className="bl-cross -left-1 -top-1" /><span className="bl-cross -right-1 -top-1" /></div></div>
+          <section id={pillar.id} aria-label={pillar.label} className="bl-wrap py-24 md:py-32">
             <div className="grid md:grid-cols-2 gap-12 md:gap-24 items-start">
               <div>
                 <Reveal stagger className="mb-8">
-                  <span className="block bl-label mb-4">{pillar.index}</span>
-                  <span className="block bl-label bl-label-amber">{pillar.label}</span>
+                  <span className="block bl-label bl-tick mb-4 tabular-nums">{pillar.index}</span>
+                  <span className="block bl-label bl-label-strong">{pillar.label}</span>
                 </Reveal>
-                <SplitReveal
+                <Reveal
                   as="h2"
-                  className="font-serif font-light text-offwhite lowercase leading-[1.05] tracking-wider text-[clamp(2.25rem,4vw,4rem)]"
+                  className="bl-h3"
                 >
                   {pillar.headline}
-                </SplitReveal>
+                </Reveal>
               </div>
-              <Reveal stagger delay={0.15} className="space-y-6 font-sans text-sm md:text-[15px] text-body leading-relaxed tracking-wide md:pt-20">
+              <Reveal stagger delay={0.08} className="space-y-6 bl-body md:pt-20">
                 {pillar.body.map((para, j) => (
                   <p key={j}>{para}</p>
                 ))}
@@ -118,14 +117,14 @@ export default function MethodPage() {
       ))}
 
       {/* CTA */}
-      <div className="mx-6 md:mx-12 h-px bg-hairline" aria-hidden="true" />
-      <section aria-label="Contact CTA" className="px-6 md:px-12 max-w-7xl mx-auto pt-16 pb-6">
+      <div className="bl-wrap" aria-hidden="true"><div className="relative"><span className="bl-rule" /><span className="bl-cross -left-1 -top-1" /><span className="bl-cross -right-1 -top-1" /></div></div>
+      <section aria-label="Contact CTA" className="bl-wrap pt-16 pb-6">
         <Reveal>
           <div className="flex flex-col sm:flex-row sm:items-center gap-8">
-            <p className="font-serif text-xl text-offwhite/80 font-light tracking-wide">
+            <p className="bl-lead text-offwhite/85">
               Engagements are limited. That is by design.
             </p>
-            <Button asChild className="shrink-0" glow>
+            <Button asChild className="shrink-0">
               <Link href="/contact">request a consult</Link>
             </Button>
           </div>
