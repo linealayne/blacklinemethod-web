@@ -9,13 +9,17 @@ import { Grain } from '@/components/motion/Grain'
 import { Loader } from '@/components/motion/Loader'
 import { FLAGS_SCRIPT } from '@/lib/flags'
 
-// Variable Fraunces: the face of the BLACKLINE wordmark, used for all display
-// type. globals.css pins it the way the wordmark renders (weight 400, the
-// small optical size, SOFT 0) so headlines match the wordmark at any size.
+// Fraunces: the face of the BLACKLINE wordmark, used for all display type.
+// The site only ever sets it at weight 400, the small optical size (14) and
+// SOFT 0, which is exactly Google's static 400 file, so that file is loaded
+// instead of the variable font: the same glyphs and widths at about a sixth
+// of the download (18 KB against 118 KB on the critical path). If a design
+// ever needs another weight or optical size, switch back to
+// `axes: ['opsz', 'SOFT']` and drop `weight`.
 const fraunces = Fraunces({
   subsets: ['latin'],
   style: ['normal'],
-  axes: ['opsz', 'SOFT'],
+  weight: ['400'],
   variable: '--font-fraunces',
   display: 'swap',
 })

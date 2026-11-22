@@ -8,15 +8,25 @@ import { HELIX } from './helix-config'
  * of uniforms, so the CPU does almost nothing per frame.
  *
  * Plain three.js (no React renderer) so the loop, the pause, and the
- * disposal are explicit. Created by HeroHelix.tsx; see helix-config.ts.
+ * disposal are explicit. See helix-config.ts.
+ *
+ * This file touches no DOM and no `window`: sizes, colours, and pointer
+ * positions are handed in. That lets it run inside a web worker on an
+ * OffscreenCanvas (helix.worker.ts), which keeps three.js, shader
+ * compilation, and every frame off the page's main thread, or directly on
+ * the main thread where OffscreenCanvas is missing. HeroHelix.tsx picks.
  */
 
 export type Tier = 'high' | 'mid' | 'low'
 
 export interface HelixOptions {
-  canvas: HTMLCanvasElement
-  /** the element whose box the scene fills (the hero section) */
-  host: HTMLElement
+  canvas: HTMLCanvasElement | OffscreenCanvas
+  /** the box the scene fills (the hero section), in CSS pixels, and the device pixel ratio */
+  width: number
+  height: number
+  dpr: number
+  /** the palette, read from the CSS tokens by the caller */
+  colors: HelixColors
   tier: Tier
   phone: boolean
   /** first visit: play the full converge; otherwise a quick settle */
@@ -25,8 +35,15 @@ export interface HelixOptions {
   onLock: () => void
   /** called after the first frame is drawn */
   onFirstFrame: () => void
-  /** intro only: performance.now() before which the particles stay scattered (the loading screen is still up) */
+  /** intro only: performance.now() (this thread's clock) before which the particles stay scattered */
   holdUntil?: number
+}
+
+export interface HelixColors {
+  amber: string
+  teal: string
+  violet: string
+  offwhite: string
 }
 
 const VERT_POINTS = /* glsl */ `
@@ -315,6 +332,7 @@ export class HelixScene {
   private width = 1
   private height = 1
   private dpr = 1
+  private deviceDpr = 1
   private frameTimes: number[] = []
   private steppedDown = false
   private centre = new THREE.Vector3()
@@ -342,23 +360,11 @@ export class HelixScene {
     this.tiltGroup.add(this.ringGroup)
 
     this.build()
-    this.resize()
+    this.resize(opts.width, opts.height, opts.dpr)
   }
 
   private build() {
-    // the palette comes from the CSS tokens (globals.css); helix-config holds fallbacks
-    const css = getComputedStyle(document.documentElement)
-    const tokenHex = (name: string, fallback: string) => {
-      const v = css.getPropertyValue(`--bl-${name}-rgb`).trim().split(/\s+/).map(Number)
-      if (v.length !== 3 || v.some((n) => !Number.isFinite(n))) return fallback
-      return `#${v.map((n) => n.toString(16).padStart(2, '0')).join('')}`
-    }
-    const c = {
-      amber: tokenHex('ember', HELIX.colors.amber),
-      teal: tokenHex('teal', HELIX.colors.teal),
-      violet: tokenHex('violet', HELIX.colors.violet),
-      offwhite: tokenHex('offwhite', HELIX.colors.offwhite),
-    }
+    const c = this.opts.colors
     const col = (hex: string) => new THREE.Color(hex)
     const counts = HELIX.counts[this.opts.tier]
     const r = rand(1984)
@@ -621,11 +627,12 @@ export class HelixScene {
     return { mesh: new THREE.LineLoop(geo, mat), mat }
   }
 
-  resize() {
-    const rect = this.opts.host.getBoundingClientRect()
-    this.width = Math.max(1, rect.width)
-    this.height = Math.max(1, rect.height)
-    const capped = Math.min(window.devicePixelRatio || 1, HELIX.dprCap)
+  /** the host box in CSS pixels and the device pixel ratio; call with no arguments to re-apply */
+  resize(width = this.width, height = this.height, deviceDpr = this.deviceDpr) {
+    this.width = Math.max(1, width)
+    this.height = Math.max(1, height)
+    this.deviceDpr = deviceDpr
+    const capped = Math.min(deviceDpr || 1, HELIX.dprCap)
     this.dpr = this.steppedDown ? Math.min(capped, 1.25) : capped
     this.renderer.setPixelRatio(this.dpr)
     this.renderer.setSize(this.width, this.height, false)
@@ -650,11 +657,8 @@ export class HelixScene {
 
   private baseTiltZ = 0
 
-  /** pointer in client coordinates; `inside` is false when it left the hero */
-  pointerMove(clientX: number, clientY: number, inside: boolean) {
-    const rect = this.opts.host.getBoundingClientRect()
-    const nx = ((clientX - rect.left) / this.width) * 2 - 1
-    const ny = -(((clientY - rect.top) / this.height) * 2 - 1)
+  /** pointer in the host's normalised device coordinates (-1..1, y up); `inside` is false when it left the hero */
+  pointerMove(nx: number, ny: number, inside: boolean) {
     const dx = nx - this.pointer.x
     const dy = ny - this.pointer.y
     this.pointer.set(nx, ny)
