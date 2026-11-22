@@ -74,8 +74,8 @@ export function PillarGene({ pillars, className = '' }: { pillars: Pillar[]; cla
     // nothing is downloaded or started until the section is close
     const root = rootRef.current
     const io = new IntersectionObserver(
-      ([e]) => {
-        if (e.isIntersecting) {
+      (entries) => {
+        if (entries.some((e) => e.isIntersecting)) {
           setNear(true)
           io.disconnect()
         }
@@ -117,8 +117,9 @@ export function PillarGene({ pillars, className = '' }: { pillars: Pillar[]; cla
       // run only while the section is on screen and the tab is visible
       let inView = false
       const update = () => s.setActive(inView && !document.hidden)
-      const io = new IntersectionObserver(([e]) => {
-        inView = e.isIntersecting
+      const io = new IntersectionObserver((entries) => {
+        // several changes can arrive together: the newest one is the truth
+        inView = entries[entries.length - 1].isIntersecting
         update()
       })
       io.observe(root)
