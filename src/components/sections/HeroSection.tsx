@@ -16,7 +16,7 @@ const HEADLINE = ['run', 'your', 'own', 'biology.']
  * headline, lower left, and one quiet line beneath a hairline (the place,
  * and the practice in a sentence). The consult button lives in the header.
  *
- * On the first page of a session the loading sequence (globals.css, "The
+ * On every full page load the loading sequence (globals.css, "The
  * loading sequence") hands over to this section: the headline rises word by
  * word and the gene forms from scattered particles. Reduced motion and no
  * WebGL get the static rendered still (.bl-helix-still).

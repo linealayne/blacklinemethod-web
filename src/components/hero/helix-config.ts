@@ -53,7 +53,7 @@ export const HELIX = {
   breathe: 0.22, // colour breathing speed (radians per second)
 
   // intro
-  introDuration: 1.5, // seconds for the scattered particles to drift into the helix (first visit)
+  introDuration: 2.1, // seconds for the scattered particles to drift into the helix (with the loading sequence)
   returnDuration: 1.2, // quick settle on later visits (copy already visible)
   lockAt: 0.86, // intro progress at which the helix counts as formed (the lock flash)
   skipDuration: 0.4,

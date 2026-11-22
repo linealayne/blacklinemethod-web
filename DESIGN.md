@@ -130,7 +130,7 @@ One palette, defined once as CSS variables in `globals.css` and referenced every
 - No scroll animation: no pinning, scrubbing, parallax, or sticky labels. The only scroll-related motion is a one-time 0.5s fade and rise as an element enters view (pillar nodes light with it).
 - Time-based: the hero scene (idle rotation, rung ripple, scan sweep, colour breathing).
 - Action-based: card flips with a decode, pillar node rings, link underlines, button fill sweep, the hero's tilt, scatter, and click pulse.
-- Once per session: the loading sequence (the wordmark types, slides to the header, the headline rises, the gene forms; about 3s, skippable). Once: the footer load-in.
+- On every full page load, never on in-site navigation: the loading sequence (the wordmark types, slides to the header, the headline rises, the gene forms; about 4.2s, skippable). Once: the footer load-in.
 - Reduced motion: everything static and readable; a single fade; the hero shows a rendered still.
 - The gene's ripples and the card flip are not to be changed unless Layne asks.
 
