@@ -407,19 +407,19 @@ html.bl-motion:not(.bl-hydrated) [data-reveal="stagger"]:not(.bl-in) > * {
 .bl-skip:focus-visible { transform: translateY(0); }
 
 /* ------------------------------------------------------------------
-   The loading sequence (first page of a session, motion allowed). Timings
+   The loading sequence (every full page load, motion allowed). Timings
    mirror INTRO in src/lib/flags.ts; the inline flags script adds the
-   classes: html.bl-intro at once, .bl-intro-b at the handoff (1.15s),
-   .bl-intro-done at the end (3s) or on any click, key, or scroll.
+   classes: html.bl-intro at once, .bl-intro-b at the handoff (1.61s),
+   .bl-intro-done at the end (4.2s) or on any click, key, or scroll.
 
-     0.10s  BLACKLINE types out, one letter every 0.09s, in the centre,
+     0.14s  BLACKLINE types out, one letter every 0.126s, in the centre,
             set exactly as the header wordmark; the loading line fills
-     1.15s  (b) the wordmark slides up and left onto the header logo: the
+     1.61s  (b) the wordmark slides up and left onto the header logo: the
             same box, font, size and tracking, moved by transform only, so
             nothing jumps or swaps
-     1.45s  the dark screen lifts; the gene starts to form
-     1.70s  the headline rises word by word; label and lead follow
-     3.00s  done: the overlay is removed, the real header logo shows
+     2.03s  the dark screen lifts; the gene starts to form
+     2.38s  the headline rises word by word; label and lead follow
+     4.20s  done: the overlay is removed, the real header logo shows
 
    Before (b) the page underneath is fully painted behind the opaque
    screen, so nothing shifts and the browser's first paints are real.
@@ -458,7 +458,7 @@ html.bl-intro:not(.bl-intro-done) #bl-loader { display: block; }
 }
 .bl-loader-word > span {
   opacity: 0;
-  animation: bl-type 0s linear calc(0.1s + var(--i) * 0.09s) forwards;
+  animation: bl-type 0s linear calc(0.14s + var(--i) * 0.126s) forwards;
 }
 .bl-loader-line {
   position: absolute;
@@ -469,12 +469,12 @@ html.bl-intro:not(.bl-intro-done) #bl-loader { display: block; }
   background: var(--bl-tan);
   transform: scaleX(0);
   transform-origin: left center;
-  animation: bl-draw 0.9s var(--bl-ease-draw) 0.1s forwards;
-  transition: opacity 0.25s linear;
+  animation: bl-draw 1.26s var(--bl-ease-draw) 0.14s forwards;
+  transition: opacity 0.35s linear;
 }
-html.bl-intro-b .bl-loader-word { transform: none; transition: transform 0.8s var(--bl-ease-slide); }
+html.bl-intro-b .bl-loader-word { transform: none; transition: transform 1.12s var(--bl-ease-slide); }
 html.bl-intro-b .bl-loader-line { opacity: 0; }
-html.bl-intro-b .bl-loader-bg { animation: bl-fade-out 0.5s ease 0.3s forwards; }
+html.bl-intro-b .bl-loader-bg { animation: bl-fade-out 0.7s ease 0.42s forwards; }
 @keyframes bl-type { to { opacity: 1; } }
 @keyframes bl-draw { from { transform: scaleX(0); } to { transform: scaleX(1); } }
 @keyframes bl-fade-out { to { opacity: 0; } }
@@ -483,7 +483,7 @@ html.bl-intro-b .bl-loader-bg { animation: bl-fade-out 0.5s ease 0.3s forwards; 
 /* the real header logo is hidden under its twin until the handoff */
 html.bl-intro:not(.bl-intro-done) [data-intro='wordmark'] { visibility: hidden; }
 html.bl-intro:not(.bl-intro-done) [data-intro='nav'] { opacity: 0; }
-html.bl-intro-b:not(.bl-intro-done) [data-intro='nav'] { animation: bl-fade-in 0.6s ease 0.45s both; }
+html.bl-intro-b:not(.bl-intro-done) [data-intro='nav'] { animation: bl-fade-in 0.84s ease 0.63s both; }
 
 /* Hero copy. Each headline word sits in a mask and rises into it. */
 [data-hero-word] {
@@ -495,19 +495,19 @@ html.bl-intro-b:not(.bl-intro-done) [data-intro='nav'] { animation: bl-fade-in 0
 }
 [data-hero-word] > span { display: inline-block; }
 html.bl-intro-b:not(.bl-intro-done) [data-hero-word] > span {
-  animation: bl-word-rise 0.9s var(--bl-ease-out) calc(0.55s + var(--i) * 0.07s) both;
+  animation: bl-word-rise 1.26s var(--bl-ease-out) calc(0.77s + var(--i) * 0.098s) both;
 }
 html.bl-intro-b:not(.bl-intro-done) [data-intro='rule'] {
   transform-origin: left center;
-  animation: bl-draw 0.9s var(--bl-ease-draw) 0.75s both;
+  animation: bl-draw 1.26s var(--bl-ease-draw) 1.05s both;
 }
 html.bl-intro-b:not(.bl-intro-done) [data-intro='copy'] {
-  animation: bl-rise-in 0.7s var(--bl-ease-out) calc(0.9s + var(--i, 0) * 0.1s) both;
+  animation: bl-rise-in 0.98s var(--bl-ease-out) calc(1.26s + var(--i, 0) * 0.14s) both;
 }
 @keyframes bl-word-rise { from { transform: translateY(108%); } to { transform: none; } }
 @keyframes bl-rise-in { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
 
-/* Reduced motion, first page of a session: one simple fade, gene already formed */
+/* Reduced motion, every full page load: one simple fade, gene already formed */
 html.bl-fade body { animation: bl-fade-in 0.5s ease both !important; animation-duration: 0.5s !important; }
 
 /* The hero scene: canvas fades in on its first frame */
