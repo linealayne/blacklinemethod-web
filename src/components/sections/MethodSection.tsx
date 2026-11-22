@@ -1,9 +1,6 @@
-'use client'
-
-import { useCallback, useState } from 'react'
 import Link from 'next/link'
 import { Reveal } from '@/components/motion/Reveal'
-import { MethodWheel } from '@/components/MethodWheel'
+import { PillarStrand } from '@/components/PillarStrand'
 
 export const PILLARS = [
   {
@@ -33,14 +30,11 @@ export const PILLARS = [
 ]
 
 /**
- * Four pillars, one system. The wheel turns on its own (time-based, never
- * scroll-based); the panel beside it crossfades to whichever pillar is at
- * the front marker, or to the one being hovered, focused, or tapped.
+ * Four pillars, one system. The statement on the left; on the right the
+ * four pillars as nodes on a single strand (PillarStrand), every word
+ * visible at once. Nothing here is tied to scroll.
  */
 export function MethodSection() {
-  const [active, setActive] = useState(0)
-  const onActive = useCallback((i: number) => setActive(i), [])
-
   return (
     <section className="bg-black" aria-label="The Method">
       <div className="bl-wrap">
@@ -49,8 +43,8 @@ export function MethodSection() {
           <span className="bl-cross -left-1 -top-1" aria-hidden="true" />
           <span className="bl-cross -right-1 -top-1" aria-hidden="true" />
         </div>
-        <div className="py-24 md:py-32 grid gap-12 md:grid-cols-2 md:gap-x-16 lg:gap-x-24 md:gap-y-0">
-          <div className="md:col-start-1 md:row-start-1 md:self-end">
+        <div className="py-24 md:py-32 grid gap-16 lg:grid-cols-12 lg:gap-x-8">
+          <div className="lg:col-span-5">
             <Reveal as="p" className="bl-label bl-tick mb-8">
               the method
             </Reveal>
@@ -61,40 +55,13 @@ export function MethodSection() {
               Hormones, training, nutrition, and lifestyle are not separate services. They are one
               circular system. The Blackline Method works across all four simultaneously.
             </Reveal>
-          </div>
 
-          <Reveal delay={0.1} className="md:col-start-2 md:row-start-1 md:row-span-2 md:self-center">
-            <MethodWheel pillars={PILLARS} onActive={onActive} className="mx-auto max-w-[380px] md:max-w-[560px]" />
-          </Reveal>
-
-          <div className="md:col-start-1 md:row-start-2">
-            {/* The panel: every pillar is in the DOM; the active one is shown */}
-            <Reveal delay={0.12} className="md:mt-12 pt-8 border-t border-hairline">
-              <div className="grid min-h-[13rem] md:min-h-[12rem]">
-                {PILLARS.map((pillar, i) => (
-                  <div
-                    key={pillar.id}
-                    className={[
-                      '[grid-area:1/1] transition-[opacity,transform] duration-500 ease-lux',
-                      i === active ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2 pointer-events-none',
-                    ].join(' ')}
-                  >
-                    <div className="flex items-center gap-4 mb-5">
-                      <span className="bl-label text-amber tabular-nums">0{i + 1}</span>
-                      <span className="h-px w-8 bg-teal/60" aria-hidden="true" />
-                    </div>
-                    <h3 className="bl-h3 mb-4">{pillar.label}</h3>
-                    <p className="bl-body max-w-md">{pillar.description}</p>
-                  </div>
-                ))}
-              </div>
-              <div className="mt-8">
-                <p className="bl-label bl-label-strong mb-2">One system</p>
-                <p className="bl-body text-body-dim max-w-md">
-                  Adjusting one without understanding the others produces incomplete results. The
-                  four are read together, around you.
-                </p>
-              </div>
+            <Reveal delay={0.12} className="mt-12 pt-8 border-t border-hairline max-w-md">
+              <p className="bl-label bl-label-strong mb-2">One system</p>
+              <p className="bl-body text-body-dim">
+                Adjusting one without understanding the others produces incomplete results. The
+                four are read together, around you.
+              </p>
             </Reveal>
 
             <Reveal className="mt-10">
@@ -104,6 +71,8 @@ export function MethodSection() {
               </Link>
             </Reveal>
           </div>
+
+          <PillarStrand pillars={PILLARS} origin="you" className="lg:col-start-7 lg:col-span-6" />
         </div>
       </div>
     </section>

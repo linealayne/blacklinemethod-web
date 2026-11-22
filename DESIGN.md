@@ -1,13 +1,14 @@
 ---
 name: Blackline Method
-description: A private optimization practice in Dallas. Pass two, "the living sequence": a dark, precise site with one dramatic moment, a living double helix.
+description: A private optimization practice in Dallas. Pass three, "one palette": a dark, precise site lit throughout by its one dramatic moment, a living double helix.
 colors:
   black: "#080808"
   ink: "#040404"
   graphite: "#111110"
   offwhite: "#F2F1EC"
-  amber: "#C8965A"
-  amber-muted: "#A27A4A"
+  tan: "#D0AE82"
+  tan-muted: "#AC906A"
+  ember: "#C8965A"
   teal: "#2FA39A"
   violet: "#7A6CF2"
   hairline: "#262624"
@@ -90,60 +91,68 @@ spacing:
   container: "1440px"
 ---
 
-# Blackline Method: design system (pass two)
+# Blackline Method: design system (pass three)
 
 CLAUDE.md is the working manual and is kept in step with this file. Where they disagree, CLAUDE.md wins.
 
 ## Overview
 
-Minimal but not bland. Near-black ground, off-white type, hairlines, generous space, and one dramatic moment: the hero, a living double helix of glowing particles. Everything else is quiet, precise, and still until a person acts on it.
+Minimal but not bland. Near-black ground, bone type, hairlines, generous space, and one dramatic moment: the hero, a living double helix of glowing particles. The rest of the site is lit by that gene: its two glows, its particles, its strand, at a fraction of the strength.
 
 ## Typography
 
 Two faces only.
 
-- **Fraunces, set like the BLACKLINE wordmark** (weight 400, optical size pinned to 14, SOFT 0, uppercase, tracked) for all display type: hero, headlines, card titles, pillar names, tier names, the mobile menu, the footer wordmark. All-caps headlines are smaller than the old lowercase giants so they read confident, not shouting.
-- **Inter** for everything that carries information. Labels, nav, and buttons are small, tracked, uppercase (the "DALLAS, TEXAS · BY APPOINTMENT" setting). Body is sentence case.
+- **Fraunces, set like the BLACKLINE wordmark** (weight 400, optical size pinned to 14, SOFT 0, uppercase, tracked) for all display type.
+- **Inter** for everything that carries information. Labels, nav, and buttons are small, tracked, uppercase. Body is sentence case.
 - Never: lowercase transforms, italic display, a third typeface.
 
 ## Colour
 
-- Base: black #080808, greys, off-white #F2F1EC.
-- Amber #C8965A is the primary accent (hover underlines, numbers, active points, focus).
-- Teal #2FA39A and violet #7A6CF2 are used richly inside the hero scene only. Outside the hero, teal is a rare secondary accent: a decoded card's edge glow, the selected pillar's ring, the contact success point. Violet never leaves the hero.
-- No gradients on text. No rainbow.
+One palette, defined once as CSS variables in `globals.css` and referenced everywhere (Tailwind, components, the hero scene).
+
+- Ground: black #080808, ink, graphite, hairline.
+- Type: bone #F2F1EC and the greys.
+- Warm accent: tan #D0AE82. Text highlights, reading points on rules, lit nodes, link underlines, focus, the loading line.
+- Light accents: teal #2FA39A and violet #7A6CF2, the gene's two glows. Used as light only (glows, live states, particles, strand illustrations), always quiet outside the hero.
+- Ember #C8965A belongs to the ripple inside the hero gene and nowhere else.
+- No gradients on text. No stray blue or orange.
 
 ## Layout
 
 - `.bl-wrap` container (1440px, 24/48px gutters); `.bl-folio` margin-column grid for section labels; nothing sticks.
-- Section tops: a hairline with a small registration cross at each end.
-- Hero: headline lower left, label at left under a hairline, lead and consult button at right; the scene behind and beside the type with vignettes behind the text.
+- Section tops: a hairline that begins as a short teal-to-violet length, with a glowing particle at each end.
+- Hero: headline lower left; beneath a hairline, the place label at left and the one-sentence description at right. No button.
+- Inner pages: a sparse still particle field and a soft glow behind the title.
 
 ## Motion
 
-- No scroll animation: no pinning, scrubbing, parallax, or sticky labels. The only scroll-related motion is a one-time 0.5s fade and rise as an element enters view.
-- Time-based: the hero scene (idle rotation, rung pulse, scan sweep, colour breathing) and the method wheel (34s per turn).
-- Action-based: card flips with a decode, wheel hold and release, link underlines, button fill sweep, the hero's tilt, scatter, and click pulse.
-- Once: the hero intro (first homepage visit per session, about 3s, skippable) and the footer load-in.
-- Reduced motion: everything static and readable; the hero shows a rendered still.
+- No scroll animation: no pinning, scrubbing, parallax, or sticky labels. The only scroll-related motion is a one-time 0.5s fade and rise as an element enters view (pillar nodes light with it).
+- Time-based: the hero scene (idle rotation, rung ripple, scan sweep, colour breathing).
+- Action-based: card flips with a decode, pillar node rings, link underlines, button fill sweep, the hero's tilt, scatter, and click pulse.
+- Once per session: the loading sequence (the wordmark types, slides to the header, the headline rises, the gene forms; about 3s, skippable). Once: the footer load-in.
+- Reduced motion: everything static and readable; a single fade; the hero shows a rendered still.
+- The gene's ripples and the card flip are not to be changed unless Layne asks.
 
 ## Components
 
-- **Buttons:** hairline frame, label face; the fill sweeps in from the left on hover and out to the right; text inverts to black.
-- **Links:** label face with a resting low-contrast underline drawn amber on hover, and a drawn 1px arrow that extends.
-- **Inputs:** underline-only, amber on focus.
-- **Sequence cards (principles):** hairline cards. Front: amber number, a base sequence in display caps, a unique helix fragment, the title. Back: the title (decoded from A T G C during the flip), the full description, a teal edge glow.
-- **Method wheel:** a ring with tick marks, four pillar nodes as real buttons, an amber front marker, "you" at the centre. Selected: amber node, teal ring, brighter label.
-- **Footer:** contacts in Inter, link columns, a hairline with one amber reading point, the full-width wordmark; one-time load-in.
+- **Buttons:** hairline frame, label face; the fill sweeps in from the left on hover and out to the right; text inverts to black. At least 44px tall.
+- **Links:** label face with a resting low-contrast underline drawn tan on hover, and a drawn 1px arrow that extends.
+- **Inputs:** underline-only, tan on focus.
+- **Principle cards:** hairline cards with a strand of light on the top edge. Front: tan number, a particle strand, the title. Back: the title (decoded from A T G C during the flip, with zero reflow), the description, a teal and violet edge glow.
+- **Pillar strand:** four nodes on one particle strand, each with its number, name, and description. Lit: tan node with a teal and violet halo; hover adds a teal ring.
+- **Footer:** contacts in Inter, link columns, a hairline with one tan reading point, the full-width wordmark; one-time load-in.
 
 ## Do
 
 - Keep every word of copy; change casing only.
 - Spend boldness in the hero. Keep the rest disciplined.
 - Keep all text real HTML; decoration is aria-hidden.
+- Use the tokens. Use `Strand.tsx` for illustration.
 
 ## Don't
 
 - Don't tie anything to scroll position.
-- Don't use teal or violet as decoration outside the hero.
+- Don't use teal or violet as paint (text, fills). They are light.
+- Don't write a colour literal in a component.
 - Don't add a third typeface or italic display.

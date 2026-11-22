@@ -3,24 +3,53 @@
 @tailwind utilities;
 
 /* ------------------------------------------------------------------
-   Design tokens (mirrors tailwind.config.ts; see CLAUDE.md and DESIGN.md)
-   "The living sequence": near-black, greys, off-white, amber as the
-   accent. Teal and violet are rich in the hero scene only; outside it,
-   teal is a rare secondary accent (a decoded card, the selected pillar).
+   Design tokens. ONE palette, taken from the hero gene, defined here and
+   nowhere else (tailwind.config.ts and the hero scene both read these).
+
+   Ground   black, ink, graphite, hairline
+   Type     offwhite (bone), lead, label, body greys
+   Warm     tan: the warm accent for text highlights (numbers, small
+            labels), reading points on rules, button frames, link
+            underlines, focus rings, form errors
+   Light    teal and violet: the gene's two glows. Used as LIGHT, never as
+            paint: glows, live/selected states, the particle at the start
+            of a section rule, strand illustrations
+   Gene     ember: the warm ripple inside the hero gene only. Do not use it
+            in the interface, and do not change it (see CLAUDE.md)
    ------------------------------------------------------------------ */
 :root {
-  --bl-black: #080808;
-  --bl-ink: #040404;
-  --bl-graphite: #111110;
-  --bl-offwhite: #F2F1EC;
-  --bl-amber: #C8965A;
-  --bl-amber-muted: #A27A4A;
-  --bl-teal: #2FA39A;
-  --bl-violet: #7A6CF2;
-  --bl-hairline: #262624;
-  --bl-label: #8C8A84;
-  --bl-body: #9C9B96;
-  --bl-body-dim: #85847F;
+  --bl-black-rgb: 8 8 8;
+  --bl-ink-rgb: 4 4 4;
+  --bl-graphite-rgb: 17 17 16;
+  --bl-offwhite-rgb: 242 241 236;
+  --bl-tan-rgb: 208 174 130;
+  --bl-tan-muted-rgb: 172 144 106;
+  --bl-teal-rgb: 47 163 154;
+  --bl-violet-rgb: 122 108 242;
+  --bl-ember-rgb: 200 150 90;
+  --bl-hairline-rgb: 38 38 36;
+  --bl-rule-strong-rgb: 94 94 91;
+  --bl-label-rgb: 140 138 132;
+  --bl-label-strong-rgb: 201 199 192;
+  --bl-lead-rgb: 185 184 178;
+  --bl-body-rgb: 156 155 150;
+  --bl-body-dim-rgb: 133 132 127;
+
+  --bl-black: rgb(var(--bl-black-rgb));
+  --bl-ink: rgb(var(--bl-ink-rgb));
+  --bl-graphite: rgb(var(--bl-graphite-rgb));
+  --bl-offwhite: rgb(var(--bl-offwhite-rgb));
+  --bl-tan: rgb(var(--bl-tan-rgb));
+  --bl-tan-muted: rgb(var(--bl-tan-muted-rgb));
+  --bl-teal: rgb(var(--bl-teal-rgb));
+  --bl-violet: rgb(var(--bl-violet-rgb));
+  --bl-hairline: rgb(var(--bl-hairline-rgb));
+  --bl-label: rgb(var(--bl-label-rgb));
+  --bl-body: rgb(var(--bl-body-rgb));
+  --bl-body-dim: rgb(var(--bl-body-dim-rgb));
+
+  /* the gene's light, as one gradient: used for glows and strand rules */
+  --bl-strand: linear-gradient(90deg, rgb(var(--bl-teal-rgb) / 0.9), rgb(var(--bl-violet-rgb) / 0.7));
 
   /* layout */
   --bl-gutter: 24px;
@@ -31,6 +60,7 @@
   --bl-ease-out: cubic-bezier(0.23, 1, 0.32, 1);
   --bl-ease-draw: cubic-bezier(0.45, 0, 0.2, 1);
   --bl-ease-flip: cubic-bezier(0.7, 0, 0.2, 1);
+  --bl-ease-slide: cubic-bezier(0.65, 0, 0.2, 1);
 }
 @media (min-width: 768px) {
   :root { --bl-gutter: 48px; --bl-header: 84px; }
@@ -66,22 +96,22 @@
   }
 
   ::selection {
-    background: rgba(242, 241, 236, 0.9);
+    background: rgb(var(--bl-offwhite-rgb) / 0.9);
     color: var(--bl-black);
   }
   html {
     scrollbar-width: thin;
-    scrollbar-color: #2e2e2c var(--bl-ink);
+    scrollbar-color: var(--bl-hairline) var(--bl-ink);
   }
   ::-webkit-scrollbar { width: 10px; }
   ::-webkit-scrollbar-track { background: var(--bl-ink); }
-  ::-webkit-scrollbar-thumb { background: #2e2e2c; border: 3px solid var(--bl-ink); border-radius: 8px; }
-  ::-webkit-scrollbar-thumb:hover { background: #45453f; }
-  input, textarea { caret-color: var(--bl-amber); scroll-margin-top: 7rem; }
+  ::-webkit-scrollbar-thumb { background: var(--bl-hairline); border: 3px solid var(--bl-ink); border-radius: 8px; }
+  ::-webkit-scrollbar-thumb:hover { background: rgb(var(--bl-rule-strong-rgb)); }
+  input, textarea { caret-color: var(--bl-tan); scroll-margin-top: 7rem; }
   [id] { scroll-margin-top: 6rem; }
 
   *:focus-visible {
-    outline: 1px solid var(--bl-amber);
+    outline: 1px solid var(--bl-tan);
     outline-offset: 3px;
   }
 
@@ -163,7 +193,7 @@
     font-size: 17px;
     line-height: 1.6;
     letter-spacing: 0;
-    color: #B9B8B2;
+    color: rgb(var(--bl-lead-rgb));
     max-width: 36rem;
   }
   @media (min-width: 768px) {
@@ -202,11 +232,63 @@
     }
   }
 
+  /* Section rule: a hairline that begins as a short length of the gene's
+     light (teal into violet) and settles into the quiet line. */
   .bl-rule {
+    position: relative;
     display: block;
     height: 1px;
     width: 100%;
     background: var(--bl-hairline);
+  }
+  .bl-rule::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    height: 1px;
+    width: min(26%, 260px);
+    background: linear-gradient(90deg, rgb(var(--bl-teal-rgb) / 0.8), rgb(var(--bl-violet-rgb) / 0.45) 55%, transparent);
+  }
+
+  /* Inner pages: a sparse, still particle field and a soft glow behind the
+     page title, the same light as the hero gene at a fraction of the
+     strength. Pure CSS, painted once. */
+  .bl-page {
+    background-color: var(--bl-black);
+    background-repeat: no-repeat;
+    background-image:
+      radial-gradient(circle 1.5px at 9% 132px, rgb(var(--bl-teal-rgb) / 0.7) 99%, transparent),
+      radial-gradient(circle 1px at 23% 318px, rgb(var(--bl-offwhite-rgb) / 0.35) 99%, transparent),
+      radial-gradient(circle 1px at 38% 96px, rgb(var(--bl-violet-rgb) / 0.75) 99%, transparent),
+      radial-gradient(circle 1.5px at 52% 236px, rgb(var(--bl-teal-rgb) / 0.4) 99%, transparent),
+      radial-gradient(circle 1px at 61% 148px, rgb(var(--bl-offwhite-rgb) / 0.3) 99%, transparent),
+      radial-gradient(circle 2px at 69% 412px, rgb(var(--bl-violet-rgb) / 0.5) 99%, transparent),
+      radial-gradient(circle 1px at 77% 188px, rgb(var(--bl-teal-rgb) / 0.7) 99%, transparent),
+      radial-gradient(circle 1.5px at 84% 328px, rgb(var(--bl-violet-rgb) / 0.7) 99%, transparent),
+      radial-gradient(circle 1px at 91% 104px, rgb(var(--bl-offwhite-rgb) / 0.4) 99%, transparent),
+      radial-gradient(circle 1px at 95% 476px, rgb(var(--bl-teal-rgb) / 0.5) 99%, transparent),
+      radial-gradient(circle 1px at 72% 560px, rgb(var(--bl-offwhite-rgb) / 0.25) 99%, transparent),
+      radial-gradient(ellipse 46% 440px at 82% 40px, rgb(var(--bl-violet-rgb) / 0.11), transparent 72%),
+      radial-gradient(ellipse 34% 380px at 100% 260px, rgb(var(--bl-teal-rgb) / 0.08), transparent 72%);
+  }
+  /* Pages whose top is a form (contact): the glow without the particles,
+     so nothing sits among the fields */
+  .bl-page.bl-page-plain {
+    background-image:
+      radial-gradient(ellipse 46% 440px at 82% 40px, rgb(var(--bl-violet-rgb) / 0.11), transparent 72%),
+      radial-gradient(ellipse 34% 380px at 100% 260px, rgb(var(--bl-teal-rgb) / 0.08), transparent 72%);
+  }
+  /* The closing statement: the same glow, rising from the lower corner */
+  .bl-glow {
+    background-repeat: no-repeat;
+    background-image:
+      radial-gradient(circle 1.5px at 82% 30%, rgb(var(--bl-teal-rgb) / 0.6) 99%, transparent),
+      radial-gradient(circle 1px at 90% 58%, rgb(var(--bl-violet-rgb) / 0.7) 99%, transparent),
+      radial-gradient(circle 1px at 71% 74%, rgb(var(--bl-offwhite-rgb) / 0.3) 99%, transparent),
+      radial-gradient(circle 1.5px at 96% 22%, rgb(var(--bl-violet-rgb) / 0.45) 99%, transparent),
+      radial-gradient(ellipse 42% 70% at 92% 100%, rgb(var(--bl-violet-rgb) / 0.1), transparent 72%),
+      radial-gradient(ellipse 30% 60% at 70% 110%, rgb(var(--bl-teal-rgb) / 0.07), transparent 72%);
   }
 }
 
@@ -224,7 +306,7 @@
     text-transform: uppercase;
     color: var(--bl-label);
   }
-  .bl-label-strong { color: #C9C7C0; }
+  .bl-label-strong { color: rgb(var(--bl-label-strong-rgb)); }
   .bl-tick {
     display: inline-flex;
     align-items: center;
@@ -254,21 +336,28 @@
   }
 }
 
-/* Section corner marks: a small registration cross where a top rule
-   starts and ends, like the crop marks on a printed report. */
+/* Section corner marks: a single particle where a rule starts and ends.
+   The left one carries the teal glow, the right one the violet. */
 .bl-cross {
   position: absolute;
   width: 9px;
   height: 9px;
   pointer-events: none;
+  --dot: var(--bl-offwhite-rgb);
 }
-.bl-cross::before, .bl-cross::after {
+.bl-cross::before {
   content: '';
   position: absolute;
-  background: rgba(242, 241, 236, 0.32);
+  left: 3px;
+  top: 3px;
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: rgb(var(--dot) / 0.85);
+  box-shadow: 0 0 8px 1px rgb(var(--dot) / 0.55);
 }
-.bl-cross::before { left: 4px; top: 0; width: 1px; height: 9px; }
-.bl-cross::after { top: 4px; left: 0; height: 1px; width: 9px; }
+.bl-cross[class*='-left-1'] { --dot: var(--bl-teal-rgb); }
+.bl-cross[class*='-right-1'] { --dot: var(--bl-violet-rgb); }
 
 /* ------------------------------------------------------------------
    Entrances: the only scroll-related motion. A one-time 0.5s fade and
@@ -308,7 +397,7 @@ html.bl-motion:not(.bl-hydrated) [data-reveal="stagger"]:not(.bl-in) > * {
   padding: 10px 16px;
   background: var(--bl-ink);
   color: var(--bl-offwhite);
-  border: 1px solid var(--bl-amber);
+  border: 1px solid var(--bl-tan);
   font-family: var(--font-inter), system-ui, sans-serif;
   font-size: 11px;
   letter-spacing: 0.2em;
@@ -318,25 +407,108 @@ html.bl-motion:not(.bl-hydrated) [data-reveal="stagger"]:not(.bl-in) > * {
 .bl-skip:focus-visible { transform: translateY(0); }
 
 /* ------------------------------------------------------------------
-   Hero intro (first homepage visit per session, motion + WebGL). The
-   page starts dark; the particles converge into the helix; when it locks,
-   finishIntro() adds .bl-intro-done and the wordmark, the header, and the
-   hero copy resolve in. Click, tap, scroll, or a key skips. Safety: if the
-   scene never reports, everything shows after 5s.
+   The loading sequence (first page of a session, motion allowed). Timings
+   mirror INTRO in src/lib/flags.ts; the inline flags script adds the
+   classes: html.bl-intro at once, .bl-intro-b at the handoff (1.15s),
+   .bl-intro-done at the end (3s) or on any click, key, or scroll.
+
+     0.10s  BLACKLINE types out, one letter every 0.09s, in the centre,
+            set exactly as the header wordmark; the loading line fills
+     1.15s  (b) the wordmark slides up and left onto the header logo: the
+            same box, font, size and tracking, moved by transform only, so
+            nothing jumps or swaps
+     1.45s  the dark screen lifts; the gene starts to form
+     1.70s  the headline rises word by word; label and lead follow
+     3.00s  done: the overlay is removed, the real header logo shows
+
+   Before (b) the page underneath is fully painted behind the opaque
+   screen, so nothing shifts and the browser's first paints are real.
    ------------------------------------------------------------------ */
-html.bl-intro:not(.bl-intro-done) [data-intro] {
+#bl-loader {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  display: none;
+}
+html.bl-intro:not(.bl-intro-done) #bl-loader { display: block; }
+.bl-loader-bg {
+  position: absolute;
+  inset: 0;
+  background: var(--bl-ink);
+}
+.bl-loader-word {
+  position: relative;
+  display: block;
+  color: var(--bl-offwhite);
+  white-space: nowrap;
+  /* from the centre of the screen: half the viewport, less where the header
+     logo sits, less half the word; 0.21em re-centres the trailing tracking */
+  transform: translate(
+    calc(50vw - max(0px, (100vw - 1440px) / 2) - var(--bl-gutter) - 50% + 0.21em),
+    calc(50vh - var(--bl-header) / 2)
+  );
+}
+@supports (height: 100dvh) {
+  .bl-loader-word {
+    transform: translate(
+      calc(50vw - max(0px, (100vw - 1440px) / 2) - var(--bl-gutter) - 50% + 0.21em),
+      calc(50dvh - var(--bl-header) / 2)
+    );
+  }
+}
+.bl-loader-word > span {
   opacity: 0;
-  animation: bl-reveal-safety 0s 5s forwards;
+  animation: bl-type 0s linear calc(0.1s + var(--i) * 0.09s) forwards;
 }
-html.bl-intro:not(.bl-intro-done) [data-intro="resolve"] { filter: blur(12px); transform: translateY(10px); }
-html.bl-intro:not(.bl-intro-done) [data-intro="wordmark"] { letter-spacing: 0.9em; filter: blur(6px); }
-html.bl-intro [data-intro] {
-  transition:
-    opacity 0.9s var(--bl-ease-out) var(--bl-intro-delay, 0s),
-    filter 1s var(--bl-ease-out) var(--bl-intro-delay, 0s),
-    transform 1s var(--bl-ease-out) var(--bl-intro-delay, 0s),
-    letter-spacing 1.2s var(--bl-ease-out) var(--bl-intro-delay, 0s);
+.bl-loader-line {
+  position: absolute;
+  left: 0;
+  right: 0.42em;
+  bottom: 0;
+  height: 1px;
+  background: var(--bl-tan);
+  transform: scaleX(0);
+  transform-origin: left center;
+  animation: bl-draw 0.9s var(--bl-ease-draw) 0.1s forwards;
+  transition: opacity 0.25s linear;
 }
+html.bl-intro-b .bl-loader-word { transform: none; transition: transform 0.8s var(--bl-ease-slide); }
+html.bl-intro-b .bl-loader-line { opacity: 0; }
+html.bl-intro-b .bl-loader-bg { animation: bl-fade-out 0.5s ease 0.3s forwards; }
+@keyframes bl-type { to { opacity: 1; } }
+@keyframes bl-draw { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+@keyframes bl-fade-out { to { opacity: 0; } }
+@keyframes bl-fade-in { from { opacity: 0; } to { opacity: 1; } }
+
+/* the real header logo is hidden under its twin until the handoff */
+html.bl-intro:not(.bl-intro-done) [data-intro='wordmark'] { visibility: hidden; }
+html.bl-intro:not(.bl-intro-done) [data-intro='nav'] { opacity: 0; }
+html.bl-intro-b:not(.bl-intro-done) [data-intro='nav'] { animation: bl-fade-in 0.6s ease 0.45s both; }
+
+/* Hero copy. Each headline word sits in a mask and rises into it. */
+[data-hero-word] {
+  display: inline-block;
+  overflow: hidden;
+  vertical-align: bottom;
+  padding-bottom: 0.06em;
+  margin-bottom: -0.06em;
+}
+[data-hero-word] > span { display: inline-block; }
+html.bl-intro-b:not(.bl-intro-done) [data-hero-word] > span {
+  animation: bl-word-rise 0.9s var(--bl-ease-out) calc(0.55s + var(--i) * 0.07s) both;
+}
+html.bl-intro-b:not(.bl-intro-done) [data-intro='rule'] {
+  transform-origin: left center;
+  animation: bl-draw 0.9s var(--bl-ease-draw) 0.75s both;
+}
+html.bl-intro-b:not(.bl-intro-done) [data-intro='copy'] {
+  animation: bl-rise-in 0.7s var(--bl-ease-out) calc(0.9s + var(--i, 0) * 0.1s) both;
+}
+@keyframes bl-word-rise { from { transform: translateY(108%); } to { transform: none; } }
+@keyframes bl-rise-in { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+
+/* Reduced motion, first page of a session: one simple fade, gene already formed */
+html.bl-fade body { animation: bl-fade-in 0.5s ease both !important; animation-duration: 0.5s !important; }
 
 /* The hero scene: canvas fades in on its first frame */
 .bl-helix-canvas { opacity: 0; transition: opacity 0.8s var(--bl-ease-out); }
@@ -357,29 +529,6 @@ html.bl-intro [data-intro] {
 html:not(.bl-motion) .bl-helix-still,
 html.bl-nowebgl .bl-helix-still,
 .bl-helix-still.is-on { display: block; }
-
-/* HUD biomarker range bars: a soft segment that breathes along a hairline track */
-.bl-hud-bar {
-  position: relative;
-  height: 1px;
-  background: rgba(242, 241, 236, 0.14);
-  overflow: visible;
-}
-.bl-hud-bar > i {
-  position: absolute;
-  top: -1px;
-  height: 3px;
-  left: var(--a, 30%);
-  width: var(--w, 30%);
-  background: linear-gradient(90deg, transparent, var(--c, var(--bl-teal)), transparent);
-  opacity: 0.8;
-  animation: bl-hud-drift var(--d, 7s) ease-in-out infinite alternate;
-}
-@keyframes bl-hud-drift {
-  0% { transform: translateX(-18%); opacity: 0.5; }
-  100% { transform: translateX(18%); opacity: 0.95; }
-}
-html.bl-reduced .bl-hud-bar > i { animation: none; }
 
 /* Route veil: fade through black between routes */
 #bl-veil {
@@ -437,7 +586,7 @@ html.bl-reduced .bl-hud-bar > i { animation: none; }
 }
 
 /* ------------------------------------------------------------------
-   Links: a drawn underline (resting low-contrast, drawn in amber on
+   Links: a drawn underline (resting low-contrast, drawn in tan on
    hover) and a drawn 1px arrow that extends.
    ------------------------------------------------------------------ */
 .bl-underline {
@@ -451,7 +600,7 @@ html.bl-reduced .bl-hud-bar > i { animation: none; }
   .group:hover .bl-underline, .bl-underline:hover { background-size: 100% 1px; }
 }
 .bl-link .bl-underline {
-  background-image: linear-gradient(var(--bl-amber), var(--bl-amber)), linear-gradient(rgba(242, 241, 236, 0.22), rgba(242, 241, 236, 0.22));
+  background-image: linear-gradient(var(--bl-tan), var(--bl-tan)), linear-gradient(rgb(var(--bl-offwhite-rgb) / 0.22), rgb(var(--bl-offwhite-rgb) / 0.22));
   background-size: 0% 1px, 100% 1px;
   background-position: left 100%, left 100%;
   padding-bottom: 6px;
@@ -488,8 +637,10 @@ html.bl-reduced .bl-hud-bar > i { animation: none; }
 @keyframes bl-status { from { opacity: 0.2; transform: translateY(4px); } to { opacity: 1; transform: none; } }
 
 /* ------------------------------------------------------------------
-   Sequence cards (principles). A 3D flip on hover or focus (desktop),
-   tap on touch. Reduced motion: the back content shows directly.
+   Principle cards. A 3D flip on hover or focus (desktop), tap on touch.
+   The faces are lit like the gene: a strand of light along the top edge,
+   a soft glow in two corners, a particle strand as the illustration.
+   Reduced motion: the back content shows directly.
    ------------------------------------------------------------------ */
 .bl-card { perspective: 1400px; }
 .bl-card-inner {
@@ -502,29 +653,124 @@ html.bl-reduced .bl-hud-bar > i { animation: none; }
 .bl-card-face {
   position: absolute;
   inset: 0;
+  overflow: hidden;
   backface-visibility: hidden;
   -webkit-backface-visibility: hidden;
   border: 1px solid var(--bl-hairline);
-  background: linear-gradient(180deg, rgba(242, 241, 236, 0.025), rgba(242, 241, 236, 0) 40%), var(--bl-black);
+  background:
+    radial-gradient(ellipse 80% 55% at 100% 0%, rgb(var(--bl-violet-rgb) / 0.07), transparent 70%),
+    radial-gradient(ellipse 70% 50% at 0% 100%, rgb(var(--bl-teal-rgb) / 0.05), transparent 70%),
+    var(--bl-black);
   transition: border-color 0.5s var(--bl-ease-out), box-shadow 0.6s var(--bl-ease-out);
+}
+/* the strand of light along the top edge */
+.bl-card-face::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgb(var(--bl-teal-rgb) / 0.75) 30%, rgb(var(--bl-violet-rgb) / 0.75) 70%, transparent);
+  opacity: 0.4;
+  transition: opacity 0.6s var(--bl-ease-out);
 }
 .bl-card-back { transform: rotateY(180deg); }
 .bl-card.is-flipped .bl-card-back {
-  border-color: rgba(47, 163, 154, 0.45);
-  box-shadow: 0 0 0 1px rgba(47, 163, 154, 0.08), 0 0 48px -16px rgba(47, 163, 154, 0.45), inset 0 0 60px -30px rgba(47, 163, 154, 0.25);
+  border-color: rgb(var(--bl-teal-rgb) / 0.32);
+  box-shadow:
+    0 0 44px -18px rgb(var(--bl-teal-rgb) / 0.5),
+    0 0 70px -30px rgb(var(--bl-violet-rgb) / 0.55);
 }
+.bl-card.is-flipped .bl-card-back::before { opacity: 1; }
 @media (hover: hover) and (pointer: fine) {
-  .bl-card:not(.is-flipped):hover .bl-card-front { border-color: rgba(200, 150, 90, 0.45); }
+  .bl-card:not(.is-flipped):hover .bl-card-front { border-color: rgb(var(--bl-teal-rgb) / 0.3); }
 }
 .bl-card-back-body { opacity: 0; transform: translateY(8px); transition: opacity 0.4s var(--bl-ease-out), transform 0.4s var(--bl-ease-out); }
 .bl-card.is-flipped .bl-card-back-body { opacity: 1; transform: none; transition-delay: 0.45s; }
 .bl-tap-hint { display: none; }
 @media (hover: none) { .bl-tap-hint { display: inline-flex; } }
+
+/* The decoding title. Every character sits in a cell whose width is the
+   final glyph's (an invisible ghost) with the cycling letter laid over it,
+   and words never break inside. The line breaks and the block's size are
+   the final ones from the first frame: nothing reflows while it types. */
+.bl-decode-word { display: inline-block; white-space: nowrap; }
+.bl-decode-cell { position: relative; display: inline-block; }
+.bl-decode-cell > i { font-style: normal; visibility: hidden; }
+.bl-decode-cell > b {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  font-weight: inherit;
+  text-align: center;
+  /* the ghost's box includes its trailing tracking; centre on the glyph */
+  margin-right: 0.07em;
+  letter-spacing: 0;
+  white-space: nowrap;
+}
+
+/* the strand on the back: one ripple runs along its rungs on the flip */
+.bl-card-back .bl-strand-rung { opacity: 0.12; }
+html.bl-motion .bl-card.is-flipped .bl-card-back .bl-strand-rung {
+  animation: bl-rung 1.1s ease-out calc(0.5s + var(--r) * 0.06s) 1 both;
+}
+@keyframes bl-rung {
+  0% { opacity: 0.12; }
+  30% { opacity: 0.95; }
+  100% { opacity: 0.12; }
+}
+
 /* Static (reduced motion): no 3D, the back face is the card */
 .bl-card.is-static .bl-card-inner { transform: none; transition: none; height: auto; }
 .bl-card.is-static .bl-card-front { display: none; }
 .bl-card.is-static .bl-card-back { position: relative; transform: none; }
 .bl-card.is-static .bl-card-back-body { opacity: 1; transform: none; }
+
+/* ------------------------------------------------------------------
+   The pillar strand (the method). Four pillars as nodes on one strand.
+   A node lights once when its pillar first enters view (the same one-time
+   entrance as everything else, never scrubbed) and answers hover and
+   focus with a teal ring. Reduced motion: every node is simply lit.
+   ------------------------------------------------------------------ */
+.bl-node {
+  position: relative;
+  display: block;
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  border: 1px solid rgb(var(--bl-offwhite-rgb) / 0.45);
+  background: var(--bl-black);
+  box-shadow: 0 0 0 5px var(--bl-black);
+  transition: border-color 0.6s var(--bl-ease-out), background-color 0.6s var(--bl-ease-out), box-shadow 0.9s var(--bl-ease-out);
+  transition-delay: var(--bl-node-delay, 0s);
+}
+.bl-node::after {
+  content: '';
+  position: absolute;
+  inset: -8px;
+  border-radius: 50%;
+  border: 1px solid rgb(var(--bl-teal-rgb) / 0.8);
+  opacity: 0;
+  transform: scale(0.5);
+  transition: opacity 0.5s var(--bl-ease-out), transform 0.6s var(--bl-ease-lux);
+}
+html:not(.bl-motion) .bl-node,
+.bl-in .bl-node,
+.bl-in.bl-node,
+.bl-pillar:hover .bl-node,
+.bl-pillar:focus-visible .bl-node {
+  border-color: var(--bl-tan);
+  background: var(--bl-tan);
+  box-shadow: 0 0 0 5px var(--bl-black), 0 0 20px 6px rgb(var(--bl-teal-rgb) / 0.4), 0 0 38px 12px rgb(var(--bl-violet-rgb) / 0.28);
+}
+.bl-pillar-rung { background: rgb(var(--bl-offwhite-rgb) / 0.18); transition: background-color 0.5s var(--bl-ease-out); }
+@media (hover: hover) and (pointer: fine) {
+  .bl-pillar:hover .bl-node::after { opacity: 1; transform: none; }
+  .bl-pillar:hover .bl-pillar-rung { background: rgb(var(--bl-teal-rgb) / 0.75); }
+}
+.bl-pillar:focus-visible .bl-node::after { opacity: 1; transform: none; }
 
 /* ------------------------------------------------------------------
    Footer load-in (once, when it enters view): the hairlines draw across,

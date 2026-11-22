@@ -10,7 +10,7 @@ const PAIRS = [
 /**
  * The contrast table: the system on the left, set back; Blackline on the
  * right, at full strength. On hover a row's Blackline side picks up the
- * amber reading point.
+ * tan reading point.
  */
 export function DifferentModelSection() {
   return (
@@ -42,8 +42,8 @@ export function DifferentModelSection() {
                 {pair.system}
               </p>
               <span className="hidden md:flex items-center mx-5" aria-hidden="true">
-                <span className="h-px flex-1 bg-offwhite/25 transition-colors duration-500 group-hover:bg-amber/60" />
-                <span className="ml-[-1px] h-[5px] w-[5px] rounded-full border border-offwhite/50 transition-colors duration-500 group-hover:border-amber group-hover:bg-amber" />
+                <span className="h-px flex-1 bg-offwhite/25 transition-colors duration-500 group-hover:bg-tan/60" />
+                <span className="ml-[-1px] h-[5px] w-[5px] rounded-full border border-offwhite/50 transition-colors duration-500 group-hover:border-tan group-hover:bg-tan" />
               </span>
               <span className="md:hidden bl-label bl-label-strong text-[10px] mt-4">blackline</span>
               <p className="bl-serif-caps text-[1.05rem] md:text-[1.4rem] leading-[1.25] tracking-[0.08em]">

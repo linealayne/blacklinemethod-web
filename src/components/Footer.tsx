@@ -16,7 +16,7 @@ const WORDMARK = 'BLACKLINE'
 
 /**
  * The footer closes on the wordmark at full width, sitting on a hairline
- * with one amber reading point. Once, when it first enters view: the
+ * with one tan reading point. Once, when it first enters view: the
  * hairlines draw across, the wordmark's letters rise one by one, then the
  * contacts and links fade up in sequence (globals.css, "Footer load-in").
  * About 1.3s end to end; nothing waits on it and reduced motion skips it.
@@ -88,12 +88,12 @@ export function Footer() {
           </div>
         </div>
 
-        {/* The line, at rest, with its amber reading point */}
+        {/* The line, at rest, with its tan reading point */}
         <div className="relative mt-20 md:mt-28" aria-hidden="true">
           <span data-foot-rule="" className="block h-px w-full bg-offwhite/25" style={{ transitionDelay: '0.1s' }} />
           <span
             data-foot-dot=""
-            className="absolute left-[78%] top-0 -mt-[2.5px] -ml-[2.5px] h-[5px] w-[5px] rounded-full bg-amber shadow-[0_0_12px_2px_rgba(200,150,90,0.35)]"
+            className="absolute left-[78%] top-0 -mt-[2.5px] -ml-[2.5px] h-[5px] w-[5px] rounded-full bg-tan shadow-[0_0_12px_2px_rgb(var(--bl-tan-rgb)/0.35)]"
           />
         </div>
 

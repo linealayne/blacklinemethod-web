@@ -1,14 +1,17 @@
 /**
  * "The living sequence": every tuning knob for the hero scene. Kept free of
- * three.js imports so the hero section can read layout values (HUD label
- * positions) without pulling WebGL into its bundle.
+ * three.js imports so anything can read the values without pulling WebGL
+ * into its bundle.
+ *
+ * DO NOT CHANGE the ripples (pulseRate, scanEvery, scanDuration, the click
+ * pulse, and their shader code in HelixScene.ts) unless Layne asks.
  *
  * Where to tune what:
  *   intro timing        introDuration, lockAt, skipDuration
  *   idle life           spin, pulseRate, scanEvery, scanDuration, breathe
  *   cursor feel         tiltX, tiltY, tiltStiffness, tiltDamping, scatterRadius, scatterForce
  *   density per device  counts (tier picked in HeroHelix.tsx)
- *   composition         layout.desktop / layout.phone, HUD below
+ *   composition         layout.desktop / layout.phone
  */
 export const HELIX = {
   // geometry (world units; the camera sees about 9 units of height)
@@ -38,7 +41,7 @@ export const HELIX = {
   // layout: where the helix sits, as a fraction of the hero box
   layout: {
     desktop: { x: 0.68, y: 0.39, scale: 0.9, tiltZ: -0.98 },
-    phone: { x: 0.56, y: 0.29, scale: 0.55, tiltZ: -0.62 },
+    phone: { x: 0.56, y: 0.32, scale: 0.55, tiltZ: -0.62 },
   },
 
   // idle motion
@@ -50,9 +53,9 @@ export const HELIX = {
   breathe: 0.22, // colour breathing speed (radians per second)
 
   // intro
-  introDuration: 2.3, // seconds for the particles to converge (first visit)
+  introDuration: 1.5, // seconds for the scattered particles to drift into the helix (first visit)
   returnDuration: 1.2, // quick settle on later visits (copy already visible)
-  lockAt: 0.86, // intro progress at which the copy resolves in
+  lockAt: 0.86, // intro progress at which the helix counts as formed (the lock flash)
   skipDuration: 0.4,
 
   // interaction
@@ -67,6 +70,8 @@ export const HELIX = {
   // rendering
   dprCap: 2,
   slowFrameMs: 22, // average frame time that triggers the DPR step-down
+  // Fallbacks only: the scene reads the palette from the CSS tokens in
+  // globals.css (--bl-ember-rgb, --bl-teal-rgb, --bl-violet-rgb, --bl-offwhite-rgb).
   colors: {
     amber: '#C8965A',
     teal: '#2FA39A',
@@ -74,17 +79,3 @@ export const HELIX = {
     offwhite: '#F2F1EC',
   },
 }
-
-/**
- * HUD biomarker labels at the edges of the scene. `x`/`y` place the label
- * (fraction of the hero box), `at` is where along the strand its leader
- * line lands (0 bottom, 1 top), `side` is which side of the strand.
- * Decorative only: no values, no results. Labels are set as written
- * (no text-transform) so HbA1c keeps its lab casing.
- */
-export const HUD = [
-  { id: 'testosterone', label: 'TESTOSTERONE', x: 0.62, y: 0.13, px: 0.42, py: 0.1, at: 0.78, side: -1, color: 'var(--bl-amber)', phone: true },
-  { id: 'vitamin-d', label: 'VITAMIN D', x: 0.87, y: 0.43, px: 0.7, py: 0.42, at: 0.4, side: 1, color: 'var(--bl-teal)', phone: true },
-  { id: 'hba1c', label: 'HbA1c', x: 0.87, y: 0.57, px: 0, py: 0, at: 0.32, side: 1, color: 'var(--bl-violet)', phone: false },
-  { id: 'cortisol', label: 'CORTISOL', x: 0.47, y: 0.29, px: 0, py: 0, at: 0.2, side: -1, color: 'var(--bl-teal)', phone: false },
-] as const

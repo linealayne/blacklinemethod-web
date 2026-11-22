@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { Menu, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { WordmarkLetters } from '@/components/motion/Loader'
 
 const NAV_LINKS = [
   { label: 'Philosophy', href: '/philosophy' },
@@ -104,11 +105,11 @@ export function Header() {
             className="bl-wordmark text-offwhite transition-opacity duration-600 hover:opacity-60 py-3"
             aria-label="Blackline Method, home"
           >
-            BLACKLINE
+            <WordmarkLetters />
           </Link>
 
-          {/* Desktop navigation: the current page carries an amber reading point */}
-          <div className="hidden lg:flex items-center gap-12" data-intro="" style={{ '--bl-intro-delay': '0.35s' } as React.CSSProperties}>
+          {/* Desktop navigation: the current page carries a lit particle */}
+          <div className="hidden lg:flex items-center gap-12" data-intro="nav">
             <nav className="flex items-center gap-9" aria-label="Main navigation">
               {NAV_LINKS.map((link) => {
                 const current = isCurrent(link.href)
@@ -126,7 +127,7 @@ export function Header() {
                     <span
                       aria-hidden="true"
                       className={[
-                        'h-[4px] w-[4px] rounded-full bg-amber transition-[opacity,transform] duration-600 ease-lux',
+                        'h-[4px] w-[4px] rounded-full bg-teal shadow-[0_0_8px_1px_rgb(var(--bl-teal-rgb)/0.7)] transition-[opacity,transform] duration-600 ease-lux',
                         current ? 'opacity-100 scale-100' : 'opacity-0 scale-0',
                       ].join(' ')}
                     />
@@ -143,8 +144,7 @@ export function Header() {
           {/* Mobile trigger */}
           <button
             ref={triggerRef}
-            data-intro=""
-            style={{ '--bl-intro-delay': '0.35s' } as React.CSSProperties}
+            data-intro="nav"
             className="lg:hidden text-offwhite/85 transition-colors duration-600 hover:text-offwhite -mr-3 p-3"
             onClick={open}
             aria-label="Open menu"
@@ -198,7 +198,7 @@ export function Header() {
                 tabIndex={menuOpen ? 0 : -1}
               >
                 {link.label}
-                {isCurrent(link.href) && <span aria-hidden="true" className="h-[6px] w-[6px] rounded-full bg-amber" />}
+                {isCurrent(link.href) && <span aria-hidden="true" className="h-[6px] w-[6px] rounded-full bg-teal shadow-[0_0_10px_2px_rgb(var(--bl-teal-rgb)/0.6)]" />}
               </Link>
             </div>
           ))}

@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { Reveal } from '@/components/motion/Reveal'
-import { MethodWheelNav } from '@/components/MethodWheel'
+import { PillarStrandNav } from '@/components/PillarStrand'
 import { Button } from '@/components/ui/button'
 
 export const metadata: Metadata = {
@@ -59,7 +59,7 @@ const PILLARS = [
 
 export default function MethodPage() {
   return (
-    <div className="bg-black min-h-screen pt-36 md:pt-48 pb-24">
+    <div className="bl-page min-h-screen pt-36 md:pt-48 pb-24">
       {/* Hero */}
       <section aria-label="Method introduction" className="bl-wrap mb-16 md:mb-20">
         <Reveal as="p" className="bl-label bl-tick mb-10">
@@ -79,11 +79,11 @@ export default function MethodPage() {
         </Reveal>
       </section>
 
-      {/* Orbit */}
+      {/* The strand: an index of the four pillars */}
       <section aria-label="System diagram" className="bl-wrap mb-16 md:mb-24">
         <Reveal delay={0.08}>
           <div className="py-10 md:py-14 border-y border-hairline">
-            <MethodWheelNav pillars={PILLARS.map((p) => ({ id: p.id, label: p.label }))} className="mx-auto max-w-[380px] md:max-w-[560px]" />
+            <PillarStrandNav pillars={PILLARS.map((p) => ({ id: p.id, label: p.label }))} className="mx-auto max-w-[920px]" />
           </div>
         </Reveal>
       </section>

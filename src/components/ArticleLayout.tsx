@@ -28,7 +28,7 @@ export function ArticleLayout({
   })
 
   return (
-    <article className="bg-black min-h-screen pt-36 md:pt-48 pb-24 px-6">
+    <article className="bl-page min-h-screen pt-36 md:pt-48 pb-24 px-6">
       <div className="max-w-[680px] mx-auto">
         {/* Eyebrow */}
         <Reveal className="flex flex-wrap items-center gap-x-4 gap-y-2 mb-10">

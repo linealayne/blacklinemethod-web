@@ -38,7 +38,7 @@ export function PracticeCards({ className = '' }: { className?: string }) {
               <p className="mt-4 bl-label">{person.role}</p>
             </div>
             <span
-              className="bl-serif-caps text-offwhite/[0.12] text-[6rem] md:text-[8rem] leading-[0.75] select-none transition-colors duration-600 ease-lux group-hover:text-amber/35"
+              className="bl-serif-caps text-offwhite/[0.12] text-[6rem] md:text-[8rem] leading-[0.75] select-none transition-colors duration-600 ease-lux group-hover:text-tan/35"
               aria-hidden="true"
             >
               {person.name.charAt(0)}

@@ -45,7 +45,7 @@ const SECTIONS = [
 
 export default function PhilosophyPage() {
   return (
-    <div className="bg-black min-h-screen pt-36 md:pt-48 pb-24">
+    <div className="bl-page min-h-screen pt-36 md:pt-48 pb-24">
       {/* Hero */}
       <section aria-label="Philosophy introduction" className="bl-wrap mb-24 md:mb-32">
         <Reveal as="p" className="bl-label bl-tick mb-10">

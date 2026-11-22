@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import { useMotion } from '@/components/motion/MotionProvider'
 import { Reveal } from '@/components/motion/Reveal'
+import { HelixFragment } from '@/components/Strand'
 
 export const TENETS = [
   {
@@ -29,29 +30,48 @@ export const TENETS = [
   },
 ]
 
-/** Sequence card knobs */
+/**
+ * Card knobs. The flip itself (hover, focus, tap, and the title decoding from
+ * A T G C as the card turns) is Layne's: do not change it unless he asks.
+ */
 const CARDS = {
   scrambleMs: 720, // how long the title takes to decode
   scrambleDelayMs: 260, // decode starts as the card passes edge-on
-  strands: ['ATGCGTACCTAG', 'GCTTAGCATGCA', 'TACGGATCCGTA'], // decorative base sequence per card
+  // the strand on each card: a different length of the same helix
   fragments: [
-    { freq: 1.5, phase: 0, rungs: 9 },
-    { freq: 2.1, phase: 0.9, rungs: 12 },
-    { freq: 2.8, phase: 1.7, rungs: 15 },
+    { turns: 1.5, phase: 0, rungCount: 9, lit: 3 },
+    { turns: 2.1, phase: 0.9, rungCount: 12, lit: 7 },
+    { turns: 2.8, phase: 1.7, rungCount: 15, lit: 5 },
   ],
 }
 
 const BASES = 'ATGC'
 
 /**
- * Letters cycle through A T G C and settle into the target, left to right.
- * Display only (aria-hidden); the real text is always in the DOM.
+ * The title, decoding. Letters cycle through A T G C and settle into the
+ * target, left to right, while the card turns.
+ *
+ * It types in place with zero reflow: every character has a cell that is
+ * already the width of its final glyph (an invisible ghost of the real
+ * letter), the cycling letter is laid over the cell, and words cannot break
+ * inside. So the line breaks, and the height of the title, are the final
+ * ones before the first letter changes. The cycling letters are written
+ * straight to the DOM (no React render per frame). Display only: the real
+ * title is in the heading as screen-reader text.
  */
-function useScramble(target: string, run: boolean, delay = 0) {
-  const [text, setText] = useState(target)
+function DecodeTitle({ text, run, delay }: { text: string; run: boolean; delay: number }) {
+  const cells = useRef<(HTMLElement | null)[]>([])
+  const words = text.split(' ')
+  const chars = words.join('')
+
   useEffect(() => {
+    const paint = (pick: (i: number) => string) =>
+      cells.current.forEach((el, i) => {
+        if (el) el.textContent = pick(i)
+      })
+    const rest = () => paint((i) => chars[i])
     if (!run) {
-      setText(target)
+      rest()
       return
     }
     let raf = 0
@@ -59,58 +79,52 @@ function useScramble(target: string, run: boolean, delay = 0) {
     const tick = (now: number) => {
       if (!start) start = now + delay
       const p = Math.max(0, (now - start) / CARDS.scrambleMs)
-      const settled = Math.floor(p * target.length)
-      let out = ''
-      for (let i = 0; i < target.length; i++) {
-        const ch = target[i]
-        if (i < settled || ch === ' ' || ch === '.') out += ch
-        else out += BASES[(Math.floor(now / 45) + i * 3) % 4]
+      const settled = Math.floor(p * chars.length)
+      if (p >= 1) {
+        rest()
+        return
       }
-      setText(out)
-      if (p < 1) raf = requestAnimationFrame(tick)
-      else setText(target)
+      paint((i) => (i < settled || chars[i] === '.' ? chars[i] : BASES[(Math.floor(now / 45) + i * 3) % 4]))
+      raf = requestAnimationFrame(tick)
     }
     raf = requestAnimationFrame(tick)
     return () => cancelAnimationFrame(raf)
-  }, [target, run, delay])
-  return text
-}
+  }, [chars, run, delay])
 
-function HelixFragment({ freq, phase, rungs }: { freq: number; phase: number; rungs: number }) {
-  const W = 300
-  const H = 96
-  const mid = H / 2
-  const amp = 30
-  const a: string[] = []
-  const b: string[] = []
-  for (let x = 0; x <= W; x += 4) {
-    const t = (x / W) * Math.PI * 2 * freq + phase
-    a.push(`${x === 0 ? 'M' : 'L'}${x} ${(mid + Math.sin(t) * amp).toFixed(2)}`)
-    b.push(`${x === 0 ? 'M' : 'L'}${x} ${(mid - Math.sin(t) * amp).toFixed(2)}`)
-  }
-  const lines = Array.from({ length: rungs }, (_, i) => {
-    const x = ((i + 0.5) / rungs) * W
-    const t = (x / W) * Math.PI * 2 * freq + phase
-    const y = Math.sin(t) * amp
-    return { x, y1: mid + y, y2: mid - y }
-  })
+  let n = 0
   return (
-    <svg viewBox={`0 0 ${W} ${H}`} className="w-full h-auto" fill="none" aria-hidden="true">
-      {lines.map((l, i) => (
-        <line key={i} x1={l.x} x2={l.x} y1={l.y1} y2={l.y2} stroke="#F2F1EC" strokeOpacity={i % 4 === 1 ? 0.5 : 0.16} strokeWidth="1" />
+    <span aria-hidden="true">
+      {words.map((word, w) => (
+        <span key={w}>
+          <span className="bl-decode-word">
+            {word.split('').map((ch) => {
+              const i = n++
+              return (
+                <span key={i} className="bl-decode-cell">
+                  <i>{ch}</i>
+                  <b
+                    ref={(el) => {
+                      cells.current[i] = el
+                    }}
+                  >
+                    {ch}
+                  </b>
+                </span>
+              )
+            })}
+          </span>
+          {w < words.length - 1 ? ' ' : ''}
+        </span>
       ))}
-      <path d={a.join(' ')} stroke="#F2F1EC" strokeOpacity="0.6" strokeWidth="1" />
-      <path d={b.join(' ')} stroke="#C8965A" strokeOpacity="0.75" strokeWidth="1" />
-    </svg>
+    </span>
   )
 }
 
-function SequenceCard({ tenet, i, isStatic }: { tenet: (typeof TENETS)[number]; i: number; isStatic: boolean }) {
+function PrincipleCard({ tenet, i, isStatic }: { tenet: (typeof TENETS)[number]; i: number; isStatic: boolean }) {
   const [flipped, setFlipped] = useState(false)
   const pointerType = useRef<string>('mouse')
-  const title = useScramble(tenet.name, flipped && !isStatic, CARDS.scrambleDelayMs)
-  const strand = useScramble(CARDS.strands[i], flipped && !isStatic)
   const headingId = `tenet-${tenet.id}`
+  const fragment = CARDS.fragments[i]
 
   const hoverCapable = () => window.matchMedia('(hover: hover) and (pointer: fine)').matches
 
@@ -147,24 +161,16 @@ function SequenceCard({ tenet, i, isStatic }: { tenet: (typeof TENETS)[number]; 
       }}
     >
       <div className="bl-card-inner">
-        {/* Front: the number, a base sequence, a helix fragment, the title */}
+        {/* Front: the number, a length of the strand, the title */}
         <div className="bl-card-face bl-card-front flex flex-col p-7 md:p-8" aria-hidden="true">
-          <div className="flex items-center justify-between">
-            <span className="bl-label text-amber tabular-nums">{tenet.index}</span>
-            <span className="relative h-[9px] w-[9px]">
-              <span className="bl-cross left-0 top-0" />
-            </span>
+          <span className="bl-label text-tan tabular-nums">{tenet.index}</span>
+          <div className="my-auto py-8">
+            <HelixFragment {...fragment} />
           </div>
-          <p className="mt-10 bl-serif-caps text-[1.05rem] md:text-[1.15rem] tracking-[0.42em] text-offwhite/55 tabular-nums">
-            {strand}
-          </p>
-          <div className="mt-8 -mx-1">
-            <HelixFragment {...CARDS.fragments[i]} />
-          </div>
-          <div className="mt-auto flex items-end justify-between gap-6">
+          <div className="flex items-end justify-between gap-6">
             <p className="bl-title max-w-[14ch]">{tenet.name}</p>
             <span className="bl-tap-hint bl-label text-[9.5px] whitespace-nowrap items-center gap-2">
-              <span className="h-[5px] w-[5px] rounded-full border border-amber/80" />
+              <span className="h-[5px] w-[5px] rounded-full bg-teal shadow-[0_0_8px_1px_rgb(var(--bl-teal-rgb)/0.7)]" />
               Tap to reveal
             </span>
           </div>
@@ -172,18 +178,16 @@ function SequenceCard({ tenet, i, isStatic }: { tenet: (typeof TENETS)[number]; 
 
         {/* Back: the title, the full description */}
         <div className="bl-card-face bl-card-back flex flex-col p-7 md:p-8">
-          <div className="flex items-center justify-between">
-            <span className="bl-label text-teal tabular-nums">{tenet.index}</span>
-            <span className="bl-label text-[9.5px] text-offwhite/40 tracking-[0.42em]" aria-hidden="true">
-              {CARDS.strands[i].slice(0, 4)}
-            </span>
+          <div className="flex items-center justify-between gap-6">
+            <span className="bl-label text-tan tabular-nums">{tenet.index}</span>
+            <HelixFragment {...fragment} width={132} height={22} density={0.42} className="h-[22px] w-[132px] shrink-0 opacity-90" />
           </div>
           <h3 id={headingId} className="mt-10 bl-h3 text-[1.45rem] md:text-[1.6rem] leading-[1.2]">
             <span className="sr-only">{tenet.name}</span>
-            <span aria-hidden="true">{isStatic ? tenet.name : title}</span>
+            <DecodeTitle text={tenet.name} run={flipped && !isStatic} delay={CARDS.scrambleDelayMs} />
           </h3>
           <div className="bl-card-back-body mt-auto">
-            <span className="block h-px w-10 bg-teal/70 mb-6" aria-hidden="true" />
+            <span className="block h-px w-10 mb-6 [background:var(--bl-strand)]" aria-hidden="true" />
             <p className="bl-body">{tenet.description}</p>
           </div>
         </div>
@@ -193,10 +197,10 @@ function SequenceCard({ tenet, i, isStatic }: { tenet: (typeof TENETS)[number]; 
 }
 
 /**
- * Principles as three sequence cards. Desktop: hover or keyboard focus
- * flips a card in 3D while its title decodes from base letters. Touch: tap
- * flips, tap again flips back. Reduced motion: the back of each card shows
- * directly. Every word is real text in the DOM.
+ * Principles as three cards. Desktop: hover or keyboard focus flips a card
+ * in 3D while its title decodes from base letters. Touch: tap flips, tap
+ * again flips back. Reduced motion: the back of each card shows directly.
+ * Every word is real text in the DOM.
  */
 export function PrinciplesSection() {
   const { mounted, reduced } = useMotion()
@@ -213,7 +217,7 @@ export function PrinciplesSection() {
         <div className="py-24 md:py-32">
           <Reveal stagger className="grid gap-5 lg:grid-cols-3 lg:gap-6">
             {TENETS.map((tenet, i) => (
-              <SequenceCard key={tenet.id} tenet={tenet} i={i} isStatic={isStatic} />
+              <PrincipleCard key={tenet.id} tenet={tenet} i={i} isStatic={isStatic} />
             ))}
           </Reveal>
 

@@ -1,5 +1,5 @@
 import * as THREE from 'three'
-import { HELIX, HUD } from './helix-config'
+import { HELIX } from './helix-config'
 
 /**
  * The living sequence: a double helix of glowing particles with base-pair
@@ -25,8 +25,8 @@ export interface HelixOptions {
   onLock: () => void
   /** called after the first frame is drawn */
   onFirstFrame: () => void
-  /** HUD anchor callback: screen positions (px, relative to host) for each HUD entry */
-  onAnchors?: (points: { x: number; y: number }[]) => void
+  /** intro only: performance.now() before which the particles stay scattered (the loading screen is still up) */
+  holdUntil?: number
 }
 
 const VERT_POINTS = /* glsl */ `
@@ -318,7 +318,6 @@ export class HelixScene {
   private frameTimes: number[] = []
   private steppedDown = false
   private centre = new THREE.Vector3()
-  private tmp = new THREE.Vector3()
 
   constructor(opts: HelixOptions) {
     this.opts = opts
@@ -347,7 +346,19 @@ export class HelixScene {
   }
 
   private build() {
-    const c = HELIX.colors
+    // the palette comes from the CSS tokens (globals.css); helix-config holds fallbacks
+    const css = getComputedStyle(document.documentElement)
+    const tokenHex = (name: string, fallback: string) => {
+      const v = css.getPropertyValue(`--bl-${name}-rgb`).trim().split(/\s+/).map(Number)
+      if (v.length !== 3 || v.some((n) => !Number.isFinite(n))) return fallback
+      return `#${v.map((n) => n.toString(16).padStart(2, '0')).join('')}`
+    }
+    const c = {
+      amber: tokenHex('ember', HELIX.colors.amber),
+      teal: tokenHex('teal', HELIX.colors.teal),
+      violet: tokenHex('violet', HELIX.colors.violet),
+      offwhite: tokenHex('offwhite', HELIX.colors.offwhite),
+    }
     const col = (hex: string) => new THREE.Color(hex)
     const counts = HELIX.counts[this.opts.tier]
     const r = rand(1984)
@@ -725,8 +736,8 @@ export class HelixScene {
     this.time += dt
     const u = this.pointsMat.uniforms
 
-    // intro progress
-    if (this.intro < 1) {
+    // intro progress (held at the scattered state while the loading screen is up)
+    if (this.intro < 1 && performance.now() >= (this.opts.holdUntil ?? 0)) {
       this.intro = Math.min(1, this.intro + dt * this.introSpeed)
       if (this.intro >= HELIX.lockAt) this.lock()
     }
@@ -801,20 +812,6 @@ export class HelixScene {
     this.centre.setFromMatrixPosition(this.tiltGroup.matrixWorld).applyMatrix4(this.camera.matrixWorldInverse)
     u.uCenterZ.value = this.centre.z
     this.linesMat.uniforms.uCenterZ.value = this.centre.z
-
-    this.emitAnchors()
-  }
-
-  /** project the HUD leader-line landing points (on the strand axis, offset to the label's side) */
-  private emitAnchors() {
-    if (!this.opts.onAnchors) return
-    const out: { x: number; y: number }[] = []
-    for (const h of HUD) {
-      this.tmp.set(h.side * HELIX.radius * 1.15, (h.at - 0.5) * HELIX.length, 0)
-      this.tmp.applyMatrix4(this.tiltGroup.matrixWorld).project(this.camera)
-      out.push({ x: (this.tmp.x * 0.5 + 0.5) * this.width, y: (-this.tmp.y * 0.5 + 0.5) * this.height })
-    }
-    this.opts.onAnchors(out)
   }
 
   /** step the pixel ratio down once if frames run slow */

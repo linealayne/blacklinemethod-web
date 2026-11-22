@@ -119,7 +119,7 @@ export function ContactSection() {
           <Reveal delay={0.08} className="md:pt-4">
             {status === 'success' ? (
               <div className="flex flex-col justify-center h-full min-h-[320px]" role="status">
-                <span className="block h-[7px] w-[7px] rounded-full bg-teal shadow-[0_0_16px_3px_rgba(47,163,154,0.45)] mb-8" aria-hidden="true" />
+                <span className="block h-[7px] w-[7px] rounded-full bg-teal shadow-[0_0_16px_3px_rgb(var(--bl-teal-rgb)/0.45)] mb-8" aria-hidden="true" />
                 <p className="bl-h3 mb-4">
                   Request received.
                 </p>
@@ -149,7 +149,7 @@ export function ContactSection() {
                     aria-describedby={fieldErrors.name ? 'contact-name-error' : undefined}
                   />
                   {fieldErrors.name && (
-                    <p id="contact-name-error" className="font-sans text-[12px] text-amber tracking-wide">{fieldErrors.name}</p>
+                    <p id="contact-name-error" className="font-sans text-[12px] text-tan tracking-wide">{fieldErrors.name}</p>
                   )}
                 </div>
 
@@ -173,7 +173,7 @@ export function ContactSection() {
                     aria-describedby={fieldErrors.email ? 'contact-email-error' : undefined}
                   />
                   {fieldErrors.email && (
-                    <p id="contact-email-error" className="font-sans text-[12px] text-amber tracking-wide">{fieldErrors.email}</p>
+                    <p id="contact-email-error" className="font-sans text-[12px] text-tan tracking-wide">{fieldErrors.email}</p>
                   )}
                 </div>
 
@@ -191,13 +191,13 @@ export function ContactSection() {
                     aria-describedby={fieldErrors.message ? 'contact-message-error' : undefined}
                   />
                   {fieldErrors.message && (
-                    <p id="contact-message-error" className="font-sans text-[12px] text-amber tracking-wide">{fieldErrors.message}</p>
+                    <p id="contact-message-error" className="font-sans text-[12px] text-tan tracking-wide">{fieldErrors.message}</p>
                   )}
                 </div>
 
                 {status === 'error' && (
                   <p
-                    className="font-sans text-[12px] text-amber tracking-wide"
+                    className="font-sans text-[12px] text-tan tracking-wide"
                     role="alert"
                   >
                     {errorMessage ?? 'Something went wrong. Please try again or email us directly.'}

@@ -6,6 +6,7 @@ import { Footer } from '@/components/Footer'
 import { MotionProvider } from '@/components/motion/MotionProvider'
 import { PageTransition } from '@/components/motion/PageTransition'
 import { Grain } from '@/components/motion/Grain'
+import { Loader } from '@/components/motion/Loader'
 import { FLAGS_SCRIPT } from '@/lib/flags'
 
 // Variable Fraunces: the face of the BLACKLINE wordmark, used for all display
@@ -83,7 +84,7 @@ export default function RootLayout({
       suppressHydrationWarning
     >
       <head>
-        {/* Sets motion/WebGL/intro flags on <html> before first paint. See src/lib/flags.ts */}
+        {/* Sets the motion flags and runs the loading sequence clock before first paint. See src/lib/flags.ts */}
         <script dangerouslySetInnerHTML={{ __html: FLAGS_SCRIPT }} />
       </head>
       <body>
@@ -91,6 +92,7 @@ export default function RootLayout({
           <a href="#bl-main" className="bl-skip">
             Skip to content
           </a>
+          <Loader />
           <PageTransition />
           <Header />
           <main id="bl-main">{children}</main>

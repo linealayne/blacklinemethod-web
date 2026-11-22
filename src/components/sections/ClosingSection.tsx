@@ -5,7 +5,7 @@ import { Folio } from '@/components/layout/Folio'
 
 export function ClosingSection() {
   return (
-    <Folio label="by appointment" ariaLabel="Request a consult" innerClassName="pt-24 pb-28 md:pt-32 md:pb-40">
+    <Folio label="by appointment" ariaLabel="Request a consult" className="bl-glow" innerClassName="pt-24 pb-28 md:pt-32 md:pb-40">
       <Reveal as="h2" className="bl-h1 max-w-[18ch]">
         engagements are limited. that is by design.
       </Reveal>

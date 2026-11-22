@@ -25,9 +25,9 @@ export function ProcessTimeline({ steps, bracket = true }: { steps: TimelineStep
           aria-hidden="true"
         >
           <span className="bl-label text-[10px]">the first ninety days</span>
-          <div className="mt-2 h-px bg-amber/45 relative">
-            <span className="absolute left-0 -top-[3px] h-[7px] w-px bg-amber/70" />
-            <span className="absolute right-0 -top-[3px] h-[7px] w-px bg-amber/70" />
+          <div className="mt-2 h-px bg-tan/45 relative">
+            <span className="absolute left-0 -top-[3px] h-[7px] w-px bg-tan/70" />
+            <span className="absolute right-0 -top-[3px] h-[7px] w-px bg-tan/70" />
           </div>
         </div>
       )}
@@ -39,8 +39,8 @@ export function ProcessTimeline({ steps, bracket = true }: { steps: TimelineStep
               className={[
                 'absolute -left-9 top-[3px] block w-[11px] h-[11px] rounded-full border bg-black md:static md:mb-7',
                 'transition-[background-color,border-color,box-shadow] duration-500',
-                i === 0 ? 'border-amber' : 'border-offwhite/40',
-                'group-hover:border-amber group-hover:bg-amber group-hover:shadow-[0_0_14px_rgba(200,150,90,0.5)]',
+                i === 0 ? 'border-tan' : 'border-offwhite/40',
+                'group-hover:border-tan group-hover:bg-tan group-hover:shadow-[0_0_14px_rgb(var(--bl-tan-rgb)/0.5)]',
               ].join(' ')}
               aria-hidden="true"
             />

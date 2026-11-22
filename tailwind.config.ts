@@ -1,16 +1,14 @@
 import type { Config } from 'tailwindcss'
 
 /**
- * Blackline design tokens (pass two: "the living sequence").
- * Near-black, greys, off-white, amber as the accent. Teal and violet are
- * used richly in the hero scene only; outside it teal is a rare secondary
- * accent (a decoded sequence card, the selected method pillar). No
- * gradients on text. See CLAUDE.md and DESIGN.md.
- *   ink          deeper black for the veil and the mobile menu
- *   amber-muted  amber at readable small-label strength (about 5.1:1 on black)
- *   label        warm grey for quiet uppercase labels (about 5.7:1 on black)
- *   body / body-dim  body copy greys that clear WCAG AA (7.2:1 and 5.4:1)
+ * Blackline design tokens (pass three: one palette, taken from the hero gene).
+ * Every colour is defined ONCE, as an RGB triplet, in src/app/globals.css
+ * (`:root`). Tailwind only points at those variables, so `text-tan/60`,
+ * `bg-teal`, `border-hairline` and friends all resolve to the same tokens.
+ * Roles are documented in CLAUDE.md ("Colour").
  */
+const token = (name: string) => `rgb(var(--bl-${name}-rgb) / <alpha-value>)`
+
 const config: Config = {
   future: { hoverOnlyWhenSupported: true },
   content: [
@@ -21,19 +19,21 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        black: '#080808',
-        ink: '#040404',
-        graphite: '#111110',
-        offwhite: '#F2F1EC',
-        amber: '#C8965A',
-        'amber-muted': '#A27A4A',
-        teal: '#2FA39A',
-        violet: '#7A6CF2',
-        hairline: '#262624',
-        muted: '#6B6B6B',
-        label: '#8C8A84',
-        body: '#9C9B96',
-        'body-dim': '#85847F',
+        black: token('black'),
+        ink: token('ink'),
+        graphite: token('graphite'),
+        offwhite: token('offwhite'),
+        tan: token('tan'),
+        'tan-muted': token('tan-muted'),
+        teal: token('teal'),
+        violet: token('violet'),
+        hairline: token('hairline'),
+        'rule-strong': token('rule-strong'),
+        label: token('label'),
+        'label-strong': token('label-strong'),
+        lead: token('lead'),
+        body: token('body'),
+        'body-dim': token('body-dim'),
       },
       fontFamily: {
         serif: ['var(--font-fraunces)', 'Georgia', 'serif'],

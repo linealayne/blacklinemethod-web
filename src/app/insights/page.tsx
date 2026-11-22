@@ -11,7 +11,7 @@ export const metadata: Metadata = {
 
 export default function InsightsPage() {
   return (
-    <div className="bg-black min-h-screen pt-36 md:pt-48 pb-24">
+    <div className="bl-page min-h-screen pt-36 md:pt-48 pb-24">
       <div className="bl-wrap">
         {/* Header */}
         <Reveal as="p" className="bl-label bl-tick mb-10">

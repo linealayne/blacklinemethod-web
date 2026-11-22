@@ -170,7 +170,7 @@ export function RangeExplainer() {
                   aria-hidden="true"
                 />
                 <div
-                  className="absolute inset-y-0 border-x border-amber/70 bg-amber/[0.12]"
+                  className="absolute inset-y-0 border-x border-tan/70 bg-tan/[0.12]"
                   style={{ left: pct(RANGE.optimal[0]), width: pct(RANGE.optimal[1] - RANGE.optimal[0]) }}
                   aria-hidden="true"
                 />
@@ -186,12 +186,12 @@ export function RangeExplainer() {
                   onKeyDown={onKeyDown}
                   className="absolute top-0 bottom-0 left-0 w-11 -ml-[22px] touch-none group rounded-[1px]"
                 >
-                  <span className="absolute left-1/2 top-0 bottom-0 w-px bg-offwhite/80 -translate-x-1/2 transition-colors duration-300 group-focus-visible:bg-amber" />
-                  <span className="absolute left-1/2 top-1/2 w-3 h-3 -translate-x-1/2 -translate-y-1/2 rounded-full bg-black border border-offwhite/80 shadow-[0_0_18px_rgba(200,150,90,0.4)] transition-[border-color,box-shadow] duration-300 group-focus-visible:border-amber group-hover:border-amber" />
+                  <span className="absolute left-1/2 top-0 bottom-0 w-px bg-offwhite/80 -translate-x-1/2 transition-colors duration-300 group-focus-visible:bg-tan" />
+                  <span className="absolute left-1/2 top-1/2 w-3 h-3 -translate-x-1/2 -translate-y-1/2 rounded-full bg-black border border-offwhite/80 shadow-[0_0_18px_rgb(var(--bl-tan-rgb)/0.4)] transition-[border-color,box-shadow] duration-300 group-focus-visible:border-tan group-hover:border-tan" />
                 </div>
               </div>
 
-              <div className="relative h-5 mt-3 font-sans text-[10px] font-medium tracking-[0.2em] uppercase text-amber-muted">
+              <div className="relative h-5 mt-3 font-sans text-[10px] font-medium tracking-[0.2em] uppercase text-tan-muted">
                 <span
                   className="absolute whitespace-nowrap"
                   style={{ left: pct((RANGE.optimal[0] + RANGE.optimal[1]) / 2), transform: 'translateX(-50%)' }}

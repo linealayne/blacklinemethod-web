@@ -64,6 +64,8 @@ This rule is non-negotiable for legal and brand reasons.
 
 ## Palette
 
+Superseded: the current palette (tan, teal, violet on near-black, defined once as tokens) is in CLAUDE.md, "Colour". The table below is the original pass-one palette, kept for history.
+
 Pulled from `tailwind.config.ts`:
 
 | Name      | Hex       | Usage                                    |

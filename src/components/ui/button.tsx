@@ -20,7 +20,7 @@ const buttonVariants = cva(
     'before:transition-transform before:duration-500 before:ease-lux hover:before:origin-left hover:before:scale-x-100',
     'active:scale-[0.98] active:duration-150',
     'disabled:pointer-events-none disabled:opacity-40',
-    'focus-visible:outline focus-visible:outline-1 focus-visible:outline-amber focus-visible:outline-offset-2',
+    'focus-visible:outline focus-visible:outline-1 focus-visible:outline-tan focus-visible:outline-offset-2',
   ].join(' '),
   {
     variants: {
@@ -30,7 +30,7 @@ const buttonVariants = cva(
       },
       size: {
         default: 'h-12 px-8',
-        sm: 'h-10 px-5 text-[10px]',
+        sm: 'h-11 px-5 text-[10px]',
         lg: 'h-14 px-10',
       },
       // kept for API compatibility; the revamp carries no glow
