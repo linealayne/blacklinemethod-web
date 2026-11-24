@@ -1,8 +1,9 @@
 # Brand mark generator
 
-Makes the BL monogram (the shared stem is the double helix) from Fraunces 400 outlines, then writes the favicon set, app icons, share image and lockup.
+The mark is the Cut B: a bold Fraunces B (opsz 144, wght 700) sliced once through the lower bowl by a thin black line, in a tan metallic gradient. `cut.js` writes every shipped brand file.
 
 1. `npm i --no-save opentype.js@1.3.4`
-2. Put the static Fraunces 400 TTF (`https://fonts.googleapis.com/css2?family=Fraunces:wght@400`, fetched with an old user agent so it serves TTF) at `<fonts>/f14.ttf`, and Inter 500 at `<fonts>/inter500.ttf`.
-3. `node scripts/brand/mark.js <fonts>/f14.ttf <tmp>`: the variants (`v4` is the shipped mark, `s0`/`s1` the small sizes, `m` the app icon weight, `v2`/`v3` the unused alternatives).
-4. `node scripts/brand/final.js <tmp> <fonts> .`: writes `public/brand/*`, `public/icons/*`, `src/app/{icon.svg,favicon.ico,apple-icon.png,opengraph-image.png,twitter-image.png}`.
+2. Put these TTFs in a fonts folder (fetch each Google Fonts CSS URL with an old user agent, such as `curl -A "Mozilla/4.0"`, so it serves TTF): `f144b.ttf` from `css2?family=Fraunces:opsz,wght@144,700`, `f14.ttf` from `css2?family=Fraunces:wght@400`, `inter500.ttf` from `css2?family=Inter:wght@500`.
+3. `node scripts/brand/cut.js <fonts> <scratch>` writes `public/brand/*`, `public/icons/*`, `src/app/{icon.svg,favicon.ico,apple-icon.png,opengraph-image.png,twitter-image.png}`, and the favicon frames to `<scratch>`.
+
+The icon sizes snap the slice to whole pixel rows (1px at 16, 2px at 32 and 48), so it never blurs away. Keep that if you change `CUT_AT` or the icon sizes.
