@@ -60,7 +60,7 @@ Minimal, dark, precise, with one dramatic moment (the hero gene). Everything els
 | hairline / rule-strong | #262624 / #5E5E5B | rules and borders / input underlines |
 | label / label-strong / lead / body / body-dim | #8C8A84 / #C9C7C0 / #B9B8B2 / #9C9B96 / #85847F | text greys (all AA on black) |
 
-`--bl-strand` is the teal-to-violet gradient used for short lit rules. Teal and violet are light, never paint: no teal or violet text, no solid fills, no gradients on type. Nothing blue or orange exists outside this table. The favicon and the Open Graph image keep their own marks.
+`--bl-strand` is the teal-to-violet gradient used for short lit rules. Teal and violet are light, never paint: no teal or violet text, no solid fills, no gradients on type. Nothing blue or orange exists outside this table. The brand mark, favicon set and share image keep their own artwork (see "Brand mark").
 
 **The gene's language outside the hero** (all static or answering a person; nothing is scroll-driven):
 
@@ -125,6 +125,13 @@ On every full page load, a refresh included, on whichever page is opened, when m
 ## Sections
 
 Homepage order: hero (the living sequence), a different model of care, principles (cards), optimal is not a range, the method (the rotating pillars gene), the process timeline, the practice (two hairline-divided columns for Layne and Spencer with a large faint initial; `PracticeCards` is reused on /philosophy; drop portraits at `public/team/layne.jpg` and `public/team/spencer.jpg` and wire them into `PracticeSection.tsx`), insights, closing CTA.
+
+## Brand mark
+
+- **The monogram:** a BL ligature in Fraunces 400 outlines. B and L share one stem; the L's foot runs out under the B as the line. The shared stem is cut away and replaced by a double helix in a tan metallic gradient (tan-muted, tan, a lighter champagne, back), the only colour in the mark; the letters are bone. The helix uses the hero's groove offset (0.82 pi). Masters: `public/brand/blackline-monogram.svg` (large), `blackline-monogram-small.svg` (16 to 48px: heavier letters, a solid tan stem with a dark twist cut through it), `blackline-lockup.svg` (monogram + BLACKLINE, outlined, tracked 0.42em). All transparent; place on black.
+- **Header:** the lockup is NOT in the header. The header keeps the BLACKLINE wordmark until Layne decides.
+- **Installed:** `src/app/icon.svg` (SVG favicon: small mark on a black tile), `src/app/favicon.ico` (16/32/48), `src/app/apple-icon.png` (180), `public/icons/icon-192.png`, `icon-512.png`, `icon-maskable-512.png` (mark inside the 80% safe zone), `src/app/manifest.ts` (theme and background #080808). Share image: `src/app/opengraph-image.png` and `twitter-image.png` (same 1200x630 PNG, with `.alt.txt` files) apply to every route through Next's file convention. Do not add `openGraph.images` or `twitter.images` to a page's metadata unless that page needs its own image.
+- **Regenerating:** `scripts/brand/` (README there). Do not redraw the mark by hand. If tan changes, regenerate.
 
 ## Email
 
